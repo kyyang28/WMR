@@ -93,29 +93,33 @@ void loop()
     //Serial.println(WMRStatus);
 
     if (WMRStatus == '1') {
-      setLeftMotorSpeed(900);
-      setRightMotorSpeed(900);
-      //Serial.println("Moving forward");
+      setLeftMotorSpeed(300);
+      setRightMotorSpeed(300);
+      Serial.println("Moving forward(RT)");
       //WMRStatus = 0;
-    }else if (WMRStatus == '2') {
-      setLeftMotorSpeed(1100);
-      setRightMotorSpeed(900);
-      //Serial.println("Turning left");
+    } else if (WMRStatus == '2') {
+      setLeftMotorSpeed(800);
+      setRightMotorSpeed(300);
+      Serial.println("Turning left(RT)");
       //WMRStatus = 0;
-    }else if (WMRStatus == '3') {
-      setLeftMotorSpeed(900);
-      setRightMotorSpeed(1100);
-      //Serial.println("Turning right");
+    } else if (WMRStatus == '3') {
+      setLeftMotorSpeed(800);
+      setRightMotorSpeed(300);
+      Serial.println("Turning right(RT)");
       //WMRStatus = 0;
-    }else if (WMRStatus == '4') {
-      setLeftMotorSpeed(-900);
-      setRightMotorSpeed(-900);
-      //Serial.println("Moving backward");
+    } else if (WMRStatus == '4') {
+      setLeftMotorSpeed(-300);
+      setRightMotorSpeed(-300);
+      Serial.println("Moving backward(RT)");
       //WMRStatus = 0;
-    }else if (WMRStatus == '5') {
-      setLeftMotorSpeed(1200);
-      setRightMotorSpeed(1200);
-      //Serial.println("Stop");
+    } else if (WMRStatus == '5') {
+      //setLeftMotorSpeed(1200);
+      //setRightMotorSpeed(1200);
+      digitalWrite(LeftMotorINA, LOW);
+      digitalWrite(LeftMotorINB, LOW);
+      digitalWrite(RightMotorINA, LOW);
+      digitalWrite(RightMotorINB, LOW);
+      Serial.println("Stop(RT)");
       //WMRStatus = 0;
     }
   }

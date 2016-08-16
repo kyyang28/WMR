@@ -8,7 +8,7 @@ void setup()
 {
   size(450, 500);
   //myPort = new Serial(this, "COM8", 38400);
-  myPort = new Serial(this, "COM26", 9600);
+  myPort = new Serial(this, "COM31", 9600);
   myPort.bufferUntil('\n');
 }
 
@@ -48,7 +48,7 @@ void draw()
   text("Status:", 120, 420);
   textSize(30);
   textSize(16);
-  text("Program made by Kyyang", 130, 460);
+  text("Program made by YOUNG", 130, 460);
 
   textSize(22);
   fill(33);
@@ -57,7 +57,7 @@ void draw()
   if (mousePressed && mouseX > 150 && mouseX < 300 && 
     mouseY > 100 && mouseY < 160) {
     myPort.write('1');
-    ledStatus = "Moving forward";
+    //ledStatus = "Moving forward";
 
     /* Highlights the buttons in red color when pressed */
     stroke(255, 0, 0);
@@ -69,7 +69,7 @@ void draw()
   if (mousePressed && mouseX > 50 && mouseX < 200 && 
     mouseY > 200 && mouseY < 260) {
     myPort.write('2');
-    ledStatus = "Turning left";
+    //ledStatus = "Turning left";
 
     /* Highlights the buttons in red color when pressed */
     stroke(255, 0, 0);
@@ -81,7 +81,7 @@ void draw()
   if (mousePressed && mouseX > 250 && mouseX < 400 && 
     mouseY > 200 && mouseY < 260) {
     myPort.write('3');
-    ledStatus = "Turning right";
+    //ledStatus = "Turning right";
 
     /* Highlights the buttons in red color when pressed */
     stroke(255, 0, 0);
@@ -93,7 +93,7 @@ void draw()
   if (mousePressed && mouseX > 150 && mouseX < 300 && 
     mouseY > 300 && mouseY < 360) {
     myPort.write('4');
-    ledStatus = "Moving backward";
+    //ledStatus = "Moving backward";
 
     /* Highlights the buttons in red color when pressed */
     stroke(255, 0, 0);
@@ -104,6 +104,6 @@ void draw()
 
   if (!mousePressed) {
     myPort.write('5');
-    ledStatus = "Stop";
+    //ledStatus = "Stop";
   }
 }
