@@ -1,0 +1,74 @@
+
+// These are the clock frequencies available to the timers /2,/8,/32,/128
+// 84Mhz/2 = 42.000 MHz     (CLOCK1)
+// 84Mhz/8 = 10.500 MHz     (CLOCK2)
+// 84Mhz/32 = 2.625 MHz     (CLOCK3)
+// 84Mhz/128 = 656.250 KHz  (CLOCK4)
+//
+// 42Mhz/44.1Khz = 952.38
+// 10.5Mhz/44.1Khz = 238.09 
+// 2.625Hmz/44.1Khz = 59.5
+// 656Khz/44.1Khz = 14.88 // 131200 / 656000 = .2 (.2 seconds)
+
+// 84Mhz/44.1Khz = 1904 instructions per tick
+
+int redLedPin = 13;
+int yellowledPin = 52;
+int greenLedPin = 53;
+
+int redLedState = false;
+int yellowLedState = false;
+int greenLedState = false;
+
+void setup()
+{
+  /* led pin setup */
+  pinMode(redLedPin, OUTPUT);
+  pinMode(yellowledPin, OUTPUT);
+  pinMode(greenLedPin, OUTPUT);
+
+  /* timer setup */
+  pmc_set_writeprotect(false);
+  pmc_enable_periph_clk(ID_TC7);
+
+  /* TC_CMR_TCCLKS_TIMER_CLOCK4 = 84Mhz/128 = 656.250 KHz */
+  TC_Configure(/* clock */TC2, /* channel */1, 
+            TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | /* using clock3 */TC_CMR_TCCLKS_TIMER_CLOCK3);
+  TC_SetRC(TC2, 1, 26250);      // 26250 / 2625000 = 0.01s = 10ms
+  //TC_SetRC(TC2, 1, 131200);   // 0.2s * 656250Hz = 131250 counts
+  //TC_SetRC(TC2, 1, 656250);   // 1s * 656250Hz = 656250 counts
+  TC_Start(TC2, 1);
+
+  TC2->TC_CHANNEL[1].TC_IER=TC_IER_CPCS;   // IER = interrupt enable register
+  TC2->TC_CHANNEL[1].TC_IDR=~TC_IER_CPCS;  // IDR = interrupt disable register
+
+  NVIC_EnableIRQ(TC7_IRQn);
+}
+
+void TC7_Handler()
+{
+  TC_GetStatus(TC2, 1);
+  redLedState = !redLedState;
+  digitalWrite(redLedPin, redLedState);
+}
+
+void loop()
+{
+  /* Nothing need to be included */
+  /* the timer interrupt service routine will handle the led blinking */
+}
+
+#if 0
+  redLedState = !redLedState;
+  digitalWrite(redLedPin, redLedState);
+  delay(600);
+
+  yellowLedState = !yellowLedState;
+  digitalWrite(yellowledPin, redLedState);
+  delay(600);
+  
+  greenLedState = !greenLedState;
+  digitalWrite(greenLedPin, redLedState);
+  delay(600);
+#endif
+
