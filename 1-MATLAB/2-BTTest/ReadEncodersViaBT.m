@@ -5,7 +5,7 @@ clear all, clc;
 b = Bluetooth('WMR_BT',1);
 fopen(b);
 
-while(1)    
+while(1)
 % fprintf(b, '1');
     leftEncoder = fscanf(b,'%d')
     rightEncoder = fscanf(b,'%d')
@@ -16,4 +16,4 @@ end
 % run DisconnectBT.m
 % disconnect bt object
 fclose(b);
-clear('b');
+clear all;

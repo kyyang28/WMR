@@ -8,7 +8,7 @@ void setup()
 {
   size(450, 500);
   //myPort = new Serial(this, "COM8", 38400);
-  myPort = new Serial(this, "COM31", 9600);
+  myPort = new Serial(this, "COM37", 9600);
   myPort.bufferUntil('\n');
 }
 

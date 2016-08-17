@@ -32,6 +32,7 @@ int channel_2 = 2;
 uint32_t leftChan = g_APinDescription[LeftMotorPWMPin].ulPWMChannel;
 uint32_t rightChan = g_APinDescription[RightMotorPWMPin].ulPWMChannel;
 
+char start = 'a';
 
 int leftMotorSpeed = 0;
 int rightMotorSpeed = 0;
@@ -45,7 +46,7 @@ int cnt = 0;
 
 int buzzerPin = 12;
 
-char WMRStatus;
+int readEncoderVal = 1200;
 
 void setup()
 {
@@ -87,52 +88,10 @@ int timeElapse = 0;
 void loop()
 {
   motorTest();
-  
+
+  /* Send left and right motors' encoder values to MATLAB via BT */
   Serial.println(leftMotorEncoderCnt);
   Serial.println(rightMotorEncoderCnt);
-  
-#if 0  
-  if (Serial.available() > 0) {
-    WMRStatus = Serial.read();
-
-    //Serial.print("WMRStatus is: ");
-    //Serial.println(WMRStatus);
-
-    if (WMRStatus == '1') {
-      setLeftMotorSpeed(300);
-      setRightMotorSpeed(300);
-      Serial.println("Moving forward(RT)");
-      //WMRStatus = 0;
-    } else if (WMRStatus == '2') {
-      setLeftMotorSpeed(800);
-      setRightMotorSpeed(300);
-      Serial.println("Turning left(RT)");
-      //WMRStatus = 0;
-    } else if (WMRStatus == '3') {
-      setLeftMotorSpeed(800);
-      setRightMotorSpeed(300);
-      Serial.println("Turning right(RT)");
-      //WMRStatus = 0;
-    } else if (WMRStatus == '4') {
-      setLeftMotorSpeed(-300);
-      setRightMotorSpeed(-300);
-      Serial.println("Moving backward(RT)");
-      //WMRStatus = 0;
-    } else if (WMRStatus == '5') {
-      //setLeftMotorSpeed(1200);
-      //setRightMotorSpeed(1200);
-      digitalWrite(LeftMotorINA, LOW);
-      digitalWrite(LeftMotorINB, LOW);
-      digitalWrite(RightMotorINA, LOW);
-      digitalWrite(RightMotorINB, LOW);
-      Serial.println("Stop(RT)");
-      //WMRStatus = 0;
-    }
-  }
-#endif
-  
-  //BuzzerTest();
-  delay(400);
 }
 
 void BuzzerTest()
@@ -179,7 +138,8 @@ int LeftMotorSpeedPIController(int LeftRawCnts, int LeftSpeedRef)
   static int prevError, LeftMotorPWM;
   //static int currError, prevError, motorPWM;
 
-  float Kp = 0.4, Ki = 1;   // Pololu 30:1 GearMotor with 64 CPR encoder
+  float Kp = 10, Ki = 1;   // Pololu 30:1 GearMotor with 64 CPR encoder
+  //float Kp = 0.4, Ki = 1;   // Pololu 30:1 GearMotor with 64 CPR encoder
 
   currError = abs(LeftRawCnts) - abs(LeftSpeedRef);
 
@@ -218,7 +178,8 @@ int RightMotorSpeedPIController(int RightRawCnts, int RightSpeedRef)
   static int prevError, RightMotorPWM;
   //static int currError, prevError, motorPWM;
 
-  float Kp = 0.4, Ki = 1;   // Pololu 30:1 GearMotor with 64 CPR encoder
+  float Kp = 10, Ki = 1;   // Pololu 30:1 GearMotor with 64 CPR encoder
+  //float Kp = 0.4, Ki = 1;   // Pololu 30:1 GearMotor with 64 CPR encoder
 
   currError = abs(RightRawCnts) - abs(RightSpeedRef);
 
@@ -253,14 +214,7 @@ int RightMotorSpeedPIController(int RightRawCnts, int RightSpeedRef)
 
 void motorTest()
 {
-#if 0
-  leftMotorSpeed = LeftMotorSpeedPIController(leftMotorEncoderCnt, LeftMotorReferenceSpeed);
-  rightMotorSpeed = RightMotorSpeedPIController(rightMotorEncoderCnt, RightMotorReferenceSpeed);
-  setLeftMotorSpeed(leftMotorSpeed);
-  setRightMotorSpeed(rightMotorSpeed);
-#endif
-
-  setLeftMotorSpeed(800);
-  setRightMotorSpeed(800);
+  setLeftMotorSpeed(900);
+  setRightMotorSpeed(900);
 }
 
