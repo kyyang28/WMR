@@ -68,6 +68,8 @@ void EncoderInit()
     // Start the channel0 and channel 1
     TC_Start(pTc[i], 0);
     TC_Start(pTc[i], 1);
+
+    Serial3.println("Encoder setup finished.");
   }  
 }
 

@@ -21,7 +21,7 @@ void BTSetup(){
     }
 }
 
-void BTStart(){  
+void BTStart(){
   char a='b';  
   Serial.println("Connection is successful, please send a to start the program");
   #ifdef BT_BINARY

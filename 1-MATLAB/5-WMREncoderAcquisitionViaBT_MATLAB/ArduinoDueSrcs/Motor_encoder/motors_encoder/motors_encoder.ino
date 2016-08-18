@@ -52,6 +52,8 @@ void setup()
 {
   /* WARNING: When using HC-05 BLUETOOTH, make sure to employ serial 9600 baudrate, not 38400 */
   Serial.begin(9600);
+  Serial2.begin(9600);
+  Serial3.begin(9600);
 
   /* Motors pin setup */
   pinMode(LeftMotorPWMPin, OUTPUT);
@@ -90,8 +92,10 @@ void loop()
   motorTest();
 
   /* Send left and right motors' encoder values to MATLAB via BT */
-  Serial.println(leftMotorEncoderCnt);
-  Serial.println(rightMotorEncoderCnt);
+  Serial2.println(leftMotorEncoderCnt);
+  Serial2.println(rightMotorEncoderCnt);
+  //Serial3.println(leftMotorEncoderCnt);
+  //Serial3.println(rightMotorEncoderCnt);
 }
 
 void BuzzerTest()
@@ -214,7 +218,7 @@ int RightMotorSpeedPIController(int RightRawCnts, int RightSpeedRef)
 
 void motorTest()
 {
-  setLeftMotorSpeed(900);
+  setLeftMotorSpeed(600);
   setRightMotorSpeed(900);
 }
 

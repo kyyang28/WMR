@@ -1,0 +1,6 @@
+
+Sensor readings with offsets:	-9	3	16380	0	0	0
+Your offsets:	501	234	1654	67	26	11
+
+Data is printed as: acelX acelY acelZ giroX giroY giroZ
+Check that your sensor readings are close to 0 0 16384 0 0 0

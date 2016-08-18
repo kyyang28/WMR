@@ -1,4 +1,19 @@
 
+#include "I2Cdev.h"
+#include "MPU6050.h"
+
+typedef union {
+  int16_t num;
+  byte byt[2];
+} BytInt16;
+
+// Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
+// is used in I2Cdev.h
+#if (I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE) || (I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE1)
+//    #define I2C_HIGHTSPEED_DUE
+#include "Wire.h"
+#endif
+
 #define PWM_FREQ          20000
 #define PWM_DUTY_CYCLE    1200
 
@@ -45,12 +60,22 @@ int cnt = 0;
 
 int buzzerPin = 12;
 
-char WMRStatus;
+#define gRes 500.*PI/180./32768.
+MPU6050 accelgyro;
+BytInt16 ax, ay, az;
+BytInt16 gx, gy, gz;
+
+int cmdMode = 0;
+int startMode = 0;
 
 void setup()
 {
   /* WARNING: When using HC-05 BLUETOOTH, make sure to employ serial 9600 baudrate, not 38400 */
   Serial.begin(9600);
+
+  /* Bluetooth 1 and 2 serial initialisation */
+  Serial2.begin(9600);
+  Serial3.begin(9600);
 
   /* Motors pin setup */
   pinMode(LeftMotorPWMPin, OUTPUT);
@@ -69,63 +94,74 @@ void setup()
   //digitalWrite(RightMotorINA, HIGH);
   //digitalWrite(RightMotorINB, LOW);
 
-  /* LED PWM setup */
-  MOTOR_PWM_Setup();
+  while (1) {
+    if (Serial3.available() > 0) {
 
-  /* Encoder setup */
-  EncoderInit();
+      startMode = Serial3.read();
 
-  /* Timer Init */
-  TimerInit();
+      if (startMode == 'S') {
 
-  /* Start the timer */
-  TimerStart();
+        /* Config MPU6050 */
+        ConfigMPU6050();
+
+        /* LED PWM setup */
+        MOTOR_PWM_Setup();
+
+        /* Encoder setup */
+        EncoderInit();
+
+        /* Timer Init */
+        TimerInit();
+
+        /* Start the timer */
+        TimerStart();
+
+        break;
+      }
+    }
+  }
 }
 
 int timeElapse = 0;
 
 void loop()
 {
-  if (Serial.available() > 0) {
-    WMRStatus = Serial.read();
+  if (Serial3.available() > 0) {
+    cmdMode = Serial3.read();
 
-    //Serial.print("WMRStatus is: ");
-    //Serial.println(WMRStatus);
-
-    if (WMRStatus == '1') {
-      setLeftMotorSpeed(300);
-      setRightMotorSpeed(300);
-      Serial.println("Moving forward(RT)");
-      //WMRStatus = 0;
-    } else if (WMRStatus == '2') {
-      setLeftMotorSpeed(800);
-      setRightMotorSpeed(300);
-      Serial.println("Turning left(RT)");
-      //WMRStatus = 0;
-    } else if (WMRStatus == '3') {
-      setLeftMotorSpeed(800);
-      setRightMotorSpeed(300);
-      Serial.println("Turning right(RT)");
-      //WMRStatus = 0;
-    } else if (WMRStatus == '4') {
-      setLeftMotorSpeed(-300);
-      setRightMotorSpeed(-300);
-      Serial.println("Moving backward(RT)");
-      //WMRStatus = 0;
-    } else if (WMRStatus == '5') {
-      //setLeftMotorSpeed(1200);
-      //setRightMotorSpeed(1200);
-      digitalWrite(LeftMotorINA, LOW);
-      digitalWrite(LeftMotorINB, LOW);
-      digitalWrite(RightMotorINA, LOW);
-      digitalWrite(RightMotorINB, LOW);
-      Serial.println("Stop(RT)");
-      //WMRStatus = 0;
+    if (cmdMode == '1') {
+      motorTest();
+      Serial3.println(leftMotorEncoderCnt);
+      Serial3.println(rightMotorEncoderCnt);
+    } else if (cmdMode == '2') {
+      gyroTest();
     }
   }
 
-  //motorTest();
-  //BuzzerTest();
+#if 0
+  motorTest();
+
+  /* Send left and right encoders' values to MATLAB via Bluetooth3 */
+  Serial3.println(leftMotorEncoderCnt);
+  Serial3.println(rightMotorEncoderCnt);
+
+  gyroTest();
+#endif
+}
+
+void gyroTest()
+{
+#if 0
+  Serial.print("a/g:\t");
+  Serial.print(ax.num); Serial.print("\t");
+  Serial.print(ay.num); Serial.print("\t");
+  Serial.print(az.num); Serial.print("\t");
+  Serial.print(gx.num); Serial.print("\t");
+  Serial.print(gy.num); Serial.print("\t");
+  Serial.println(gz.num);
+#endif
+  Serial3.println(gz.num);
+  //delay(200);
 }
 
 void BuzzerTest()
@@ -253,8 +289,8 @@ void motorTest()
   setRightMotorSpeed(rightMotorSpeed);
 #endif
 
-  setLeftMotorSpeed(900);
-  setRightMotorSpeed(900);
+  setLeftMotorSpeed(-900);
+  setRightMotorSpeed(-1100);
 
   //showEncoderCnt();
 #if 0
@@ -329,6 +365,7 @@ void motorTest()
     motorSpeed = 800;
   }
 #endif
-  delay(800);
+
+  delay(400);
 }
 

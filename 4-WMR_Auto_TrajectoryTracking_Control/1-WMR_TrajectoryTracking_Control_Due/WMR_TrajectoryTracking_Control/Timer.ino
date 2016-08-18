@@ -62,6 +62,7 @@ void TC3_Handler()
   TC1->TC_CHANNEL[0].TC_SR;
   leftMotorEncoderCnt = -TC0->TC_CHANNEL[0].TC_RA;
   rightMotorEncoderCnt = -TC2->TC_CHANNEL[0].TC_RA;
+  accelgyro.getMotion6(&ax.num, &ay.num, &az.num, &gx.num, &gy.num, &gz.num);
   calcEncoderRadian();
   TimerFlag = true;
 }

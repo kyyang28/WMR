@@ -80,10 +80,11 @@ function connectBT_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global b;
 b = Bluetooth('WMR_BT',1);
+% b = Bluetooth('WMR_BT_TEST',1);
 fopen(b);
 set(handles.displayText,'String','Bluetooth is connected!!!');
 
-    
+
 % --- Executes on button press in disconnectBT.
 function disconnectBT_Callback(hObject, eventdata, handles)
 % hObject    handle to disconnectBT (see GCBO)
