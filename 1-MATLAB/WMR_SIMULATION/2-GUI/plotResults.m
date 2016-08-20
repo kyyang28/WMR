@@ -55,7 +55,7 @@ figure(2)
 set(gcf,'position',pos_gcf3);
 
 plotDashline(T,x_e,3);
-xlim(handles.tSpan);
+xlim(tSpan);
 legend('x_1','x_2','x_3')
 xlabel('Time (sec)');
 ylabel('State');
@@ -65,7 +65,7 @@ title('Time response of the state variables in error tracking system');
 figure(3)
 set(gcf,'position',pos_gcf3);
 plotDashline(T,x_r-x_c,3);
-xlim(handles.tSpan);
+xlim(tSpan);
 legend('q_{xr}-q_{x}','q_{yr}-q_{y}','\theta_{r}-\theta_{c}')
 xlabel('Time (sec)');
 ylabel('Tracking errors');
@@ -90,7 +90,7 @@ ushow=ushowp;
 
 subplot(2,1,1);
 plot(T,ur(1,:),'r',T,ushow(1,:),'b-.');
-xlim(handles.tSpan);
+xlim(tSpan);
 legend('u_{r1}','u_1')
 xlabel('Time (sec)');
 ylabel('Linear velocity v (m/s)');
@@ -99,7 +99,7 @@ title('Time response of linear velocity');
 % subplot(2,2,sn(2));
 subplot(2,1,2);
 plot(T,ur(2,:),'r',T,ushow(2,:),'b-.');
-xlim(handles.tSpan);
+xlim(tSpan);
 legend('u_{r2}','u_2')
 xlabel('Time (sec)');
 ylabel('Steering velocity w (rad/s)');
@@ -116,7 +116,7 @@ plot(T,s1(x_e(2,:)),'r-');
 hold on;
 plot(T,s2(x_e(1,:),x_e(2,:),x_e(3,:)),'b--');
 hold off;
-xlim(handles.tSpan);
+xlim(tSpan);
 legend('s_1','s_2')
 xlabel('Time (sec)');
 title('Time response of sliding surfaces');
@@ -127,9 +127,9 @@ if mode_uct>0
     set(gcf,'position',pos_gcf2);
     subplot(2,1,1);
     plot(T,phishow(1,:));
-    xlim(handles.tSpan);
+    xlim(tSpan);
     subplot(2,1,2);
     plot(T,phishow(2,:));
-    xlim(handles.tSpan);
+    xlim(tSpan);
 end
 

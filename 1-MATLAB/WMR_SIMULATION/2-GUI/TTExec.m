@@ -13,7 +13,7 @@ function tt_out = TTExec(t,x)
 % @params x - initial states ([x_c y_c theta_c x_r y_r theta_r])
 % @output tt_out
 
-global mode_uct;
+global mode_uct
 
 % Step 1: Parameter initialisation
 tt_out = zeros(6,1);    % six row, one column
