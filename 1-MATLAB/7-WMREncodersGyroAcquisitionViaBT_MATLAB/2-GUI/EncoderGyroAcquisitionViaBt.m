@@ -22,7 +22,7 @@ function varargout = EncoderGyroAcquisitionViaBt(varargin)
 
 % Edit the above text to modify the response to help EncoderGyroAcquisitionViaBt
 
-% Last Modified by GUIDE v2.5 18-Aug-2016 03:55:06
+% Last Modified by GUIDE v2.5 19-Aug-2016 17:34:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -90,8 +90,11 @@ fopen(b);
 
 set(handles.btstatus,'String','Bluetooth3 is connected!!!');
 
+% Synchronising character 'S' with Arduino Due board to start the program
 fprintf(b, 'S');
 
+% Receiving the all the initialisation information from Arduino Due and
+% display on the listbox GUI component
 info1 = fscanf(b,'%c')
 set(handles.initInfo,'String',info1);
 
@@ -123,15 +126,35 @@ info8 = fscanf(b,'%c')
 newStr7 = strvcat(newStr6, info8);
 set(handles.initInfo,'String',newStr7);
 
+% pause(2);
+% 
+% while (1)
+%     leftEncoderData = fscanf(b,'%d')
+%     rightEncoderData = fscanf(b,'%d')
+%     wheel_L = fscanf(b,'%f')
+%     wheel_R = fscanf(b,'%f')
+%     Speed_L = fscanf(b,'%d')
+%     Speed_R = fscanf(b,'%d')
+%     gyroData = fscanf(b,'%d')
+%     set(handles.leftEncoderText,'String',num2str(rightEncoderData));
+%     set(handles.rightEncoderText,'String',num2str(leftEncoderData));
+%     set(handles.wheelLText,'String',num2str(wheel_L));
+%     set(handles.wheelRText,'String',num2str(wheel_R));
+%     set(handles.speedLText,'String',num2str(Speed_L));
+%     set(handles.speedRText,'String',num2str(Speed_R));
+%     set(handles.gyroText,'String',num2str(gyroData));
+%     pause(0.5);
+% end
+
 % --- Executes on button press in btdisconnect.
 function btdisconnect_Callback(hObject, eventdata, handles)
 % hObject    handle to btdisconnect (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global b;
+set(handles.btstatus,'String','Bluetooth is disconnected!!!');
 fclose(b);
 clear all;
-set(handles.btstatus,'String','Bluetooth is disconnected!!!');
 
 % --- Executes on button press in readEncoderVals.
 function readEncoderVals_Callback(hObject, eventdata, handles)
@@ -140,7 +163,7 @@ function readEncoderVals_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global b;
 while(1)
-    fprintf(b, '1');
+    fprintf(b, '1');  % send '1' to arduino for receiving encoders' value
     leftEncoderData = fscanf(b,'%d')
     rightEncoderData = fscanf(b,'%d')
     set(handles.leftEncoderText,'String',num2str(rightEncoderData));
@@ -155,6 +178,7 @@ function readGyroVals_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global b;
 while(1)
+%     fprintf(b, '4');  % send '4' to arduino for receiving gyro value
     gyroData = fscanf(b,'%d')
     set(handles.gyroText,'String',num2str(gyroData));
     pause(1);
@@ -198,10 +222,48 @@ function readGyroValues_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global b;
-
 while(1)
-    fprintf(b, '2');
+    fprintf(b, '4');  % send '4' to arduino for receiving gyro value
     gyroData = fscanf(b,'%d')
     set(handles.gyroText,'String',num2str(gyroData));
     pause(0.5);
 end
+
+
+% --- Executes on button press in readWheelsValues.
+function readWheelsValues_Callback(hObject, eventdata, handles)
+% hObject    handle to readWheelsValues (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global b;
+while(1)
+    fprintf(b, '2');  % send '2' to arduino for receiving wheel_L and wheel_R values
+    wheel_L = fscanf(b,'%f')
+    wheel_R = fscanf(b,'%f')
+    set(handles.wheelLText,'String',num2str(wheel_L));
+    set(handles.wheelRText,'String',num2str(wheel_R));
+    pause(0.5);
+end
+
+% --- Executes on button press in readSpeedValues.
+function readSpeedValues_Callback(hObject, eventdata, handles)
+% hObject    handle to readSpeedValues (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global b;
+while(1)
+    fprintf(b, '3');  % send '3' to arduino for receiving speed_L and speed_R values
+    Speed_L = fscanf(b,'%d')
+    Speed_R = fscanf(b,'%d')
+    set(handles.speedLText,'String',num2str(Speed_L));
+    set(handles.speedRText,'String',num2str(Speed_R));
+    pause(0.5);
+end
+
+
+% --- Executes on button press in clearListBox.
+function clearListBox_Callback(hObject, eventdata, handles)
+% hObject    handle to clearListBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.clearListBox, 'Value', []);

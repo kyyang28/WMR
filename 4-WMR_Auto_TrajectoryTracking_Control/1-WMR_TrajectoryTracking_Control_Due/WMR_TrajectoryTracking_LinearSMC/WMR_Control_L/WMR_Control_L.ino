@@ -1,6 +1,12 @@
 
 #include "I2Cdev.h"
 #include "MPU6050.h"
+#include "VectorQuaternion.h"
+
+#define PWM_FREQ          20000
+#define PWM_DUTY_CYCLE    1200
+#define MOTORMAX          50
+//#define KIMAX             100.0
 
 typedef union {
   int16_t num;
@@ -13,9 +19,6 @@ typedef union {
 //    #define I2C_HIGHTSPEED_DUE
 #include "Wire.h"
 #endif
-
-#define PWM_FREQ          20000
-#define PWM_DUTY_CYCLE    1200
 
 /* Motors pwm pins setup */
 int LeftMotorPWMPin = 9;
@@ -68,6 +71,32 @@ BytInt16 gx, gy, gz;
 int cmdMode = 0;
 int startMode = 0;
 
+/* Algorithm Variables */
+vectorJMu<float> qc(-.1, -.1, 0.6);
+vectorJMu<float> qr(0, 0, 0);
+vectorJMu<float> xe;
+vectorJMu<float> dxe;
+float vr;
+float wr;
+float tt = 0.01;    // 0.01s = 10ms
+float Time;
+
+float eta[2];
+float eps[2];
+float uctrl[2];
+float upid[2];
+float ki[2] = {0};
+
+float w_enL, w_enR, dTheta;
+float v_WMR;
+float w_WMR;
+int k1_n = 1;
+float gammaG[2][2];
+float gammaF[2];
+
+float wheelR;
+float wheelL;
+
 void setup()
 {
   /* WARNING: When using HC-05 BLUETOOTH, make sure to employ serial 9600 baudrate, not 38400 */
@@ -94,11 +123,17 @@ void setup()
   //digitalWrite(RightMotorINA, HIGH);
   //digitalWrite(RightMotorINB, LOW);
 
+  /*
+   *  WARNING: Wait for BT to connect WMR in order to start the program
+   *  Synchronising Arduino with MATLAB via Bluetooth3(BT3)
+   *  Sending initialisation information to listbox of MATLAB GUI
+   */
   while (1) {
     if (Serial3.available() > 0) {
 
       startMode = Serial3.read();
 
+      /* Sychronisation character 'S' */
       if (startMode == 'S') {
 
         /* Config MPU6050 */
@@ -116,16 +151,31 @@ void setup()
         /* Start the timer */
         TimerStart();
 
+        /* Initialise once */
         break;
       }
     }
   }
+
+  /* WMR program starts 2s after initialisation processes are finished */
+  delay(2000);
 }
 
 int timeElapse = 0;
 
 void loop()
 {
+  if (TimerFlag) {
+    TrajectoryTrackingAlgo();
+    Serial3.println(leftMotorEncoderCnt);
+    Serial3.println(rightMotorEncoderCnt);
+    Serial3.println(wheelL);
+    Serial3.println(wheelR);
+    Serial3.println(upid[0]);
+    Serial3.println(upid[1]);
+  }
+  
+#if 0
   if (Serial3.available() > 0) {
     cmdMode = Serial3.read();
 
@@ -133,19 +183,11 @@ void loop()
       motorTest();
       Serial3.println(leftMotorEncoderCnt);
       Serial3.println(rightMotorEncoderCnt);
+      Serial3.println(gz.num);
     } else if (cmdMode == '2') {
       gyroTest();
     }
   }
-
-#if 0
-  motorTest();
-
-  /* Send left and right encoders' values to MATLAB via Bluetooth3 */
-  Serial3.println(leftMotorEncoderCnt);
-  Serial3.println(rightMotorEncoderCnt);
-
-  gyroTest();
 #endif
 }
 
@@ -289,8 +331,8 @@ void motorTest()
   setRightMotorSpeed(rightMotorSpeed);
 #endif
 
-  setLeftMotorSpeed(-900);
-  setRightMotorSpeed(-1100);
+  setLeftMotorSpeed(800);
+  setRightMotorSpeed(1000);
 
   //showEncoderCnt();
 #if 0

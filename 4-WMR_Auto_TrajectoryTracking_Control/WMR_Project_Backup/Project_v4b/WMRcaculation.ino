@@ -31,8 +31,6 @@ void WMRcaculation() {
   v_WMR = (w_enL + w_enR) * 0.063 / 4;
   //w_WMR = (w_enR - w_enL) * 0.063 / 0.2;
 
-  //Serial.print("gz.num is: ");
-  //Serial.println(gz.num);
   dTheta = -float(gz.num) * gRes;
 
   if (abs(dTheta) < 0.01 ) {
@@ -114,9 +112,7 @@ void WMRcaculation() {
   upid[0] += ki[0];
   upid[1] += ki[1];
 
-  setLeftMotorSpeed(upid[0]);
-  setRightMotorSpeed(upid[1]);
-  //MR.setSpeed(upid[0]);
-  //ML.setSpeed(upid[1]);
+  MR.setSpeed(upid[0]);
+  ML.setSpeed(upid[1]);
 }
 
