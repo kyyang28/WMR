@@ -10,37 +10,37 @@ clear all;
 clc;
 
 % Global variables for simulation
-global c K eps eta mode_uct mode_tjt circle kphi kpsi;
+global c K eps eta mode_uct mode_tjt circle kphi;
 
 % The duration of simulation
 duration = 10;
 circle = [1 duration];
 
-% Trajectory shape size
-trajectorySize = [-1 3 -1 3];       % Line
-% trajectorySize = [-2 1 -1 2];     % Circle
+% Trajectory type size
+% trajectorySize = [-1 3 -1 3];       % Line
+frameSize = [-2 1 -1 2];     % Circle
 
 % Control mode
 % 0: no uncertainty
 % 1: matched uncertainty
 mode_uct = 1;
 
-% Trajectory shape size
+% Trajectory type
 % 0: line
 % 1: circle
-mode_tjt = 0;
+mode_tjt = 1;
 
 % Sliding mode control parameters
 K = [1 1];          % Sliding function parameters
 eps = [0.1 0.1];    % Boundary parameters to alleviate chattering effect
 eta = [4; 4];       % Reaching gain
 kphi = 0.5;         % parameter for matched uncertainty
-kpsi = 0.1;         % parameter for mismatched uncertainty
+% kpsi = 0.1;         % parameter for mismatched uncertainty
 c = 1;             % constant parameter
 
 % Setup the initial condition
 theta_0 = atan(1);
-xc_0 = [-0.3; -0.4; theta_0 - pi/4];     % forward tracking
+xc_0 = [0; -0.75; theta_0 + pi/8];     % forward tracking
 % xc_0 = [-0.3; -0.4; theta_0 + 0.6];      % backward tracking
 xr_0 = [0; 0; theta_0];     % Initial position of reference robot
 X_0 = [xr_0; xc_0];             % Initial states of simulation

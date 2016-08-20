@@ -35,8 +35,8 @@ x_e = T * (x_r - x_c);
 phi_temp = kphi * norm(x_e); %+0.1;%+2*abs(ur(1)*ur(2));
 
 % arbitrary simulated sin and cos matched uncertainties functions
-phi_extra = sin(200 * t);
-phi_extra2 = cos(200 * t);
+phi_extra = sin(400 * t);
+phi_extra2 = cos(400 * t);
 
 phi_out1 = phi_temp * phi_extra;
 phi_out2 = phi_temp * phi_extra2;

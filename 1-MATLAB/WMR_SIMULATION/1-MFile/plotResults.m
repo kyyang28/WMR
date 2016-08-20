@@ -44,7 +44,7 @@ rc=patch(xsc,ysc,'w');
 set(gcf,'position',pos_gcf);
 set(gca,'DataAspectRatioMode','manual');
 set(gca,'DataAspectRatio',[1 1 1]);
-axis(trajectorySize);
+axis(frameSize);
 legend('Reference trajectory','Robot trjectory','Start point of reference trajectory','Initial point of actual robot')
 xlabel('x (m)');
 ylabel('y (m)');
