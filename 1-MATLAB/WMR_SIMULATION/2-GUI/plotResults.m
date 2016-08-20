@@ -6,17 +6,19 @@
 % @Version: 001
 % @Date: Aug. 19th, 2016
 %
-close all;
+% close all;
+
+global TOUT YOUT
 
 width = 500;
 pos_gcf = [500 100 800 800];
 pos_gcf2 = [500 100 width 500];
 pos_gcf3 = [500 100 width 250];
-x_r = Y(:,1:3)';
-x_c = Y(:,4:6)';
+x_r = YOUT(:,1:3)';
+x_c = YOUT(:,4:6)';
 x_p = [];
 
-for i=1:length(T)
+for i=1:length(TOUT)
     Tc=[cos(x_c(3,i)) sin(x_c(3,i)) 0;-sin(x_c(3,i)) cos(x_c(3,i)) 0;0 0 1];
     x_p = [x_p Tc*(x_r(:,i)-x_c(:,i))];
 end
@@ -44,17 +46,17 @@ rc=patch(xsc,ysc,'w');
 set(gcf,'position',pos_gcf);
 set(gca,'DataAspectRatioMode','manual');
 set(gca,'DataAspectRatio',[1 1 1]);
-axis(handles.frameSize);
-legend('Reference trajectory','Robot trjectory','Start point of reference trajectory','Initial point of actual robot')
+axis(frameSize);
+legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot')
 xlabel('x (m)');
-ylabel('y (m)');
+ylabel('YOUT (m)');
 title('Motion of the WMR');
 
 % State plot
 figure(2)
 set(gcf,'position',pos_gcf3);
 
-plotDashline(T,x_e,3);
+plotDashline(TOUT,x_e,3);
 xlim(tSpan);
 legend('x_1','x_2','x_3')
 xlabel('Time (sec)');
@@ -64,9 +66,9 @@ title('Time response of the state variables in error tracking system');
 % Tracking error
 figure(3)
 set(gcf,'position',pos_gcf3);
-plotDashline(T,x_r-x_c,3);
+plotDashline(TOUT,x_r-x_c,3);
 xlim(tSpan);
-legend('q_{xr}-q_{x}','q_{yr}-q_{y}','\theta_{r}-\theta_{c}')
+legend('q_{xr}-q_{x}','q_{yr}-q_{YOUT}','\theta_{r}-\theta_{c}')
 xlabel('Time (sec)');
 ylabel('Tracking errors');
 title('Time response of tracking errors');
@@ -80,16 +82,16 @@ ushow=[];
 ushowp=[];
 phishow=[];
 ur=[];
-for i=1:length(T)
-    ur=[ur genTraj(T(i))];
-    ushowp=[ushowp SMCFunc(Y(i,:)',genTraj(T(i)))];
-    phishow=[phishow genPhi(T(i),Y(i,:)',ur)];
+for i=1:length(TOUT)
+    ur=[ur genTraj(TOUT(i))];
+    ushowp=[ushowp SMCFunc(YOUT(i,:)',genTraj(TOUT(i)))];
+    phishow=[phishow genPhi(TOUT(i),YOUT(i,:)',ur)];
 end
 
 ushow=ushowp;
 
 subplot(2,1,1);
-plot(T,ur(1,:),'r',T,ushow(1,:),'b-.');
+plot(TOUT,ur(1,:),'r',TOUT,ushow(1,:),'b-.');
 xlim(tSpan);
 legend('u_{r1}','u_1')
 xlabel('Time (sec)');
@@ -98,7 +100,7 @@ title('Time response of linear velocity');
 % title(tn);
 % subplot(2,2,sn(2));
 subplot(2,1,2);
-plot(T,ur(2,:),'r',T,ushow(2,:),'b-.');
+plot(TOUT,ur(2,:),'r',TOUT,ushow(2,:),'b-.');
 xlim(tSpan);
 legend('u_{r2}','u_2')
 xlabel('Time (sec)');
@@ -112,9 +114,9 @@ set(gcf,'position',pos_gcf3);
 s1=@(x_e) K(1)*x_e;
 s2=@(ye,x_e,the) K(2).*the+ye./sqrt(c+ye.^2+x_e.^2);
 
-plot(T,s1(x_e(2,:)),'r-');
+plot(TOUT,s1(x_e(2,:)),'r-');
 hold on;
-plot(T,s2(x_e(1,:),x_e(2,:),x_e(3,:)),'b--');
+plot(TOUT,s2(x_e(1,:),x_e(2,:),x_e(3,:)),'b--');
 hold off;
 xlim(tSpan);
 legend('s_1','s_2')
@@ -126,10 +128,10 @@ if mode_uct>0
     figure(6);
     set(gcf,'position',pos_gcf2);
     subplot(2,1,1);
-    plot(T,phishow(1,:));
+    plot(TOUT,phishow(1,:));
     xlim(tSpan);
     subplot(2,1,2);
-    plot(T,phishow(2,:));
+    plot(TOUT,phishow(2,:));
     xlim(tSpan);
 end
 

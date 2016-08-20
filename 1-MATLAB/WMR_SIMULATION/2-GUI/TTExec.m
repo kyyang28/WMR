@@ -13,7 +13,7 @@ function tt_out = TTExec(t,x)
 % @params x - initial states ([x_c y_c theta_c x_r y_r theta_r])
 % @output tt_out
 
-global mode_uct
+global mode_uct mode_tjt
 
 % Step 1: Parameter initialisation
 tt_out = zeros(6,1);    % six row, one column
@@ -27,22 +27,22 @@ x_r = x(1:3);
 % t     - the duration of simulation (input parameter)
 % u_r    - reference linear and rotational speeds v_r and w_r
 %         u_r = [v_r;w_r]
-% u_r = genTraj(t);
+u_r = genTraj(t);
 
 % Step 3: Generate control law without uncertainty situation
 % x     - initial states (input param)
 % u_r    - reference trajectory shape (input param)
-% u_input = SMCFunc(x, u_r);
+u_input = SMCFunc(x, u_r);
 
 % Step 4: Deal with uncertainties, either matched uncertainty (mode_uct = 1) or
 % mismatched uncertainty (mode_uct = 2) not included
 % ONLY DEAL WITH MATCHED UNCERTAINTY ATM
 if mode_uct == 1
-%    u_phi = genPhi(t,x,u_r);
+   u_phi = genPhi(t,x,u_r);
 
 %  add MATCHED UNCERTAINTY into the input channel of control law to
 %  simulate and see the robustness of the SLIDING MODE CONTROL
-%    u_input = u_input + u_phi;
+   u_input = u_input + u_phi;
 end
 
 % Step 5: Build system models
@@ -72,3 +72,4 @@ x_c_dot = [u_input(1)*cos(x_c(3)); u_input(1)*sin(x_c(3)); u_input(2)];
 tt_out = [x_r_dot; x_c_dot];
 
 end
+

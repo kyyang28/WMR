@@ -22,7 +22,7 @@ function varargout = WMR_TT_SIM(varargin)
 
 % Edit the above text to modify the response to help WMR_TT_SIM
 
-% Last Modified by GUIDE v2.5 20-Aug-2016 22:14:27
+% Last Modified by GUIDE v2.5 20-Aug-2016 23:44:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -80,20 +80,49 @@ function runSimButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-global c K eps eta mode_uct mode_tjt kphi frameSize;
+global duration c K eps eta mode_uct mode_tjt kphi frameSize tSpan circle;
 
-% frame size
-% handles.frameSize = [-1 3 -1 3];       % Line
-handles.frameSize = [-2 1 -1 2];     % Circle
-% frameSize = [-2 1 -1 2];
+trajectoryType = get(handles.typePanel, 'SelectedObject');
+trajectoryTypeSelection = get(trajectoryType,'String');
 
-% save handles.frameSize to workspace
-assignin('base','frameSize',handles.frameSize);
+switch trajectoryTypeSelection
+    case 'Line'
+%         msgbox('Line Trajectory');
+%         set(handles.noUncertainty, 'Enable', 'Off');
+%         set(handles.matchedUncertainty, 'Enable', 'On');
+        handles.trajectoryType = 0;
+        mode_tjt = 0;
+        assignin('base','mode_tjt',mode_tjt);
+
+        % line frame size
+        handles.frameSize = [-1 3 -1 3];       % Line
+        frameSize = [-1 3 -1 3];
+
+        % save handles.frameSize to workspace
+        assignin('base','frameSize',frameSize);
+
+    case 'Circle'
+%         msgbox('Circle Trajectory');
+%         set(handles.matchedUncertainty, 'Enable', 'Off');
+%         set(handles.noUncertainty, 'Enable', 'On');
+        handles.trajectoryType = 1;
+        mode_tjt = 1;
+        assignin('base','mode_tjt',mode_tjt);
+
+        % circle frame size
+        handles.frameSize = [-2 1 -1 2];     % Circle
+        frameSize = [-2 1 -1 2];
+
+        % save handles.frameSize to workspace
+        assignin('base','frameSize',frameSize);
+end
 
 % save duration of simulation to handles
 handles.duration = str2num(get(handles.simDurationText,'String'));
-% duration = str2num(get(handles.simDurationText,'String'));
-assignin('base','duration',handles.duration);
+duration = str2num(get(handles.simDurationText,'String'));
+assignin('base','duration',duration);
+circle = [1 duration];
+assignin('base','circle',circle);
 
 % save no uncertainty checkbox value to handles
 if get(handles.noUncertainty, 'Value') == 0
@@ -117,24 +146,6 @@ elseif get(handles.matchedUncertainty, 'Value') == 1
     assignin('base','mode_uct',mode_uct);
 end
 
-trajectoryType = get(handles.typePanel, 'SelectedObject');
-trajectoryTypeSelection = get(trajectoryType,'String');
-
-switch trajectoryTypeSelection
-    case 'Line'
-%         msgbox('Line Trajectory');
-%         set(handles.noUncertainty, 'Enable', 'Off');
-%         set(handles.matchedUncertainty, 'Enable', 'On');
-        handles.trajectoryType = 0;
-        assignin('base','mode_tjt',handles.trajectoryType);
-    case 'Circle'
-%         msgbox('Circle Trajectory');
-%         set(handles.matchedUncertainty, 'Enable', 'Off');
-%         set(handles.noUncertainty, 'Enable', 'On');
-        handles.trajectoryType = 1;
-        assignin('base','mode_tjt',handles.trajectoryType);
-end
-
 % Sliding mode control parameters
 smc_param_constant = str2num(get(handles.contantText,'String'));
 smc_param_gainK = str2num(get(handles.gainText,'String'));
@@ -150,17 +161,17 @@ handles.kphi = smc_param_kphi;                      % parameter for matched unce
 % kpsi = 0.1;                                   % parameter for mismatched uncertainty
 handles.const = smc_param_constant;                 % constant parameter
 
-% % K = [smc_param_gainK smc_param_gainK];          % Sliding function parameters
-% % eps = [smc_param_eps smc_param_eps];            % Boundary parameters to alleviate chattering effect
-% % eta = [smc_param_eta; smc_param_eta];           % Reaching gain
-% % kphi = smc_param_kphi;                      % parameter for matched uncertainty
-% % kpsi = 0.1;                                   % parameter for mismatched uncertainty
-% % const = smc_param_constant;                 % constant parameter
-assignin('base','K',handles.K);
-assignin('base','eps',handles.eps);
-assignin('base','eta',handles.eta);
-assignin('base','kphi',handles.kphi);
-assignin('base','c',handles.const);
+K = [smc_param_gainK smc_param_gainK];          % Sliding function parameters
+eps = [smc_param_eps smc_param_eps];            % Boundary parameters to alleviate chattering effect
+eta = [smc_param_eta; smc_param_eta];           % Reaching gain
+kphi = smc_param_kphi;                      % parameter for matched uncertainty
+% kpsi = 0.1;                                   % parameter for mismatched uncertainty
+c = smc_param_constant;                 % constant parameter
+assignin('base','K',K);
+assignin('base','eps',eps);
+assignin('base','eta',eta);
+assignin('base','kphi',kphi);
+assignin('base','c',c);
 
 % Setup the initial condition
 % theta_0 = atan(1);
@@ -185,8 +196,8 @@ handles.AbsTolp = 1e-10;
 handles.options = odeset('RelTol',handles.RelTolP,'AbsTol',handles.AbsTolp*ones(1,length(handles.X_0)));
 % options = odeset('RelTol',RelTolP,'AbsTol',AbsTolp*ones(1,length(X_0)));
 
-% tSpan = [0 handles.duration];
-assignin('base','tSpan',handles.tSpan);
+tSpan = [0 handles.duration];
+assignin('base','tSpan',tSpan);
 
 % save handles data to gui data
 guidata(hObject,handles);
@@ -212,11 +223,8 @@ callODE(hObject, eventdata, handles);
 % 
 % X_0 = handles.X_0
 
-
-% save resultsDataFile.mat T Y
-
 % Plot the resulting graphs
-% run plotResults.m
+run plotResults.m
 
 % --- Executes on button press in closeSimButton.
 function closeSimButton_Callback(hObject, eventdata, handles)
@@ -233,7 +241,6 @@ function simDurationText_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of simDurationText as text
 %        str2double(get(hObject,'String')) returns contents of simDurationText as a double
-global duration tSpan
 assignin('base','duration',str2num(get(hObject,'String')));
 assignin('base','tSpan',[0 str2num(get(hObject,'String'))]);
 
@@ -303,6 +310,7 @@ function matchedUncertainty_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of matchedUncertainty
+global mode_uct
 assignin('base','mode_uct',get(hObject,'Value'));
 
 % --- Executes on button press in noUncertainty.
@@ -580,7 +588,7 @@ function typePanel_SelectionChangedFcn(hObject, eventdata, handles)
 % hObject    handle to the selected object in typePanel 
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global mode_tjt
+
 trajectoryType = get(handles.typePanel, 'SelectedObject');
 trajectoryTypeSelection = get(trajectoryType,'String');
 
@@ -590,13 +598,30 @@ switch trajectoryTypeSelection
 %         set(handles.noUncertainty, 'Enable', 'Off');
 %         set(handles.matchedUncertainty, 'Enable', 'On');
         handles.trajectoryType = 0;
-        assignin('base','mode_tjt',handles.trajectoryType);
+        mode_tjt = 0;
+        assignin('base','mode_tjt',mode_tjt);
+
+        % line frame size
+        handles.frameSize = [-1 3 -1 3];       % Line
+        frameSize = [-1 3 -1 3];
+
+        % save handles.frameSize to workspace
+        assignin('base','frameSize',frameSize);
+
     case 'Circle'
 %         msgbox('Circle Trajectory');
 %         set(handles.matchedUncertainty, 'Enable', 'Off');
 %         set(handles.noUncertainty, 'Enable', 'On');
         handles.trajectoryType = 1;
-        assignin('base','mode_tjt',handles.trajectoryType);
+        mode_tjt = 1;
+        assignin('base','mode_tjt',mode_tjt);
+
+        % circle frame size
+        handles.frameSize = [-2 1 -1 2];     % Circle
+        frameSize = [-2 1 -1 2];
+
+        % save handles.frameSize to workspace
+        assignin('base','frameSize',frameSize);
 end
 
 guidata(hObject, handles);
@@ -605,5 +630,35 @@ function callODE(hObject, eventdata, handles)
 % hObject    handle to the selected object in typePanel 
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[handles.T handles.Y] = ode45(@TTExec, handles.tSpan, handles.X_0, handles.options);
+global TOUT YOUT
+[TOUT, YOUT] = ode45(@TTExec, handles.tSpan, handles.X_0, handles.options);
+assignin('base','TOUT',TOUT);
+assignin('base','YOUT',YOUT);
+handles.TOUT = TOUT;
+handles.YOUT = YOUT;
 guidata(hObject, handles);
+
+save resultsDataFile.mat TOUT YOUT
+
+
+% --- Executes on button press in detailResults.
+function detailResults_Callback(hObject, eventdata, handles)
+% hObject    handle to detailResults (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in runAnimation.
+function runAnimation_Callback(hObject, eventdata, handles)
+% hObject    handle to runAnimation (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in unmatchedUncertainty.
+function unmatchedUncertainty_Callback(hObject, eventdata, handles)
+% hObject    handle to unmatchedUncertainty (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of unmatchedUncertainty
