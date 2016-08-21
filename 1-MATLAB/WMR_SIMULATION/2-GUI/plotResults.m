@@ -8,12 +8,12 @@
 %
 % close all;
 
-global TOUT YOUT
+global TOUT YOUT tSpan frameSize K c mode_uct
 
-width = 500;
-pos_gcf = [500 100 800 800];
-pos_gcf2 = [500 100 width 500];
-pos_gcf3 = [500 100 width 250];
+% width = 500;
+% pos_gcf = [500 100 800 800];
+% pos_gcf2 = [500 100 width 500];
+% pos_gcf3 = [500 100 width 250];
 x_r = YOUT(:,1:3)';
 x_c = YOUT(:,4:6)';
 x_p = [];
@@ -54,7 +54,7 @@ x_e = [x_p(2,:);x_p(1,:);x_p(3,:)];
 
 % State plot
 figure(2)
-set(gcf,'position',pos_gcf3);
+% set(gcf,'position',pos_gcf3);
 
 plotDashline(TOUT,x_e,3);
 xlim(tSpan);
@@ -65,7 +65,7 @@ title('Time response of the state variables in error tracking system');
 
 % Tracking error
 figure(3)
-set(gcf,'position',pos_gcf3);
+% set(gcf,'position',pos_gcf3);
 plotDashline(TOUT,x_r-x_c,3);
 xlim(tSpan);
 legend('q_{xr}-q_{x}','q_{yr}-q_{YOUT}','\theta_{r}-\theta_{c}')
@@ -75,7 +75,7 @@ title('Time response of tracking errors');
 
 % Control signal
 figure(4)
-set(gcf,'position',pos_gcf2);
+% set(gcf,'position',pos_gcf2);
 
 %======================================================================%
 ushow=[];
@@ -109,7 +109,7 @@ title('Time response of steering velocity');
 
 % Sliding surface plot
 figure(5)
-set(gcf,'position',pos_gcf3);
+% set(gcf,'position',pos_gcf3);
 
 s1=@(x_e) K(1)*x_e;
 s2=@(ye,x_e,the) K(2).*the+ye./sqrt(c+ye.^2+x_e.^2);
@@ -126,7 +126,7 @@ title('Time response of sliding surfaces');
 % Uncertainty
 if mode_uct > 0
     figure(6);
-    set(gcf,'position',pos_gcf2);
+%     set(gcf,'position',pos_gcf2);
     subplot(2,1,1);
     plot(TOUT,phishow(1,:));
     xlim(tSpan);

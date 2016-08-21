@@ -22,7 +22,7 @@ function varargout = WMR_TT_SIM(varargin)
 
 % Edit the above text to modify the response to help WMR_TT_SIM
 
-% Last Modified by GUIDE v2.5 21-Aug-2016 04:39:44
+% Last Modified by GUIDE v2.5 21-Aug-2016 15:01:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -58,6 +58,7 @@ clc;
 % Choose default command line output for WMR_TT_SIM
 handles.output = hObject;
 handles.trajectoryType = 0;
+handles.cnt = 0;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -83,164 +84,8 @@ function runSimButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-global duration c K eps eta mode_uct mode_tjt kphi frameSize tSpan circle;
-global TOUT YOUT
-
-trajectoryType = get(handles.typePanel, 'SelectedObject');
-trajectoryTypeSelection = get(trajectoryType,'String');
-
-switch trajectoryTypeSelection
-    case 'Line'
-%         msgbox('Line Trajectory');
-%         set(handles.noUncertainty, 'Enable', 'Off');
-%         set(handles.matchedUncertainty, 'Enable', 'On');
-        handles.trajectoryType = 0;
-        mode_tjt = 0;
-        assignin('base','mode_tjt',mode_tjt);
-
-        % line frame size
-        handles.frameSize = [-1 3 -1 3];       % Line
-        frameSize = [-1 3 -1 3];
-
-        % save handles.frameSize to workspace
-        assignin('base','frameSize',frameSize);
-
-    case 'Circle'
-%         msgbox('Circle Trajectory');
-%         set(handles.matchedUncertainty, 'Enable', 'Off');
-%         set(handles.noUncertainty, 'Enable', 'On');
-        handles.trajectoryType = 1;
-        mode_tjt = 1;
-        assignin('base','mode_tjt',mode_tjt);
-
-        % circle frame size
-        handles.frameSize = [-2 1 -1 2];     % Circle
-        frameSize = [-2 1 -1 2];
-
-        % save handles.frameSize to workspace
-        assignin('base','frameSize',frameSize);
-end
-
-% save duration of simulation to handles
-handles.duration = str2num(get(handles.simDurationText,'String'));
-duration = str2num(get(handles.simDurationText,'String'));
-assignin('base','duration',duration);
-circle = [1 duration];
-assignin('base','circle',circle);
-
-% save no uncertainty checkbox value to handles
-if get(handles.noUncertainty, 'Value') == 0
-%    msgbox('No uncertainty is unchecked');
-    handles.isNoUncertaintyChecked = 0;
-elseif get(handles.noUncertainty, 'Value') == 1
-%    msgbox('No uncertainty is checked');    
-    handles.isNoUncertaintyChecked = 1;
-    mode_uct = 0;
-    assignin('base','mode_uct',mode_uct);
-end
-
-% save matched uncertainty checkbox value to handles
-if get(handles.matchedUncertainty, 'Value') == 0
-%    msgbox('No uncertainty is checked');    
-    handles.isMatchedUncertaintyChecked = 0;
-elseif get(handles.matchedUncertainty, 'Value') == 1
-%    msgbox('No uncertainty is checked');    
-    handles.isMatchedUncertaintyChecked = 1;
-    mode_uct = 1;
-    assignin('base','mode_uct',mode_uct);
-end
-
-% Sliding mode control parameters
-smc_param_constant = str2num(get(handles.contantText,'String'));
-smc_param_gainK = str2num(get(handles.gainText,'String'));
-smc_param_eps = str2num(get(handles.epsText,'String'));
-smc_param_eta = str2num(get(handles.etaText,'String'));
-smc_param_kphi = str2num(get(handles.kphiText,'String'));
-
-% save SMC parameters to handles
-handles.K = [smc_param_gainK smc_param_gainK];          % Sliding function parameters
-handles.eps = [smc_param_eps smc_param_eps];            % Boundary parameters to alleviate chattering effect
-handles.eta = [smc_param_eta; smc_param_eta];           % Reaching gain
-handles.kphi = smc_param_kphi;                      % parameter for matched uncertainty
-% kpsi = 0.1;                                   % parameter for mismatched uncertainty
-handles.const = smc_param_constant;                 % constant parameter
-
-K = [smc_param_gainK smc_param_gainK];          % Sliding function parameters
-eps = [smc_param_eps smc_param_eps];            % Boundary parameters to alleviate chattering effect
-eta = [smc_param_eta; smc_param_eta];           % Reaching gain
-kphi = smc_param_kphi;                      % parameter for matched uncertainty
-% kpsi = 0.1;                                   % parameter for mismatched uncertainty
-c = smc_param_constant;                 % constant parameter
-assignin('base','K',K);
-assignin('base','eps',eps);
-assignin('base','eta',eta);
-assignin('base','kphi',kphi);
-assignin('base','c',c);
-
-% Setup the initial condition
-% theta_0 = atan(1);
-init_x_c = str2num(get(handles.xcText,'String'));
-init_y_c = str2num(get(handles.ycText,'String'));
-init_theta_c = str2num(get(handles.thetacText,'String'));
-init_x_r = str2num(get(handles.xrText,'String'));
-init_y_r = str2num(get(handles.yrText,'String'));
-init_theta_r = str2num(get(handles.thetarText,'String'));
-
-% init_theta_c = atan(1) + pi/8
-xc_init = [init_x_c; init_y_c; init_theta_c];       % forward tracking
-% xc_0 = [-0.3; -0.4; theta_0 + 0.6];               % backward tracking
-xr_init = [init_x_r; init_y_r; init_theta_r];       % Initial position of reference robot
-handles.X_0 = [xr_init; xc_init];                   % Initial states of simulation
-assignin('base','X_0',handles.X_0);
-
-% Simulation execution
-handles.tSpan = [0 handles.duration];
-handles.RelTolP = 1e-8;
-handles.AbsTolp = 1e-10;
-handles.options = odeset('RelTol',handles.RelTolP,'AbsTol',handles.AbsTolp*ones(1,length(handles.X_0)));
-% options = odeset('RelTol',RelTolP,'AbsTol',AbsTolp*ones(1,length(X_0)));
-
-tSpan = [0 handles.duration];
-assignin('base','tSpan',tSpan);
-
-% save handles data to gui data
-guidata(hObject,handles);
-
-% command to run differential equation (ode45)
-% all setup and control strategies are included in dynamicFunc function
-% file
-
-% [TOUT YOUT] = ode45(@TTExec, handles.tSpan, handles.X_0, handles.options);
-callODE(hObject, eventdata, handles);
-
-x_r = YOUT(:,1:3)';
-x_c = YOUT(:,4:6)';
-
-% plot the motion
-axis(handles.trajectoryTrackingResult);
-plot(handles.trajectoryTrackingResult, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
-legend('Reference trajectory','WMR trajectory','Location','northwest')
-% legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
-xlabel('x(m)');
-ylabel('YOUT(m)');
-title('Motion of the WMR');
-
-% Testing purpose
-% duration = handles.duration
-% noUncertainty = handles.isNoUncertaintyChecked
-% matchedUncertainty = handles.isMatchedUncertaintyChecked
-% trajectoryType = handles.trajectoryType
-% 
-% K = handles.K
-% eps = handles.eps
-% eta = handles.eta
-% kphi = handles.kphi
-% const = handles.const
-% 
-% X_0 = handles.X_0
-
-% Plot the resulting graphs
-run plotResults.m
+% Helper function to execute this simulation
+runSimulation(hObject, eventdata, handles);
 
 % --- Executes on button press in closeSimButton.
 function closeSimButton_Callback(hObject, eventdata, handles)
@@ -604,6 +449,7 @@ function typePanel_SelectionChangedFcn(hObject, eventdata, handles)
 % hObject    handle to the selected object in typePanel 
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global vrVal wrVal
 
 trajectoryType = get(handles.typePanel, 'SelectedObject');
 trajectoryTypeSelection = get(trajectoryType,'String');
@@ -623,7 +469,12 @@ switch trajectoryTypeSelection
 
         % save handles.frameSize to workspace
         assignin('base','frameSize',frameSize);
-
+        
+        vrVal = 0.8;
+        wrVal = 0;
+        assignin('base','vrVal',vrVal);
+        assignin('base','wrVal',wrVal);
+        
     case 'Circle'
 %         msgbox('Circle Trajectory');
 %         set(handles.matchedUncertainty, 'Enable', 'Off');
@@ -662,7 +513,7 @@ function detailResults_Callback(hObject, eventdata, handles)
 % hObject    handle to detailResults (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+DisplayDetailResults;
 
 % --- Executes on button press in runAnimation.
 function runAnimation_Callback(hObject, eventdata, handles)
@@ -694,15 +545,174 @@ function configType_Callback(hObject, eventdata, handles)
 % hObject    handle to configType (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles.cnt = handles.cnt + 1;
+
 if handles.trajectoryType == 0
     LineTrajectoryTypeConfig; 
 elseif handles.trajectoryType == 1
     CircleTrajectoryTypeConfig;
 end
-
+guidata(hObject,handles);
 
 % --- Executes on button press in configUncertainty.
 function configUncertainty_Callback(hObject, eventdata, handles)
 % hObject    handle to configUncertainty (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+function runSimulation(hObject, eventdata, handles)
+% hObject    handle to configUncertainty (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global duration c K eps eta mode_uct mode_tjt kphi frameSize tSpan circle;
+global vrVal wrVal TOUT YOUT
+
+trajectoryType = get(handles.typePanel, 'SelectedObject');
+trajectoryTypeSelection = get(trajectoryType,'String');
+
+switch trajectoryTypeSelection
+    case 'Line'
+%         msgbox('Line Trajectory');
+%         set(handles.noUncertainty, 'Enable', 'Off');
+%         set(handles.matchedUncertainty, 'Enable', 'On');
+        handles.trajectoryType = 0;
+        mode_tjt = 0;
+        assignin('base','mode_tjt',mode_tjt);
+
+        % line frame size
+        handles.frameSize = [-1 3 -1 3];       % Line
+        frameSize = [-1 3 -1 3];
+
+        % save handles.frameSize to workspace
+        assignin('base','frameSize',frameSize);
+
+        if handles.cnt == 0
+            vrVal = 0.8;
+            wrVal = 0;
+            assignin('base','vrVal',vrVal);
+            assignin('base','wrVal',wrVal);
+        end
+    case 'Circle'
+%         msgbox('Circle Trajectory');
+%         set(handles.matchedUncertainty, 'Enable', 'Off');
+%         set(handles.noUncertainty, 'Enable', 'On');
+        handles.trajectoryType = 1;
+        mode_tjt = 1;
+        assignin('base','mode_tjt',mode_tjt);
+
+        % circle frame size
+        handles.frameSize = [-2 1 -1 2];     % Circle
+        frameSize = [-2 1 -1 2];
+
+        % save handles.frameSize to workspace
+        assignin('base','frameSize',frameSize);
+end
+
+% save duration of simulation to handles
+handles.duration = str2num(get(handles.simDurationText,'String'));
+duration = str2num(get(handles.simDurationText,'String'));
+assignin('base','duration',duration);
+circle = [1 duration];
+assignin('base','circle',circle);
+
+% save no uncertainty checkbox value to handles
+if get(handles.noUncertainty, 'Value') == 0
+%    msgbox('No uncertainty is unchecked');
+    handles.isNoUncertaintyChecked = 0;
+elseif get(handles.noUncertainty, 'Value') == 1
+%    msgbox('No uncertainty is checked');    
+    handles.isNoUncertaintyChecked = 1;
+    mode_uct = 0;
+    assignin('base','mode_uct',mode_uct);
+end
+
+% save matched uncertainty checkbox value to handles
+if get(handles.matchedUncertainty, 'Value') == 0
+%    msgbox('No uncertainty is checked');    
+    handles.isMatchedUncertaintyChecked = 0;
+elseif get(handles.matchedUncertainty, 'Value') == 1
+%    msgbox('No uncertainty is checked');    
+    handles.isMatchedUncertaintyChecked = 1;
+    mode_uct = 1;
+    assignin('base','mode_uct',mode_uct);
+end
+
+% Sliding mode control parameters
+smc_param_constant = str2num(get(handles.contantText,'String'));
+smc_param_gainK = str2num(get(handles.gainText,'String'));
+smc_param_eps = str2num(get(handles.epsText,'String'));
+smc_param_eta = str2num(get(handles.etaText,'String'));
+smc_param_kphi = str2num(get(handles.kphiText,'String'));
+
+% save SMC parameters to handles
+handles.K = [smc_param_gainK smc_param_gainK];          % Sliding function parameters
+handles.eps = [smc_param_eps smc_param_eps];            % Boundary parameters to alleviate chattering effect
+handles.eta = [smc_param_eta; smc_param_eta];           % Reaching gain
+handles.kphi = smc_param_kphi;                      % parameter for matched uncertainty
+% kpsi = 0.1;                                   % parameter for mismatched uncertainty
+handles.const = smc_param_constant;                 % constant parameter
+
+K = [smc_param_gainK smc_param_gainK];          % Sliding function parameters
+eps = [smc_param_eps smc_param_eps];            % Boundary parameters to alleviate chattering effect
+eta = [smc_param_eta; smc_param_eta];           % Reaching gain
+kphi = smc_param_kphi;                      % parameter for matched uncertainty
+% kpsi = 0.1;                                   % parameter for mismatched uncertainty
+c = smc_param_constant;                 % constant parameter
+assignin('base','K',K);
+assignin('base','eps',eps);
+assignin('base','eta',eta);
+assignin('base','kphi',kphi);
+assignin('base','c',c);
+
+% Setup the initial condition
+% theta_0 = atan(1);
+init_x_c = str2num(get(handles.xcText,'String'));
+init_y_c = str2num(get(handles.ycText,'String'));
+init_theta_c = str2num(get(handles.thetacText,'String'));
+init_x_r = str2num(get(handles.xrText,'String'));
+init_y_r = str2num(get(handles.yrText,'String'));
+init_theta_r = str2num(get(handles.thetarText,'String'));
+
+% init_theta_c = atan(1) + pi/8
+xc_init = [init_x_c; init_y_c; init_theta_c];       % forward tracking
+% xc_0 = [-0.3; -0.4; theta_0 + 0.6];               % backward tracking
+xr_init = [init_x_r; init_y_r; init_theta_r];       % Initial position of reference robot
+handles.X_0 = [xr_init; xc_init];                   % Initial states of simulation
+assignin('base','X_0',handles.X_0);
+
+% Simulation execution
+handles.tSpan = [0 handles.duration];
+handles.RelTolP = 1e-8;
+handles.AbsTolp = 1e-10;
+handles.options = odeset('RelTol',handles.RelTolP,'AbsTol',handles.AbsTolp*ones(1,length(handles.X_0)));
+% options = odeset('RelTol',RelTolP,'AbsTol',AbsTolp*ones(1,length(X_0)));
+
+tSpan = [0 handles.duration];
+assignin('base','tSpan',tSpan);
+
+% save handles data to gui data
+guidata(hObject,handles);
+
+% command to run differential equation (ode45)
+% all setup and control strategies are included in dynamicFunc function
+% file
+
+% [TOUT YOUT] = ode45(@TTExec, handles.tSpan, handles.X_0, handles.options);
+callODE(hObject, eventdata, handles);
+
+x_r = YOUT(:,1:3)';
+x_c = YOUT(:,4:6)';
+
+% plot the motion
+axis(handles.trajectoryTrackingResult);
+plot(handles.trajectoryTrackingResult, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
+legend('Reference trajectory','WMR trajectory','Location','northwest')
+% legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
+xlabel('XOUT(m)');
+ylabel('YOUT(m)');
+title('Motion of the WMR');
+
+% Enable Detail Results and Run Animation buttons to check the results
+set(handles.detailResults,'enable','on');
+set(handles.runAnimation,'enable','on');
