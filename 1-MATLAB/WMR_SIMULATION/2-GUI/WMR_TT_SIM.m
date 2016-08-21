@@ -566,7 +566,7 @@ function runSimulation(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global duration c K eps eta mode_uct mode_tjt kphi frameSize tSpan circle;
-global vrVal wrVal YOUT x_r x_c
+global vrVal wrVal x_r x_c YOUT
 
 trajectoryType = get(handles.typePanel, 'SelectedObject');
 trajectoryTypeSelection = get(trajectoryType,'String');

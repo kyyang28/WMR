@@ -279,16 +279,38 @@ function plotDetailResults(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-global TOUT tSpan mode_uct errorTracking x_e x_r x_c u_r u_tmp phi_tmp sigma_1 sigma_2
-figCnt = 1;
+% Step 1: State plot
+plotStateGraph(hObject, eventdata, handles);
 
-% State plot
-figure(figCnt);
-figCnt = figCnt + 1;
-plot(TOUT,x_e(1,:), 'r-');
+% Step 2: Tracking error
+plotErrorTrackingGraph(hObject, eventdata, handles);
+
+% Step 3: Control signal
+plotControlSignalGraph(hObject, eventdata, handles);
+
+% Step 4: Sliding surface plot
+plotSlidingSurfaceGraph(hObject, eventdata, handles);
+
+% Step 5: Matched uncertainty
+plotMatchedUncertaintyGraph(hObject, eventdata, handles);
+
+
+
+function plotStateGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT tSpan x_e
+
+% Added by YOUNG - Solve separated plot window override the GUI axes contents
+fig1 = figure;
+fp1 = axes('Parent', fig1);
+% Added by YOUNG - Solve separated plot window override the GUI axes contents
+
+plot(fp1, TOUT,x_e(1,:), 'r-');
 hold on;
-plot(TOUT,x_e(2,:), 'b--');
-plot(TOUT,x_e(3,:), 'm-.');
+plot(fp1, TOUT,x_e(2,:), 'b--');
+plot(fp1, TOUT,x_e(3,:), 'm-.');
 hold off;
 
 xlim(tSpan);
@@ -297,9 +319,32 @@ xlabel('Time (sec)');
 ylabel('State');
 title('Time response of the state variables in error tracking system');
 
-% Tracking error
-figure(figCnt)
-figCnt = figCnt + 1;
+
+function plotErrorTrackingGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT tSpan errorTracking x_r x_c
+
+% % Added by YOUNG - Solve separated plot window override the GUI axes contents
+% fig2 = figure;
+% fp2 = axes('Parent', fig2);
+% % Added by YOUNG - Solve separated plot window override the GUI axes contents
+% 
+% errorTracking = x_r - x_c;
+% 
+% plot(fp2, TOUT,errorTracking(1,:),'r-');
+% hold on;
+% plot(fp2, TOUT,errorTracking(2,:),'b--');
+% plot(fp2, TOUT,errorTracking(3,:),'m-.');
+% hold off;
+% 
+% xlim(tSpan);
+% legend('q_{x_r} - q_{x_c}','q_{y_r} - q_{y_c}','\theta_r - \theta_c')
+% xlabel('Time (sec)');
+% ylabel('Tracking errors');
+% title('Time response of tracking errors');
+figure;
 errorTracking = x_r - x_c;
 
 plot(TOUT,errorTracking(1,:),'r-');
@@ -314,9 +359,18 @@ xlabel('Time (sec)');
 ylabel('Tracking errors');
 title('Time response of tracking errors');
 
-% Control signal
-figure(figCnt);
-figCnt = figCnt + 1;
+
+function plotControlSignalGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT tSpan u_r u_tmp
+
+% Added by YOUNG - Solve separated plot window override the GUI axes contents
+% fig3 = figure;
+% fp3 = axes('Parent', fig3);
+figure
+% Added by YOUNG - Solve separated plot window override the GUI axes contents
 
 subplot(2,1,1);
 % ur(1,:) - all the linear velocity in time TOUT
@@ -336,10 +390,28 @@ xlabel('Time (sec)');
 ylabel('Angular(Steering) velocity [w] (rad/s)');
 title('Time response of angular(steering) velocity');
 
-% Sliding surface plot
-figure(figCnt);
-figCnt = figCnt + 1;
 
+function plotSlidingSurfaceGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT tSpan x_e sigma_1 sigma_2
+
+% % Added by YOUNG - Solve separated plot window override the GUI axes contents
+% fig4 = figure;
+% fp4 = axes('Parent', fig4);
+% % Added by YOUNG - Solve separated plot window override the GUI axes contents
+% 
+% plot(fp4, TOUT, sigma_1(x_e(2,:)), 'r-');
+% hold on;
+% plot(fp4, TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
+% hold off;
+% xlim(tSpan);
+% legend('\sigma_1','\sigma_2')
+% xlabel('Time (sec)');
+% title('Time response of sliding surfaces (\sigma_1 and \sigma_2)');
+
+figure;
 plot(TOUT, sigma_1(x_e(2,:)), 'r-');
 hold on;
 plot(TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
@@ -349,10 +421,28 @@ legend('\sigma_1','\sigma_2')
 xlabel('Time (sec)');
 title('Time response of sliding surfaces (\sigma_1 and \sigma_2)');
 
-% Uncertainty
+
+function plotMatchedUncertaintyGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT tSpan mode_uct phi_tmp
+
 if mode_uct > 0
-    figure(figCnt);
-%     figCnt = figCnt + 1;
+    
+%     % Added by YOUNG - Solve separated plot window override the GUI axes contents
+%     fig5 = figure;
+%     fp5 = axes('Parent', fig5);
+%     % Added by YOUNG - Solve separated plot window override the GUI axes contents    
+% 
+%     subplot(2,1,1,fp5);
+%     plot(fp5, TOUT, phi_tmp(1,:));
+%     xlim(tSpan);
+%     subplot(2,1,2);
+%     plot(fp5, TOUT, phi_tmp(2,:));
+%     xlim(tSpan);
+
+    figure
     subplot(2,1,1);
     plot(TOUT, phi_tmp(1,:));
     xlim(tSpan);
@@ -360,6 +450,7 @@ if mode_uct > 0
     plot(TOUT, phi_tmp(2,:));
     xlim(tSpan);
 end
+
 % +-----------------------------------------------------------------------+
 % +-------------- Helper function to plot individual graph ---------------+
 % +-----------------------------------------------------------------------+
