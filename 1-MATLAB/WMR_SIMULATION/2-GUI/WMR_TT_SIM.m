@@ -22,7 +22,7 @@ function varargout = WMR_TT_SIM(varargin)
 
 % Edit the above text to modify the response to help WMR_TT_SIM
 
-% Last Modified by GUIDE v2.5 21-Aug-2016 02:42:39
+% Last Modified by GUIDE v2.5 21-Aug-2016 04:39:44
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -692,5 +692,17 @@ function trajectoryTrackingResult_CreateFcn(hObject, eventdata, handles)
 % --- Executes on button press in configType.
 function configType_Callback(hObject, eventdata, handles)
 % hObject    handle to configType (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if handles.trajectoryType == 0
+    LineTrajectoryTypeConfig; 
+elseif handles.trajectoryType == 1
+    CircleTrajectoryTypeConfig;
+end
+
+
+% --- Executes on button press in configUncertainty.
+function configUncertainty_Callback(hObject, eventdata, handles)
+% hObject    handle to configUncertainty (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

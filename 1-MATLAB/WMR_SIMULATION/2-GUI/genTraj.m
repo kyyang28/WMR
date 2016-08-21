@@ -9,15 +9,15 @@
 function u_r = genTraj(t)
 % function to generate different trajectory shapes
 
-global mode_tjt circle
+global mode_tjt circle vrVal wrVal
 
 % Initialse u_r
 u_r = zeros(2,1);
 
 if mode_tjt == 0
 %   Line
-    v_r = 1;
-    w_r = 0;
+    v_r = vrVal;
+    w_r = wrVal;
 elseif mode_tjt == 1
 %   Circle (TBA)
     v_r = 2 * circle(1) * pi / circle(2);
