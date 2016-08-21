@@ -566,7 +566,7 @@ function runSimulation(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global duration c K eps eta mode_uct mode_tjt kphi frameSize tSpan circle;
-global vrVal wrVal TOUT YOUT
+global vrVal wrVal YOUT x_r x_c
 
 trajectoryType = get(handles.typePanel, 'SelectedObject');
 trajectoryTypeSelection = get(trajectoryType,'String');
@@ -703,6 +703,8 @@ callODE(hObject, eventdata, handles);
 
 x_r = YOUT(:,1:3)';
 x_c = YOUT(:,4:6)';
+assignin('base','x_r',x_r);
+assignin('base','x_c',x_c);
 
 % plot the motion
 axis(handles.trajectoryTrackingResult);
@@ -716,3 +718,5 @@ title('Motion of the WMR');
 % Enable Detail Results and Run Animation buttons to check the results
 set(handles.detailResults,'enable','on');
 set(handles.runAnimation,'enable','on');
+
+uiwait(msgbox('Simulation is finished!!!','Done','modal'));

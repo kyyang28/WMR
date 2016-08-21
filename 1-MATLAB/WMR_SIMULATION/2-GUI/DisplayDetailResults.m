@@ -51,9 +51,65 @@ function DisplayDetailResults_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to DisplayDetailResults (see VARARGIN)
-
+global mode_uct TOUT YOUT x_c x_r x_p x_e Tc u_tmp u_tmp2 phi_tmp u_r sigma_1 sigma_2 K c
+cla(handles.stateVariablePlot);
+cla(handles.linearVelocityControlSignalPlot);
+cla(handles.slidingSurfacesPlot);
+cla(handles.trackingErrorPlot);
+cla(handles.rotationalVelocityControlSignalPlot);
+cla(handles.matchedUncertaintyPlot1);
+cla(handles.matchedUncertaintyPlot2);
 % Choose default command line output for DisplayDetailResults
 handles.output = hObject;
+
+% Initialisation of plot
+handles.x_p = [];
+x_p = [];
+
+for i = 1:length(TOUT)
+    handles.Tc = [cos(x_c(3,i)) sin(x_c(3,i)) 0;-sin(x_c(3,i)) cos(x_c(3,i)) 0;0 0 1];
+    x_p = [handles.x_p handles.Tc*(x_r(:,i) - x_c(:,i))];
+    handles.x_p = x_p;
+end
+
+x_e = [handles.x_p(2,:); handles.x_p(1,:); handles.x_p(3,:)];
+handles.x_e = x_e;
+
+% output Tc, x_p, x_e to workspace
+% MAKE SURE to include "global Tc x_p x_e" variables with EXACT SAME name
+assignin('base', 'Tc', Tc);
+assignin('base', 'x_p', x_p);
+assignin('base', 'x_e', x_e);
+
+u_tmp = [];
+u_tmp2 = [];
+phi_tmp = [];
+u_r = [];
+for i = 1:length(TOUT)
+    u_r = [u_r genTraj(TOUT(i))];
+    u_tmp2 = [u_tmp2 SMCFunc(YOUT(i,:)', genTraj(TOUT(i)))];
+    phi_tmp = [phi_tmp genPhi(TOUT(i),YOUT(i,:)',u_r)];
+end
+
+u_tmp = u_tmp2;
+
+handles.u_r = u_r;
+handles.u_tmp = u_tmp;
+handles.phi_tmp = phi_tmp;
+
+assignin('base', 'u_tmp', u_tmp);
+assignin('base', 'u_tmp2', u_tmp2);
+assignin('base', 'phi_tmp', phi_tmp);
+assignin('base', 'u_r', u_r);
+
+% Define function handle of sliding surfaces
+sigma_1 = @(x_e) K(1)*x_e;
+sigma_2 = @(y_e,x_e,theta) K(2).* theta + y_e./sqrt(c + y_e.^2 + x_e.^2);
+handles.sigma_1 = sigma_1;
+handles.sigma_2 = sigma_2;
+assignin('base', 'sigma_1', sigma_1);
+assignin('base', 'sigma_2', sigma_2);
+
 
 % Update handles structure
 guidata(hObject, handles);
@@ -61,6 +117,25 @@ guidata(hObject, handles);
 % UIWAIT makes DisplayDetailResults wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
+
+% +-----------------------------------------------------------------------+
+% +-------------- Helper function to plot individual graph ---------------+
+% +-----------------------------------------------------------------------+
+plotStateVariableGraph(hObject, eventdata, handles);
+plotLinVelCtrlSigGraph(hObject, eventdata, handles);
+plotRotVelCtrlSigGraph(hObject, eventdata, handles);
+plotSlidingSurfacesGraph(hObject, eventdata, handles);
+plotTrackingErrorGraph(hObject, eventdata, handles);
+
+% Only plot uncertainty graphs when there exists uncertainties in the
+% control input channel
+if mode_uct > 0
+    plotMatchedUncertainty1Graph(hObject, eventdata, handles);
+    plotMatchedUncertainty2Graph(hObject, eventdata, handles);
+end
+% +-----------------------------------------------------------------------+
+% +-------------- Helper function to plot individual graph ---------------+
+% +-----------------------------------------------------------------------+
 
 % --- Outputs from this function are returned to the command line.
 function varargout = DisplayDetailResults_OutputFcn(hObject, eventdata, handles) 
@@ -80,13 +155,23 @@ function plotIndividuallyBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Plot the resulting graphs
-run plotResults.m
+% run plotResults.m
+plotDetailResults(hObject, eventdata, handles);
 
 % --- Executes on button press in closeBtn.
 function closeBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to closeBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Clear all the graphs
+cla(handles.stateVariablePlot);
+cla(handles.linearVelocityControlSignalPlot);
+cla(handles.slidingSurfacesPlot);
+cla(handles.trackingErrorPlot);
+cla(handles.rotationalVelocityControlSignalPlot);
+cla(handles.matchedUncertaintyPlot1);
+cla(handles.matchedUncertaintyPlot2);
 close;
 
 
@@ -96,3 +181,185 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 movegui('center');
+
+
+% +-----------------------------------------------------------------------+
+% +-------------- Helper function to plot individual graph ---------------+
+% +-----------------------------------------------------------------------+
+function plotStateVariableGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT x_e
+axis(handles.stateVariablePlot);
+plot(handles.stateVariablePlot, TOUT, x_e(1,:), 'r-', TOUT, x_e(2,:), 'b--', TOUT, x_e(3,:), 'm-.');
+legend(handles.stateVariablePlot,'x_1','x_2','x_3')
+xlabel(handles.stateVariablePlot,'Time (sec)');
+ylabel(handles.stateVariablePlot,'State');
+title(handles.stateVariablePlot,'Time response of the state variables in error tracking system');
+
+
+function plotLinVelCtrlSigGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT u_r u_tmp
+plot(handles.linearVelocityControlSignalPlot, TOUT, u_r(1,:),'r', TOUT, u_tmp(1,:), 'b-.');
+legend(handles.linearVelocityControlSignalPlot, 'u_{v_{ref}}','u_{v_{curr}}')
+xlabel(handles.linearVelocityControlSignalPlot, 'Time (sec)');
+ylabel(handles.linearVelocityControlSignalPlot, 'Linear velocity [v] (m/s)');
+title(handles.linearVelocityControlSignalPlot, 'Time response of linear velocity');
+
+
+function plotRotVelCtrlSigGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT u_r u_tmp
+plot(handles.rotationalVelocityControlSignalPlot, TOUT,u_r(2,:), 'r', TOUT, u_tmp(2,:), 'b-.');
+legend(handles.rotationalVelocityControlSignalPlot, 'u_{w_{ref}}','u_{w_{curr}}')
+xlabel(handles.rotationalVelocityControlSignalPlot, 'Time (sec)');
+ylabel(handles.rotationalVelocityControlSignalPlot, 'Angular(Steering) velocity [w] (rad/s)');
+title(handles.rotationalVelocityControlSignalPlot, 'Time response of angular(steering) velocity');
+
+
+function plotSlidingSurfacesGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT x_e sigma_1 sigma_2
+plot(handles.slidingSurfacesPlot, TOUT, sigma_1(x_e(2,:)), 'r-', TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
+legend(handles.slidingSurfacesPlot, '\sigma_1','\sigma_2')
+xlabel(handles.slidingSurfacesPlot, 'Time (sec)');
+ylabel(handles.slidingSurfacesPlot, 'Sliding surfaces');
+title(handles.slidingSurfacesPlot, 'Time response of sliding surfaces (\sigma_1 and \sigma_2)');
+
+
+function plotTrackingErrorGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT errorTracking x_r x_c
+
+errorTracking = x_r - x_c;
+
+axis(handles.trackingErrorPlot);
+
+plot(handles.trackingErrorPlot, TOUT, errorTracking(1,:), 'r-', TOUT, errorTracking(2,:), 'b--', TOUT, errorTracking(3,:), 'm-.');
+legend(handles.trackingErrorPlot, 'q_{x_r} - q_{x_c}', 'q_{y_r} - q_{y_c}', '\theta_r - \theta_c')
+xlabel(handles.trackingErrorPlot, 'Time (sec)');
+ylabel(handles.trackingErrorPlot, 'Tracking errors');
+title(handles.trackingErrorPlot, 'Time response of tracking errors');
+
+
+function plotMatchedUncertainty1Graph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT phi_tmp mode_uct
+
+if mode_uct > 0
+    plot(handles.matchedUncertaintyPlot1, TOUT, phi_tmp(1,:));
+end
+
+
+function plotMatchedUncertainty2Graph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global TOUT phi_tmp mode_uct
+
+if mode_uct > 0
+    plot(handles.matchedUncertaintyPlot2, TOUT, phi_tmp(2,:));
+end
+
+
+function plotDetailResults(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+global TOUT tSpan mode_uct errorTracking x_e x_r x_c u_r u_tmp phi_tmp sigma_1 sigma_2
+figCnt = 1;
+
+% State plot
+figure(figCnt);
+figCnt = figCnt + 1;
+plot(TOUT,x_e(1,:), 'r-');
+hold on;
+plot(TOUT,x_e(2,:), 'b--');
+plot(TOUT,x_e(3,:), 'm-.');
+hold off;
+
+xlim(tSpan);
+legend('x_1','x_2','x_3')
+xlabel('Time (sec)');
+ylabel('State');
+title('Time response of the state variables in error tracking system');
+
+% Tracking error
+figure(figCnt)
+figCnt = figCnt + 1;
+errorTracking = x_r - x_c;
+
+plot(TOUT,errorTracking(1,:),'r-');
+hold on;
+plot(TOUT,errorTracking(2,:),'b--');
+plot(TOUT,errorTracking(3,:),'m-.');
+hold off;
+
+xlim(tSpan);
+legend('q_{x_r} - q_{x_c}','q_{y_r} - q_{y_c}','\theta_r - \theta_c')
+xlabel('Time (sec)');
+ylabel('Tracking errors');
+title('Time response of tracking errors');
+
+% Control signal
+figure(figCnt);
+figCnt = figCnt + 1;
+
+subplot(2,1,1);
+% ur(1,:) - all the linear velocity in time TOUT
+plot(TOUT, u_r(1,:), 'r',TOUT, u_tmp(1,:), 'b-.');
+xlim(tSpan);
+legend('u_{v_{ref}}','u_{v_{curr}}')
+xlabel('Time (sec)');
+ylabel('Linear velocity [v] (m/s)');
+title('Time response of linear velocity');
+% title(tn);
+% subplot(2,2,sn(2));
+subplot(2,1,2);
+plot(TOUT,u_r(2,:), 'r', TOUT, u_tmp(2,:), 'b-.');
+xlim(tSpan);
+legend('u_{w_{ref}}','u_{w_{curr}}')
+xlabel('Time (sec)');
+ylabel('Angular(Steering) velocity [w] (rad/s)');
+title('Time response of angular(steering) velocity');
+
+% Sliding surface plot
+figure(figCnt);
+figCnt = figCnt + 1;
+
+plot(TOUT, sigma_1(x_e(2,:)), 'r-');
+hold on;
+plot(TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
+hold off;
+xlim(tSpan);
+legend('\sigma_1','\sigma_2')
+xlabel('Time (sec)');
+title('Time response of sliding surfaces (\sigma_1 and \sigma_2)');
+
+% Uncertainty
+if mode_uct > 0
+    figure(figCnt);
+%     figCnt = figCnt + 1;
+    subplot(2,1,1);
+    plot(TOUT, phi_tmp(1,:));
+    xlim(tSpan);
+    subplot(2,1,2);
+    plot(TOUT, phi_tmp(2,:));
+    xlim(tSpan);
+end
+% +-----------------------------------------------------------------------+
+% +-------------- Helper function to plot individual graph ---------------+
+% +-----------------------------------------------------------------------+
