@@ -26,31 +26,31 @@ end
 x_e = [x_p(2,:);x_p(1,:);x_p(3,:)];
 
 % Motion plot
-figure(1)
-plot(x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
-
-%-----------------------------------------------%
-%-------------Generate Trangle------------------%
-a=.1;
-datap=trian(x_r(:,1),a);         
-xsr=datap(1,:);
-ysr=datap(2,:);
-datap=trian(x_c(:,1),a);
-xsc=datap(1,:);
-ysc=datap(2,:);
-rr=patch(xsr,ysr,'r');
-rc=patch(xsc,ysc,'w');
-%---------------------End-----------------------%
-%-----------------------------------------------%
-
-set(gcf,'position',pos_gcf);
-set(gca,'DataAspectRatioMode','manual');
-set(gca,'DataAspectRatio',[1 1 1]);
-axis(frameSize);
-legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot')
-xlabel('x (m)');
-ylabel('YOUT (m)');
-title('Motion of the WMR');
+% figure(1)
+% plot(x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
+% 
+% %-----------------------------------------------%
+% %-------------Generate Trangle------------------%
+% a=.1;
+% datap=trian(x_r(:,1),a);         
+% xsr=datap(1,:);
+% ysr=datap(2,:);
+% datap=trian(x_c(:,1),a);
+% xsc=datap(1,:);
+% ysc=datap(2,:);
+% rr=patch(xsr,ysr,'r');
+% rc=patch(xsc,ysc,'w');
+% %---------------------End-----------------------%
+% %-----------------------------------------------%
+% 
+% set(gcf,'position',pos_gcf);
+% set(gca,'DataAspectRatioMode','manual');
+% set(gca,'DataAspectRatio',[1 1 1]);
+% axis(frameSize);
+% legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot')
+% xlabel('x (m)');
+% ylabel('YOUT (m)');
+% title('Motion of the WMR');
 
 % State plot
 figure(2)
@@ -124,7 +124,7 @@ xlabel('Time (sec)');
 title('Time response of sliding surfaces');
 
 % Uncertainty
-if mode_uct>0
+if mode_uct > 0
     figure(6);
     set(gcf,'position',pos_gcf2);
     subplot(2,1,1);

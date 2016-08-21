@@ -22,7 +22,7 @@ function varargout = WMR_TT_SIM(varargin)
 
 % Edit the above text to modify the response to help WMR_TT_SIM
 
-% Last Modified by GUIDE v2.5 20-Aug-2016 23:44:09
+% Last Modified by GUIDE v2.5 21-Aug-2016 02:42:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -52,6 +52,9 @@ function WMR_TT_SIM_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to WMR_TT_SIM (see VARARGIN)
 clc;
+% set(handles.trajectoryTrackingResult, 'XLim', [-2,1], 'YLim', [-1,2]);
+% set(handles.trajectoryTrackingResult, 'XLim', [-1,3], 'YLim', [-1,3]);
+
 % Choose default command line output for WMR_TT_SIM
 handles.output = hObject;
 handles.trajectoryType = 0;
@@ -81,6 +84,7 @@ function runSimButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 global duration c K eps eta mode_uct mode_tjt kphi frameSize tSpan circle;
+global TOUT YOUT
 
 trajectoryType = get(handles.typePanel, 'SelectedObject');
 trajectoryTypeSelection = get(trajectoryType,'String');
@@ -206,8 +210,20 @@ guidata(hObject,handles);
 % all setup and control strategies are included in dynamicFunc function
 % file
 
-% [T Y] = ode45(@TTExec, handles.tSpan, handles.X_0, handles.options);
+% [TOUT YOUT] = ode45(@TTExec, handles.tSpan, handles.X_0, handles.options);
 callODE(hObject, eventdata, handles);
+
+x_r = YOUT(:,1:3)';
+x_c = YOUT(:,4:6)';
+
+% plot the motion
+axis(handles.trajectoryTrackingResult);
+plot(handles.trajectoryTrackingResult, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
+legend('Reference trajectory','WMR trajectory','Location','northwest')
+% legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
+xlabel('x(m)');
+ylabel('YOUT(m)');
+title('Motion of the WMR');
 
 % Testing purpose
 % duration = handles.duration
@@ -662,3 +678,19 @@ function unmatchedUncertainty_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of unmatchedUncertainty
+
+
+% --- Executes during object creation, after setting all properties.
+function trajectoryTrackingResult_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to trajectoryTrackingResult (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate trajectoryTrackingResult
+
+
+% --- Executes on button press in configType.
+function configType_Callback(hObject, eventdata, handles)
+% hObject    handle to configType (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
