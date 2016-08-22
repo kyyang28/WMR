@@ -58,6 +58,8 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+addpath('TTCS');
+
 % UIWAIT makes SimulationOptions wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 

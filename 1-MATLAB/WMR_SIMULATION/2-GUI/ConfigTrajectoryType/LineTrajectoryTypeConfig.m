@@ -134,7 +134,7 @@ function confirmBtn_Callback(hObject, eventdata, handles)
 global vrVal wrVal
 
 dlgTitle = 'Quit';
-dlgQuestion = 'Do you want to quit the config window?';
+dlgQuestion = 'Do you want to confirm and quit the config window?';
 choice = questdlg(dlgQuestion, dlgTitle, 'Yes', 'No', 'Yes');
 switch choice
     case 'Yes'

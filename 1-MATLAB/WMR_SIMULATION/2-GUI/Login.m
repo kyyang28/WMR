@@ -22,7 +22,7 @@ function varargout = Login(varargin)
 
 % Edit the above text to modify the response to help Login
 
-% Last Modified by GUIDE v2.5 21-Aug-2016 21:06:00
+% Last Modified by GUIDE v2.5 22-Aug-2016 22:46:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,6 +57,14 @@ handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
+
+addpath('ProjectCore');
+addpath('ProjectCore/ProjectSimulation');
+addpath('ProjectCore/ProjectSimulation/TTCS');     % TTCS = Trajectory Tracking Control Simulation
+addpath('ProjectCore/ProjectSimulation/MCS');      % MCS = Motor Control Simulation
+addpath('ProjectCore/ProjectMonitoring');
+addpath('RESULTS');
+addpath('LOGO');
 
 % UIWAIT makes Login wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -173,4 +181,3 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 movegui('center');
-

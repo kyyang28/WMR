@@ -313,7 +313,7 @@ plot(fp, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
 carModelRefTri = draw2DCarModelTri(hObject, eventdata, handles, x_r);
 carModelRealTri = draw2DCarModelTri(hObject, eventdata, handles, x_c);
 patch(carModelRefTri(1,:), carModelRefTri(2,:), 'red');
-patch(carModelRealTri(1,:), carModelRealTri(2,:), 'blue');
+patch(carModelRealTri(1,:), carModelRealTri(2,:), 'green');
 
 legend('Reference trajectory','WMR trajectory','Location','northwest')
 % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')

@@ -58,6 +58,12 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+% add related paths
+addpath('ProjectSimulation');
+addpath('ProjectSimulation\TTCS');
+addpath('ProjectSimulation\MCS');
+addpath('ProjectMonitoring');
+
 % UIWAIT makes ModeSelection wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 

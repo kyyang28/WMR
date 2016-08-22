@@ -22,7 +22,7 @@ function varargout = WMR_TT_SIM(varargin)
 
 % Edit the above text to modify the response to help WMR_TT_SIM
 
-% Last Modified by GUIDE v2.5 22-Aug-2016 15:35:43
+% Last Modified by GUIDE v2.5 22-Aug-2016 21:16:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -58,9 +58,11 @@ clc;
 % Choose default command line output for WMR_TT_SIM
 handles.output = hObject;
 handles.trajectoryType = 0;
-handles.cnt = 0;
+handles.flag = 0;
 handles.car2DModel = zeros(2,4);
 handles.carModel = zeros(2,3);
+
+addpath('ConfigTrajectoryType');
 
 % Update handles structure
 guidata(hObject, handles);
@@ -446,6 +448,12 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 movegui('northwest');
 
 
+function typePanel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in typePanel 
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
 % --- Executes when selected object is changed in typePanel.
 function typePanel_SelectionChangedFcn(hObject, eventdata, handles)
 % hObject    handle to the selected object in typePanel 
@@ -455,6 +463,8 @@ global vrVal wrVal
 
 trajectoryType = get(handles.typePanel, 'SelectedObject');
 trajectoryTypeSelection = get(trajectoryType,'String');
+
+handles = guidata(hObject);
 
 switch trajectoryTypeSelection
     case 'Line'
@@ -471,11 +481,6 @@ switch trajectoryTypeSelection
 
         % save handles.frameSize to workspace
         assignin('base','frameSize',frameSize);
-        
-        vrVal = 0.8;
-        wrVal = 0;
-        assignin('base','vrVal',vrVal);
-        assignin('base','wrVal',wrVal);
         
     case 'Circle'
 %         msgbox('Circle Trajectory');
@@ -507,7 +512,7 @@ handles.TOUT = TOUT;
 handles.YOUT = YOUT;
 guidata(hObject, handles);
 
-save resultsDataFile.mat TOUT YOUT
+save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
 
 
 % --- Executes on button press in detailResults.
@@ -522,7 +527,7 @@ function runAnimation_Callback(hObject, eventdata, handles)
 % hObject    handle to runAnimation (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+RunAnimationGUI;
 
 % --- Executes on button press in unmatchedUncertainty.
 function unmatchedUncertainty_Callback(hObject, eventdata, handles)
@@ -547,14 +552,13 @@ function configType_Callback(hObject, eventdata, handles)
 % hObject    handle to configType (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles.cnt = handles.cnt + 1;
+handles = guidata(hObject);
 
 if handles.trajectoryType == 0
     LineTrajectoryTypeConfig; 
 elseif handles.trajectoryType == 1
     CircleTrajectoryTypeConfig;
 end
-guidata(hObject,handles);
 
 % --- Executes on button press in configUncertainty.
 function configUncertainty_Callback(hObject, eventdata, handles)
@@ -589,7 +593,10 @@ switch trajectoryTypeSelection
         % save handles.frameSize to workspace
         assignin('base','frameSize',frameSize);
 
-        if handles.cnt == 0
+%         handles = guidata(hObject);
+        if handles.flag == 0
+            handles.flag = 1;
+            guidata(hObject,handles);   % save new value to handles
             vrVal = 0.8;
             wrVal = 0;
             assignin('base','vrVal',vrVal);
@@ -724,7 +731,7 @@ patch(carModelTriReal(1,:), carModelTriReal(2,:), 'green');
 % handles = guidata(hObject);
 % output = handles.carShape
 
-legend('Reference trajectory','WMR trajectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
+legend('Reference trajectory','WMR trajectory','Intial point of the reference trajectory','Initial point of the robot','Location','northwest')
 % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
 xlabel('XOUT(m)');
 ylabel('YOUT(m)');
@@ -805,4 +812,3 @@ carY(3) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3) - 2 * pi / 3);
 handles.carModel = [carX; carY];
 guidata(hObject,handles);
 carModel = [carX; carY];
-
