@@ -512,7 +512,8 @@ handles.TOUT = TOUT;
 handles.YOUT = YOUT;
 guidata(hObject, handles);
 
-save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
+save resultsDataFile.mat TOUT YOUT
+% save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
 
 
 % --- Executes on button press in detailResults.
@@ -527,7 +528,9 @@ function runAnimation_Callback(hObject, eventdata, handles)
 % hObject    handle to runAnimation (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-RunAnimationGUI;
+
+% RunAnimationGUI;
+run RunAnimation.m
 
 % --- Executes on button press in unmatchedUncertainty.
 function unmatchedUncertainty_Callback(hObject, eventdata, handles)
