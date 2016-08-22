@@ -59,10 +59,8 @@ clc;
 handles.output = hObject;
 handles.trajectoryType = 0;
 handles.cnt = 0;
-handles.xs = zeros(1,3);
-handles.ys = zeros(1,3);
 handles.car2DModel = zeros(2,4);
-handles.carShape = zeros(2,3);
+handles.carModel = zeros(2,3);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -721,12 +719,12 @@ carModelTriReal = draw2DCarModelTri(hObject, eventdata, handles, x_c);
 
 % draw the graph based on the rotationed matrix of robot
 patch(carModelTriRef(1,:), carModelTriRef(2,:), 'red');
-patch(carModelTriReal(1,:), carModelTriReal(2,:), 'blue');
+patch(carModelTriReal(1,:), carModelTriReal(2,:), 'green');
 
 % handles = guidata(hObject);
 % output = handles.carShape
 
-legend('Reference trajectory','WMR trajectory','Location','northwest')
+legend('Reference trajectory','WMR trajectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
 % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
 xlabel('XOUT(m)');
 ylabel('YOUT(m)');
@@ -782,13 +780,11 @@ guidata(hObject,handles);
 carModelCoords = [rotGroupP(1,:); rotGroupP(2,:)];
 
 
-function output = draw2DCarModelTri(hObject, eventdata, handles, stateVars)
+function carModel = draw2DCarModelTri(hObject, eventdata, handles, stateVars)
 % hObject    handle to configUncertainty (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = guidata(hObject);
-xs = handles.xs;
-ys = handles.ys;
 
 % xs(1) = stateVars(1) + sqrt(4) / 4 * 0.1 * cos(stateVars(3));
 % xs(2) = stateVars(1) + sqrt(4) / 4 * 0.1 * cos(stateVars(3) + 2 * pi / 3);
@@ -798,15 +794,15 @@ ys = handles.ys;
 % ys(2) = stateVars(2) + sqrt(3) / 3 * 0.1 * sin(stateVars(3) + 2 * pi / 3);
 % ys(3) = stateVars(2) + sqrt(3) / 3 * 0.1 * sin(stateVars(3) - 2 * pi / 3);
 
-xs(1) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3));
-xs(2) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) + 2 * pi / 3);
-xs(3) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) - 2 * pi / 3);
+carX(1) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3));
+carX(2) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) + 2 * pi / 3);
+carX(3) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) - 2 * pi / 3);
 
-ys(1) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3));
-ys(2) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3) + 2 * pi / 3);
-ys(3) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3) - 2 * pi / 3);
+carY(1) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3));
+carY(2) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3) + 2 * pi / 3);
+carY(3) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3) - 2 * pi / 3);
 
-handles.carShape = [xs;ys];
+handles.carModel = [carX; carY];
 guidata(hObject,handles);
-output = [xs;ys];
+carModel = [carX; carY];
 

@@ -280,7 +280,7 @@ function plotDetailResults(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Step 1: WMR Motion plot
-plotWMRMotionGraph(hObject, eventdata, handles);
+plotWMRTrajectoryTrackingGraph(hObject, eventdata, handles);
 
 % Step 2: State plot
 plotStateGraph(hObject, eventdata, handles);
@@ -298,7 +298,7 @@ plotSlidingSurfaceGraph(hObject, eventdata, handles);
 plotMatchedUncertaintyGraph(hObject, eventdata, handles);
 
 
-function plotWMRMotionGraph(hObject, eventdata, handles)
+function plotWMRTrajectoryTrackingGraph(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -310,12 +310,10 @@ fp = axes('Parent', fig);
 
 plot(fp, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
 
-% carShapeRef = draw2DCarModel(hObject, eventdata, handles, x_r);
-% carShapeReal = draw2DCarModel(hObject, eventdata, handles, x_c);
-% carShapeRef = drawTriangle(hObject, eventdata, handles, x_r);
-% carShapeReal = drawTriangle(hObject, eventdata, handles, x_c);
-% patch(carShapeRef(1,:), carShapeRef(2,:), 'red');
-% patch(carShapeReal(1,:), carShapeReal(2,:), 'blue');
+carModelRefTri = draw2DCarModelTri(hObject, eventdata, handles, x_r);
+carModelRealTri = draw2DCarModelTri(hObject, eventdata, handles, x_c);
+patch(carModelRefTri(1,:), carModelRefTri(2,:), 'red');
+patch(carModelRealTri(1,:), carModelRealTri(2,:), 'blue');
 
 legend('Reference trajectory','WMR trajectory','Location','northwest')
 % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
@@ -493,6 +491,20 @@ if mode_uct > 0
     xlim(tSpan);
 end
 
+function carModel = draw2DCarModelTri(hObject, eventdata, handles, stateVars)
+% hObject    handle to configUncertainty (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+carX(1) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3));
+carX(2) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) + 2 * pi / 3);
+carX(3) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) - 2 * pi / 3);
+
+carY(1) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3));
+carY(2) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3) + 2 * pi / 3);
+carY(3) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3) - 2 * pi / 3);
+
+carModel = [carX; carY];
 % +-----------------------------------------------------------------------+
 % +-------------- Helper function to plot individual graph ---------------+
 % +-----------------------------------------------------------------------+
