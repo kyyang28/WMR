@@ -279,21 +279,49 @@ function plotDetailResults(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Step 1: State plot
+% Step 1: WMR Motion plot
+plotWMRMotionGraph(hObject, eventdata, handles);
+
+% Step 2: State plot
 plotStateGraph(hObject, eventdata, handles);
 
-% Step 2: Tracking error
+% Step 3: Tracking error
 plotErrorTrackingGraph(hObject, eventdata, handles);
 
-% Step 3: Control signal
+% Step 4: Control signal
 plotControlSignalGraph(hObject, eventdata, handles);
 
-% Step 4: Sliding surface plot
+% Step 5: Sliding surface plot
 plotSlidingSurfaceGraph(hObject, eventdata, handles);
 
-% Step 5: Matched uncertainty
+% Step 6: Matched uncertainty
 plotMatchedUncertaintyGraph(hObject, eventdata, handles);
 
+
+function plotWMRMotionGraph(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+global x_r x_c
+% Added by YOUNG - Solve separated plot window override the GUI axes contents
+fig = figure;
+fp = axes('Parent', fig);
+% Added by YOUNG - Solve separated plot window override the GUI axes contents
+
+plot(fp, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
+
+% carShapeRef = draw2DCarModel(hObject, eventdata, handles, x_r);
+% carShapeReal = draw2DCarModel(hObject, eventdata, handles, x_c);
+% carShapeRef = drawTriangle(hObject, eventdata, handles, x_r);
+% carShapeReal = drawTriangle(hObject, eventdata, handles, x_c);
+% patch(carShapeRef(1,:), carShapeRef(2,:), 'red');
+% patch(carShapeReal(1,:), carShapeReal(2,:), 'blue');
+
+legend('Reference trajectory','WMR trajectory','Location','northwest')
+% legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
+xlabel('XOUT(m)');
+ylabel('YOUT(m)');
+title('Trajectory tracking of the WMR');
 
 
 function plotStateGraph(hObject, eventdata, handles)
@@ -302,15 +330,28 @@ function plotStateGraph(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 global TOUT tSpan x_e
 
-% Added by YOUNG - Solve separated plot window override the GUI axes contents
-fig1 = figure;
-fp1 = axes('Parent', fig1);
-% Added by YOUNG - Solve separated plot window override the GUI axes contents
+% % Added by YOUNG - Solve separated plot window override the GUI axes contents
+% fig1 = figure;
+% fp1 = axes('Parent', fig1);
+% % Added by YOUNG - Solve separated plot window override the GUI axes contents
+% 
+% plot(fp1, TOUT,x_e(1,:), 'r-');
+% hold on;
+% plot(fp1, TOUT,x_e(2,:), 'b--');
+% plot(fp1, TOUT,x_e(3,:), 'm-.');
+% hold off;
+% 
+% xlim(tSpan);
+% legend('x_1','x_2','x_3')
+% xlabel('Time (sec)');
+% ylabel('State');
+% title('Time response of the state variables in error tracking system');
 
-plot(fp1, TOUT,x_e(1,:), 'r-');
+figure;
+plot(TOUT,x_e(1,:), 'r-');
 hold on;
-plot(fp1, TOUT,x_e(2,:), 'b--');
-plot(fp1, TOUT,x_e(3,:), 'm-.');
+plot(TOUT,x_e(2,:), 'b--');
+plot(TOUT,x_e(3,:), 'm-.');
 hold off;
 
 xlim(tSpan);
@@ -318,6 +359,7 @@ legend('x_1','x_2','x_3')
 xlabel('Time (sec)');
 ylabel('State');
 title('Time response of the state variables in error tracking system');
+
 
 
 function plotErrorTrackingGraph(hObject, eventdata, handles)

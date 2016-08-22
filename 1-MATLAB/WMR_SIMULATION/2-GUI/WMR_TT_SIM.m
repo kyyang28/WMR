@@ -22,7 +22,7 @@ function varargout = WMR_TT_SIM(varargin)
 
 % Edit the above text to modify the response to help WMR_TT_SIM
 
-% Last Modified by GUIDE v2.5 21-Aug-2016 15:01:46
+% Last Modified by GUIDE v2.5 22-Aug-2016 15:35:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,6 +61,7 @@ handles.trajectoryType = 0;
 handles.cnt = 0;
 handles.xs = zeros(1,3);
 handles.ys = zeros(1,3);
+handles.car2DModel = zeros(2,4);
 handles.carShape = zeros(2,3);
 
 % Update handles structure
@@ -713,10 +714,14 @@ assignin('base','x_c',x_c);
 axis(handles.trajectoryTrackingResult);
 plot(handles.trajectoryTrackingResult, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
 
-carShapeRef = drawTriangle(hObject, eventdata, handles, x_r);
-carShapeReal = drawTriangle(hObject, eventdata, handles, x_c);
-patch(carShapeRef(1,:), carShapeRef(2,:), 'red');
-patch(carShapeReal(1,:), carShapeReal(2,:), 'blue');
+% carModelRecRef = draw2DCarModelRec(hObject, eventdata, handles, x_r);
+% carModelRecReal = draw2DCarModelRec(hObject, eventdata, handles, x_c);
+carModelTriRef = draw2DCarModelTri(hObject, eventdata, handles, x_r);
+carModelTriReal = draw2DCarModelTri(hObject, eventdata, handles, x_c);
+
+% draw the graph based on the rotationed matrix of robot
+patch(carModelTriRef(1,:), carModelTriRef(2,:), 'red');
+patch(carModelTriReal(1,:), carModelTriReal(2,:), 'blue');
 
 % handles = guidata(hObject);
 % output = handles.carShape
@@ -725,7 +730,7 @@ legend('Reference trajectory','WMR trajectory','Location','northwest')
 % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
 xlabel('XOUT(m)');
 ylabel('YOUT(m)');
-title('Motion of the WMR');
+title('Trajectory tracking of the WMR');
 
 % Enable Detail Results and Run Animation buttons to check the results
 set(handles.detailResults,'enable','on');
@@ -738,7 +743,46 @@ elseif handles.trajectoryType == 1
 end
 
 
-function output = drawTriangle(hObject, eventdata, handles, x)
+function carModelCoords = draw2DCarModelRec(hObject, eventdata, handles, stateVars)
+% hObject    handle to configUncertainty (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles = guidata(hObject);
+
+% Rotational angle in radian
+theta = 0.7854;
+
+% Rotational matrix
+R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+
+% Length of the square
+L = 0.3;
+
+% Calculate four corner coordinates based on the robot center coordinate
+cornerP1 = [stateVars(1)+1/2*L*sin(stateVars(3)), stateVars(2)+1/2*L*cos(stateVars(3))]
+cornerP2 = [stateVars(1)-1/2*L*cos(stateVars(3)), stateVars(2)+1/2*L*sin(stateVars(3))]
+cornerP3 = [stateVars(1)-1/2*L*sin(stateVars(3)), stateVars(2)-1/2*L*cos(stateVars(3))]
+cornerP4 = [stateVars(1)+1/2*L*cos(stateVars(3)), stateVars(2)-1/2*L*sin(stateVars(3))]
+
+% Robot X axises matrix
+carX = [cornerP1(1), cornerP2(1), cornerP3(1), cornerP4(1)];
+
+% Robot Y axises matrix
+carY = [cornerP1(2), cornerP2(2), cornerP3(2), cornerP4(2)];
+
+% Coordinates of all four corner points
+groupP = [carX; carY];
+
+% Coordinates of all four corner points after applying rotational matrix
+rotGroupP = R * groupP;
+
+handles.car2DModel = [rotGroupP(1,:); rotGroupP(2,:)];
+guidata(hObject,handles);
+carModelCoords = [rotGroupP(1,:); rotGroupP(2,:)];
+
+
+function output = draw2DCarModelTri(hObject, eventdata, handles, stateVars)
 % hObject    handle to configUncertainty (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -746,13 +790,21 @@ handles = guidata(hObject);
 xs = handles.xs;
 ys = handles.ys;
 
-xs(1) = x(1) + sqrt(4) / 4 * 0.1 * cos(x(3));
-xs(2) = x(1) + sqrt(4) / 4 * 0.1 * cos(x(3) + 2 * pi / 3);
-xs(3) = x(1) + sqrt(4) / 4 * 0.1 * cos(x(3) - 2 * pi / 3);
+% xs(1) = stateVars(1) + sqrt(4) / 4 * 0.1 * cos(stateVars(3));
+% xs(2) = stateVars(1) + sqrt(4) / 4 * 0.1 * cos(stateVars(3) + 2 * pi / 3);
+% xs(3) = stateVars(1) + sqrt(4) / 4 * 0.1 * cos(stateVars(3) - 2 * pi / 3);
+% 
+% ys(1) = stateVars(2) + sqrt(3) / 3 * 0.1 * sin(stateVars(3));
+% ys(2) = stateVars(2) + sqrt(3) / 3 * 0.1 * sin(stateVars(3) + 2 * pi / 3);
+% ys(3) = stateVars(2) + sqrt(3) / 3 * 0.1 * sin(stateVars(3) - 2 * pi / 3);
 
-ys(1) = x(2) + sqrt(3) / 3 * 0.1 * sin(x(3));
-ys(2) = x(2) + sqrt(3) / 3 * 0.1 * sin(x(3) + 2 * pi / 3);
-ys(3) = x(2) + sqrt(3) / 3 * 0.1 * sin(x(3) - 2 * pi / 3);
+xs(1) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3));
+xs(2) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) + 2 * pi / 3);
+xs(3) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) - 2 * pi / 3);
+
+ys(1) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3));
+ys(2) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3) + 2 * pi / 3);
+ys(3) = stateVars(2) + sqrt(1) / 1 * 0.1 * sin(stateVars(3) - 2 * pi / 3);
 
 handles.carShape = [xs;ys];
 guidata(hObject,handles);
