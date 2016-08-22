@@ -59,6 +59,9 @@ clc;
 handles.output = hObject;
 handles.trajectoryType = 0;
 handles.cnt = 0;
+handles.xs = zeros(1,3);
+handles.ys = zeros(1,3);
+handles.carShape = zeros(2,3);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -709,6 +712,15 @@ assignin('base','x_c',x_c);
 % plot the motion
 axis(handles.trajectoryTrackingResult);
 plot(handles.trajectoryTrackingResult, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
+
+carShapeRef = drawTriangle(hObject, eventdata, handles, x_r);
+carShapeReal = drawTriangle(hObject, eventdata, handles, x_c);
+patch(carShapeRef(1,:), carShapeRef(2,:), 'red');
+patch(carShapeReal(1,:), carShapeReal(2,:), 'blue');
+
+% handles = guidata(hObject);
+% output = handles.carShape
+
 legend('Reference trajectory','WMR trajectory','Location','northwest')
 % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
 xlabel('XOUT(m)');
@@ -719,4 +731,30 @@ title('Motion of the WMR');
 set(handles.detailResults,'enable','on');
 set(handles.runAnimation,'enable','on');
 
-uiwait(msgbox('Simulation is finished!!!','Done','modal'));
+if handles.trajectoryType == 0
+    uiwait(msgbox('Line simulation is finished!!!','Done','modal'));
+elseif handles.trajectoryType == 1
+    uiwait(msgbox('Circle simulation is finished!!!','Done','modal'));    
+end
+
+
+function output = drawTriangle(hObject, eventdata, handles, x)
+% hObject    handle to configUncertainty (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles = guidata(hObject);
+xs = handles.xs;
+ys = handles.ys;
+
+xs(1) = x(1) + sqrt(4) / 4 * 0.1 * cos(x(3));
+xs(2) = x(1) + sqrt(4) / 4 * 0.1 * cos(x(3) + 2 * pi / 3);
+xs(3) = x(1) + sqrt(4) / 4 * 0.1 * cos(x(3) - 2 * pi / 3);
+
+ys(1) = x(2) + sqrt(3) / 3 * 0.1 * sin(x(3));
+ys(2) = x(2) + sqrt(3) / 3 * 0.1 * sin(x(3) + 2 * pi / 3);
+ys(3) = x(2) + sqrt(3) / 3 * 0.1 * sin(x(3) - 2 * pi / 3);
+
+handles.carShape = [xs;ys];
+guidata(hObject,handles);
+output = [xs;ys];
+
