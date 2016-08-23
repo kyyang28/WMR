@@ -260,6 +260,9 @@ global TOUT phi_tmp mode_uct
 
 if mode_uct > 0
     plot(handles.matchedUncertaintyPlot1, TOUT, phi_tmp(1,:));
+    xlabel(handles.matchedUncertaintyPlot1, 'Time (sec)');
+    ylabel(handles.matchedUncertaintyPlot1, 'Magnitude of matched uncertainty 1');
+    title(handles.matchedUncertaintyPlot1, 'Arbitrary matched uncertainty 1 of control input channel');
 end
 
 
@@ -271,6 +274,9 @@ global TOUT phi_tmp mode_uct
 
 if mode_uct > 0
     plot(handles.matchedUncertaintyPlot2, TOUT, phi_tmp(2,:));
+    xlabel(handles.matchedUncertaintyPlot2, 'Time (sec)');
+    ylabel(handles.matchedUncertaintyPlot2, 'Magnitude of matched uncertainty 2');
+    title(handles.matchedUncertaintyPlot2, 'Arbitrary matched uncertainty 2 of control input channel');
 end
 
 
@@ -306,6 +312,7 @@ global x_r x_c
 % Added by YOUNG - Solve separated plot window override the GUI axes contents
 fig = figure;
 fp = axes('Parent', fig);
+movegui(fig,'northwest');
 % Added by YOUNG - Solve separated plot window override the GUI axes contents
 
 plot(fp, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
@@ -345,7 +352,8 @@ global TOUT tSpan x_e
 % ylabel('State');
 % title('Time response of the state variables in error tracking system');
 
-figure;
+fig = figure;
+movegui(fig,'southwest');
 plot(TOUT,x_e(1,:), 'r-');
 hold on;
 plot(TOUT,x_e(2,:), 'b--');
@@ -384,7 +392,8 @@ global TOUT tSpan errorTracking x_r x_c
 % xlabel('Time (sec)');
 % ylabel('Tracking errors');
 % title('Time response of tracking errors');
-figure;
+fig = figure;
+movegui(fig,'north');
 errorTracking = x_r - x_c;
 
 plot(TOUT,errorTracking(1,:),'r-');
@@ -409,7 +418,8 @@ global TOUT tSpan u_r u_tmp
 % Added by YOUNG - Solve separated plot window override the GUI axes contents
 % fig3 = figure;
 % fp3 = axes('Parent', fig3);
-figure
+fig = figure;
+movegui(fig,'south');
 % Added by YOUNG - Solve separated plot window override the GUI axes contents
 
 subplot(2,1,1);
@@ -451,7 +461,8 @@ global TOUT tSpan x_e sigma_1 sigma_2
 % xlabel('Time (sec)');
 % title('Time response of sliding surfaces (\sigma_1 and \sigma_2)');
 
-figure;
+fig = figure;
+movegui(fig,'northeast');
 plot(TOUT, sigma_1(x_e(2,:)), 'r-');
 hold on;
 plot(TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
@@ -482,12 +493,19 @@ if mode_uct > 0
 %     plot(fp5, TOUT, phi_tmp(2,:));
 %     xlim(tSpan);
 
-    figure
+    fig = figure;
+    movegui(fig,'southeast');
     subplot(2,1,1);
     plot(TOUT, phi_tmp(1,:));
+    xlabel('Time (sec)');
+    ylabel('Magnitude of matched uncertainty 1');
+    title('Arbitrary matched uncertainty 1 of control input channel');    
     xlim(tSpan);
     subplot(2,1,2);
     plot(TOUT, phi_tmp(2,:));
+    xlabel('Time (sec)');
+    ylabel('Magnitude of matched uncertainty 2');
+    title('Arbitrary matched uncertainty 2 of control input channel');    
     xlim(tSpan);
 end
 
