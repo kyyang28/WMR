@@ -59,6 +59,7 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 addpath('TTCS');
+addpath('MCS');
 
 % UIWAIT makes SimulationOptions wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -87,7 +88,7 @@ function mcsBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to mcsBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+MotorSimulationOptions;
 
 % --- Executes on button press in quitBtn.
 function quitBtn_Callback(hObject, eventdata, handles)
