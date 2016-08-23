@@ -1,16 +1,22 @@
 
-close all;
+% close all;
 
-global x_r x_c xrs yrs xcs ycs
+global x_r x_c xrs yrs xcs ycs frameSize
 
 % x_r_tmp = x_r;
 % x_c_tmp = x_c;
 
 sr = 10;
 fig_num = 1;
-sh = figure(fig_num);
-axis manual
-axis([-3 3 -3 3]);
+sh = figure;
+fp = axes('Parent', sh);
+% sh = figure(fig_num);
+
+% fig = figure;
+% fp = axes('Parent', fig);
+
+% axis([-3 3 -3 3]);
+axis(frameSize);
 
 % set(gcf,'Renderer','zbuffer');
 set(sh,'position',[400 100 800 800]);
@@ -27,14 +33,19 @@ xrs = x_r(1,1);
 yrs = x_r(2,1);
 xcs = x_c(1,1);
 ycs = x_c(2,1);
+assignin('base','xrs',xrs);
+assignin('base','yrs',yrs);
+assignin('base','xcs',xcs);
+assignin('base','ycs',ycs);
+
 % xrs = x_r_tmp(1,1);
 % yrs = x_r_tmp(2,1);
 % xcs = x_c_tmp(1,1);
 % ycs = x_c_tmp(2,1);
 
-fh1 = plot(xrs,yrs,'r','XDataSource','xrs','YDataSource','yrs');
+fh1 = plot(fp,xrs,yrs,'r','XDataSource','xrs','YDataSource','yrs');
 hold on;
-fh2 = plot(xcs,ycs,'g-.','XDataSource','xcs','YDataSource','ycs');
+fh2 = plot(fp,xcs,ycs,'b-.','XDataSource','xcs','YDataSource','ycs');
 hold off;
 xlabel('x(m)');
 ylabel('y(m)')
@@ -46,7 +57,8 @@ WMR_CURR = WMR2DModel('q',x_r(:,1),'size',[0.25 0.2],'color','g');
 WMR_REF.initialise(fig_num);
 WMR_CURR.initialise(fig_num);
 
-axis([-3 3 -3 3]);
+axis(frameSize);
+% axis([-3 3 -3 3]);
 
 F = getframe(sh);
 im = frame2im(F);
@@ -77,10 +89,13 @@ for i = 1+10:10:25000
 %     WMR_REF.mov(x_r_tmp(:,i));
 %     WMR_CURR.mov(x_c_tmp(:,i));
 
-    axis([-3 3 -3 3]);
+    axis(frameSize);
+%     axis([-3 3 -3 3]);
     F = getframe(sh,rect);
     
     im = frame2im(F);
     [A,map] = rgb2ind(im,256);
     imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',1/sr);
 end
+
+% close(sh);
