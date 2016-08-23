@@ -512,8 +512,8 @@ handles.TOUT = TOUT;
 handles.YOUT = YOUT;
 guidata(hObject, handles);
 
-save resultsDataFile.mat TOUT YOUT
-% save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
+% save resultsDataFile.mat TOUT YOUT
+save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
 
 
 % --- Executes on button press in detailResults.

@@ -25,7 +25,7 @@ set(gca,'DataAspectRatioMode','manual');
 set(gca,'DataAspectRatio',[1 1 1]);
 
 %
-filename = 'WMR_TT_Animation.gif';
+% filename = 'WMR_TT_Animation.gif';
 % filename = 'RESULTS/Animation_Results/WMR_TT_Animation.gif';
 
 %
@@ -63,7 +63,7 @@ axis(frameSize);
 F = getframe(sh);
 im = frame2im(F);
 [A,map] = rgb2ind(im,256);
-imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',1/sr);
+% imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',1/sr);
 [h,w,p] = size(F.cdata);
 rect = [0 0 w h];
 
@@ -95,7 +95,7 @@ for i = 1+10:10:25000
     
     im = frame2im(F);
     [A,map] = rgb2ind(im,256);
-    imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',1/sr);
+%     imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',1/sr);
 end
 
 % close(sh);

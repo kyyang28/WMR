@@ -61,6 +61,7 @@ guidata(hObject, handles);
 addpath('ProjectCore');
 addpath('ProjectCore/ProjectSimulation');
 addpath('ProjectCore/ProjectSimulation/TTCS');     % TTCS = Trajectory Tracking Control Simulation
+addpath('ProjectCore/ProjectSimulation/TTCS/ConfigTrajectoryType');
 addpath('ProjectCore/ProjectSimulation/MCS');      % MCS = Motor Control Simulation
 addpath('ProjectCore/ProjectMonitoring');
 addpath('RESULTS');
