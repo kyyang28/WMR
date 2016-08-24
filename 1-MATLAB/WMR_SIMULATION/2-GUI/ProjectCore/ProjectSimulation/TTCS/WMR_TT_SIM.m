@@ -445,7 +445,7 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-movegui('northwest');
+movegui('center');
 
 
 function typePanel_CreateFcn(hObject, eventdata, handles)

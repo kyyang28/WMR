@@ -94,7 +94,9 @@ function simulinkBasedControllerBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to simulinkBasedControllerBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-uiwait(msgbox('To be available','Done','modal'));
+
+MotorSpeedControlSimulink;
+% uiwait(msgbox('To be available','Done','modal'));
 
 
 % --- Executes on button press in simscapeBasedControllerBtn.
