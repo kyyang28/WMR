@@ -80,12 +80,14 @@ function simulinkModelingBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 MotorSpeedSimulinkModeling;
 
+
 % --- Executes on button press in simscapeModelingBtn.
 function simscapeModelingBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to simscapeModelingBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 MotorSpeedSimscapeModeling;
+
 
 % --- Executes on button press in simulinkBasedControllerBtn.
 function simulinkBasedControllerBtn_Callback(hObject, eventdata, handles)

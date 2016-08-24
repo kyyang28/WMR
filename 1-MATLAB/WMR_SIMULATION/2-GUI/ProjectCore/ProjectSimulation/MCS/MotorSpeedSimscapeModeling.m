@@ -22,7 +22,7 @@ function varargout = MotorSpeedSimscapeModeling(varargin)
 
 % Edit the above text to modify the response to help MotorSpeedSimscapeModeling
 
-% Last Modified by GUIDE v2.5 23-Aug-2016 19:22:09
+% Last Modified by GUIDE v2.5 24-Aug-2016 03:10:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -71,3 +71,178 @@ function varargout = MotorSpeedSimscapeModeling_OutputFcn(hObject, eventdata, ha
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+
+
+
+function inertiaText_Callback(hObject, eventdata, handles)
+% hObject    handle to inertiaText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of inertiaText as text
+%        str2double(get(hObject,'String')) returns contents of inertiaText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function inertiaText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to inertiaText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function dampingText_Callback(hObject, eventdata, handles)
+% hObject    handle to dampingText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of dampingText as text
+%        str2double(get(hObject,'String')) returns contents of dampingText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function dampingText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to dampingText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function emfText_Callback(hObject, eventdata, handles)
+% hObject    handle to emfText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of emfText as text
+%        str2double(get(hObject,'String')) returns contents of emfText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function emfText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to emfText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit4_Callback(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit4 as text
+%        str2double(get(hObject,'String')) returns contents of edit4 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function resistanceText_Callback(hObject, eventdata, handles)
+% hObject    handle to resistanceText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of resistanceText as text
+%        str2double(get(hObject,'String')) returns contents of resistanceText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function resistanceText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to resistanceText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function inductionText_Callback(hObject, eventdata, handles)
+% hObject    handle to inductionText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of inductionText as text
+%        str2double(get(hObject,'String')) returns contents of inductionText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function inductionText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to inductionText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in showModelingBtn.
+function showModelingBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to showModelingBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global J b K R L
+
+J = str2num(get(handles.inertiaText,'String'));
+b = str2num(get(handles.dampingText,'String'));
+K = str2num(get(handles.emfText,'String'));
+R = str2num(get(handles.resistanceText,'String'));
+L = str2num(get(handles.inductionText,'String'));
+assignin('base', 'J', J);
+assignin('base', 'b', b);
+assignin('base', 'K', K);
+assignin('base', 'R', R);
+assignin('base', 'L', L);
+
+open_system('MotorSpeedModelingSimscape');
+
+
+% --- Executes on button press in quitBtn.
+function quitBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to quitBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+close;
+
+
+% --- Executes during object creation, after setting all properties.
+function figure1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+movegui('center');
