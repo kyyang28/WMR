@@ -3,9 +3,11 @@
 #include "MPU6050.h"
 #include "VectorQuaternion.h"
 
+#define KCONSTANT 19.2/200/PI
 #define PWM_FREQ          20000
 #define PWM_DUTY_CYCLE    1200
 #define MOTORMAX          50
+#define INTLIMIT          1200
 //#define KIMAX             100.0
 
 typedef union {
@@ -55,9 +57,12 @@ int leftMotorSpeed = 0;
 int rightMotorSpeed = 0;
 //int leftMotorSpeed = -400;
 //int rightMotorSpeed = -1000;
-int LeftMotorReferenceSpeed = 5;
-int RightMotorReferenceSpeed = 40;
+//int LeftMotorReferenceSpeed = 5;
+float LeftMotorReferenceSpeed = 0;
+float RightMotorReferenceSpeed = 0;
 int stopMotorSpeed = PWM_DUTY_CYCLE;  // stopMotorSpeed = 1200
+
+const float intPartLimit = INTLIMIT;
 
 int cnt = 0;
 
@@ -97,10 +102,12 @@ float gammaF[2];
 float wheelR;
 float wheelL;
 
+const float boundMotor = MOTORMAX;
+
 void setup()
 {
   /* WARNING: When using HC-05 BLUETOOTH, make sure to employ serial 9600 baudrate, not 38400 */
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   /* Bluetooth 1 and 2 serial initialisation */
   Serial2.begin(9600);
@@ -123,6 +130,7 @@ void setup()
   //digitalWrite(RightMotorINA, HIGH);
   //digitalWrite(RightMotorINB, LOW);
 
+#if 0
   /*
       WARNING: Wait for BT to connect WMR in order to start the program
       Synchronising Arduino with MATLAB via Bluetooth3(BT3)
@@ -156,6 +164,22 @@ void setup()
       }
     }
   }
+#else
+    /* Config MPU6050 */
+    ConfigMPU6050();
+    
+    /* LED PWM setup */
+    MOTOR_PWM_Setup();
+    
+    /* Encoder setup */
+    EncoderInit();
+    
+    /* Timer Init */
+    TimerInit();
+    
+    /* Start the timer */
+    TimerStart();
+#endif
 
   /* WMR program starts 2s after initialisation processes are finished */
   delay(2000);
@@ -163,8 +187,40 @@ void setup()
 
 int timeElapse = 0;
 
+void motorTest()
+{
+#if 1
+  //LeftMotorReferenceSpeed+=float(rightMotorEncoderCnt)/5.0;
+  //LeftMotorReferenceSpeed=round(LeftMotorReferenceSpeed);
+  /*if(rightMotorEncoderCnt>0) LeftMotorReferenceSpeed=30;
+  else if(rightMotorEncoderCnt<0) LeftMotorReferenceSpeed=0;*/
+
+  RightMotorReferenceSpeed+=float(leftMotorEncoderCnt)/5.0;
+  RightMotorReferenceSpeed=round(RightMotorReferenceSpeed);
+  /*if(leftMotorEncoderCnt>0) RightMotorReferenceSpeed=30;
+  else if(leftMotorEncoderCnt<0) RightMotorReferenceSpeed=0;*/
+  
+  //leftMotorSpeed = LeftMotorSpeedPIController(leftMotorEncoderCnt, (int)LeftMotorReferenceSpeed);
+  rightMotorSpeed = RightMotorSpeedPIController(rightMotorEncoderCnt, RightMotorReferenceSpeed);
+  //setLeftMotorSpeed(leftMotorSpeed);
+  setRightMotorSpeed(rightMotorSpeed);
+#endif
+}
+
 void loop()
 {
+  if(TimerFlag){
+    TimerFlag=false;
+    //motorTest();
+    TrajectoryTrackingAlgo();
+    /*Serial.print(leftMotorEncoderCnt);
+    Serial.print('\t');
+    Serial.print(rightMotorEncoderCnt);
+    Serial.print('\t');
+    Serial.println(gz.num);*/
+    Serial.print('\n');
+  }
+#if 0
   if (TimerFlag) {
     TrajectoryTrackingAlgo();
 
@@ -178,6 +234,7 @@ void loop()
     //Serial3.println(upid[0]);
     //Serial3.println(upid[1]);
   }
+#endif
 
 #if 0
   if (Serial3.available() > 0) {
@@ -248,170 +305,95 @@ void showEncoderCnt()
   Serial.println(rightEncoderRadian);
 }
 
-int LeftMotorSpeedPIController(int LeftRawCnts, int LeftSpeedRef)
+float LeftMotorSpeedPIController(int LeftRawCnts, float LeftSpeedRef)
 {
-  int currError = 0;
-  static int prevError, LeftMotorPWM;
+  float currError = 0;
+  float LeftMotorPWM;
+  static float prevError, intPart;
   //static int currError, prevError, motorPWM;
 
-  float Kp = 0.4, Ki = 1;   // Pololu 30:1 GearMotor with 64 CPR encoder
+  const float Kp = 30, Ki = 5, Kd = 2.5;   // Pololu 30:1 GearMotor with 64 CPR encoder
 
-  currError = abs(LeftRawCnts) - abs(LeftSpeedRef);
+  currError = LeftSpeedRef - LeftRawCnts;
 
   /* Based on incremental discrete equation of PI controller */
-  LeftMotorPWM += Kp * (currError - prevError) + Ki * currError;
-
+  intPart += Ki * currError;
+  boundFun(&intPart,intPartLimit);
+  LeftMotorPWM = Kp * currError + intPart + Kd * (currError - prevError);
   /* Update prevError variable to currError for next round */
   prevError = currError;
 
-#if 0
+#if 1
   Serial.print(LeftRawCnts);
-  Serial.print("(LeftEncoderVal)");
+  //Serial.print("(LeftEncoderVal)");
   Serial.print('\t');
   Serial.print(LeftSpeedRef);
-  Serial.print("(LeftSpeedRef)");
+  //Serial.print("(LeftSpeedRef)");
   Serial.print('\t');
   Serial.print(currError);
-  Serial.print("(LeftCurrError)");
+  //Serial.print("(LeftCurrError)");
   Serial.print('\t');
   Serial.print(prevError);
-  Serial.print("(LeftPrevError)");
+  //Serial.print("(LeftPrevError)");
   Serial.print('\t');
   //Serial.print(currError - prevError);
   //Serial.print("(currError - PrevError)");
   //Serial.print('\t');
   Serial.print(LeftMotorPWM);
-  Serial.println("(LeftMotorPWM)");
+  //Serial.println("(LeftMotorPWM)");
 #endif
 
   return LeftMotorPWM;
 }
 
-int RightMotorSpeedPIController(int RightRawCnts, int RightSpeedRef)
+float RightMotorSpeedPIController(int RightRawCnts, float RightSpeedRef)
 {
-  int currError = 0;
-  static int prevError, RightMotorPWM;
+  float currError = 0;
+  float RightMotorPWM;
+  static float prevError, intPart;
   //static int currError, prevError, motorPWM;
 
-  float Kp = 0.4, Ki = 1;   // Pololu 30:1 GearMotor with 64 CPR encoder
+  const float Kp = 30, Ki = 5, Kd = 2.5;   // Pololu 30:1 GearMotor with 64 CPR encoder
 
-  currError = abs(RightRawCnts) - abs(RightSpeedRef);
+  currError = RightSpeedRef - RightRawCnts;
 
   /* Based on incremental discrete equation of PI controller */
-  RightMotorPWM += Kp * (currError - prevError) + Ki * currError;
+  intPart += Ki * currError;
+  boundFun(&intPart,intPartLimit);
+  /*if(intPart > INTLIMIT) intPart = INTLIMIT;
+  else if(intPart < -INTLIMIT) intPart = -INTLIMIT;*/
+  RightMotorPWM = Kp * currError + intPart + Kd * (currError - prevError);
 
   /* Update prevError variable to currError for next round */
   prevError = currError;
 
-#if 0
+#if 1
   Serial.print(RightRawCnts);
-  Serial.print("(RightEncoderVal)");
+  //Serial.print("(RightEncoderVal)");
   Serial.print('\t');
   Serial.print(RightSpeedRef);
-  Serial.print("(RightSpeedRef)");
+  //Serial.print("(RightSpeedRef)");
   Serial.print('\t');
   Serial.print(currError);
-  Serial.print("(RightCurrError)");
+  //Serial.print("(RightCurrError)");
   Serial.print('\t');
   Serial.print(prevError);
-  Serial.print("(RightPrevError)");
+  //Serial.print("(RightPrevError)");
   Serial.print('\t');
   //Serial.print(currError - prevError);
   //Serial.print("(currError - PrevError)");
   //Serial.print('\t');
   Serial.print(RightMotorPWM);
-  Serial.println("(RightMotorPWM)");
+  //Serial.println("(RightMotorPWM)");
 #endif
 
   return RightMotorPWM;
 }
 
-void motorTest()
-{
-#if 0
-  leftMotorSpeed = LeftMotorSpeedPIController(leftMotorEncoderCnt, LeftMotorReferenceSpeed);
-  rightMotorSpeed = RightMotorSpeedPIController(rightMotorEncoderCnt, RightMotorReferenceSpeed);
-  setLeftMotorSpeed(leftMotorSpeed);
-  setRightMotorSpeed(rightMotorSpeed);
-#endif
-
-  setLeftMotorSpeed(800);
-  setRightMotorSpeed(1000);
-
-  //showEncoderCnt();
-#if 0
-  Serial.print(leftMotorSpeed);
-  Serial.print('\t');
-  Serial.print("(LeftMotorPWM)");
-  Serial.print('\t');
-  Serial.print(rightMotorSpeed);
-  Serial.println("(RightMotorPWM)");
-#endif
-
-#if 0
-  if (cnt != 10) {
-    leftMotorSpeed = MotorSpeedPIController(leftMotorEncoderCnt, LeftMotorReferenceSpeed);
-    rightMotorSpeed = MotorSpeedPIController(rightMotorEncoderCnt, RightMotorReferenceSpeed);
-    setLeftMotorSpeed(leftMotorSpeed);
-    setRightMotorSpeed(rightMotorSpeed);
-    //showEncoderCnt();
-    Serial.print(leftMotorSpeed);
-    Serial.print('\t');
-    Serial.print('\t');
-    Serial.println(rightMotorSpeed);
-    cnt++;
-  } else {
-    setLeftMotorSpeed(stopMotorSpeed);    // speed = 1200 - 1200 = 0, stop the left motor
-    setRightMotorSpeed(stopMotorSpeed);   // speed = 1200 - 1200 = 0, stop the right motor
-  }
-#endif
-
-#if 0
-  if (cnt != 10) {
-    //digitalWrite(RightMotorINA, LOW);
-    //digitalWrite(RightMotorINB, HIGH);
-
-    digitalWrite(RightMotorINA, HIGH);
-    digitalWrite(RightMotorINB, LOW);
-    PWMC_SetDutyCycle (PWM, rightChan, 200);    // speed = 200
-
-    //digitalWrite(LeftMotorINA, LOW);
-    //digitalWrite(LeftMotorINB, HIGH);
-
-    digitalWrite(LeftMotorINA, HIGH);
-    digitalWrite(LeftMotorINB, LOW);
-    PWMC_SetDutyCycle (PWM, leftChan, 200);    // speed = 200
-
-    cnt++;
-
-  } else {
-    digitalWrite(RightMotorINA, LOW);
-    digitalWrite(RightMotorINB, LOW);
-    digitalWrite(LeftMotorINA, LOW);
-    digitalWrite(LeftMotorINB, LOW);
-  }
-#endif
-
-#if 0
-  setLeftMotorSpeed(leftMotorSpeed);
-  setRightMotorSpeed(rightMotorSpeed);
-
-  showEncoderCnt();
-
-  /* The larger the motorSpeed, the slower the motors spin */
-  if (motorSpeed < 1100 && motorSpeed > 0) {
-    motorSpeed += 100;
-  } else if (motorSpeed > -1100 && motorSpeed < 0) {
-    motorSpeed -= 100;
-  }
-
-  if (motorSpeed >= 1100) {
-    motorSpeed = -800;
-  } else if (motorSpeed <= -1100) {
-    motorSpeed = 800;
-  }
-#endif
-
-  delay(400);
+template<class T> int boundFun(T* pData, T bound){
+  if (*pData > bound) *pData = bound;
+  else if (*pData < -bound) *pData = -bound;
+  return 0;
 }
+
 

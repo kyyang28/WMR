@@ -88,12 +88,10 @@ int setLeftMotorSpeed(float leftMotorSpeed)
 {
   int speed = 0;
   
-  if (leftMotorSpeed > PWM_DUTY_CYCLE) {
-    speed = 0;
-  }else if (leftMotorSpeed < -PWM_DUTY_CYCLE) {
-    speed = 0;
+  if (abs(leftMotorSpeed) > PWM_DUTY_CYCLE) {
+    speed = PWM_DUTY_CYCLE ;
   }else {
-    speed = PWM_DUTY_CYCLE - abs(int(leftMotorSpeed));
+    speed = abs(int(leftMotorSpeed));
   }
 
   if (leftMotorSpeed > 0) {
@@ -112,13 +110,11 @@ int setLeftMotorSpeed(float leftMotorSpeed)
 int setRightMotorSpeed(float rightMotorSpeed)
 {
   int speed = 0;
-
-  if (rightMotorSpeed > PWM_DUTY_CYCLE) {
-    speed = 0;
-  }else if (rightMotorSpeed < -PWM_DUTY_CYCLE) {
-    speed = 0;
+  
+  if (abs(rightMotorSpeed) > PWM_DUTY_CYCLE) {
+    speed = PWM_DUTY_CYCLE;
   }else {
-    speed = PWM_DUTY_CYCLE - abs(int(rightMotorSpeed));
+    speed = abs(int(rightMotorSpeed));
   }
 
   if (rightMotorSpeed > 0) {

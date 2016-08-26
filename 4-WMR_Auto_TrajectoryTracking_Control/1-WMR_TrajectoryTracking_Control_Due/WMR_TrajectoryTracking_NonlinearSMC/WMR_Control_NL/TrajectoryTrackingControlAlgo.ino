@@ -1,6 +1,6 @@
 
 void RefCal() {
-  vr = 0.1;
+  vr = 0.2;
   wr = 0;
   Time += tt;
 }
@@ -20,8 +20,8 @@ float edp;
 void TrajectoryTrackingAlgo()
 {
   /* omege_R = v / r + w*b / r = 2*pi / 32 * wheelR */
-  const static float v_constant = 32.0 / 0.06 / PI;
-  const static float w_constant = 23 / 6 / PI * 16.0;
+  const static float v_constant = 19.2 / 0.12 / PI;
+  const static float w_constant = 19.2 * 23.0 / 2.0 / PI / 12.0;
   //const static float v_constant = 32.0 / 0.063 / PI;
   //const static float w_constant = 22.5 / 6.3 / PI * 16.0;
   float dp;
@@ -113,53 +113,14 @@ void TrajectoryTrackingAlgo()
   wheelR = uctrl[0] * v_constant + uctrl[1] * w_constant;
   wheelL = uctrl[0] * v_constant - uctrl[1] * w_constant;
 
-  if (wheelR > MOTORMAX)
-    wheelR = MOTORMAX;
-  else if (wheelR < -MOTORMAX)
-    wheelR = -MOTORMAX;
-
-  if (wheelL > MOTORMAX)
-    wheelL = MOTORMAX;
-  else if (wheelL < -MOTORMAX)
-    wheelL = -MOTORMAX;
-
-  leftMotorSpeed = LeftMotorSpeedPIController(leftMotorEncoderCnt, (int)wheelL);
-  rightMotorSpeed = RightMotorSpeedPIController(rightMotorEncoderCnt, (int)wheelR);
+  boundFun(&wheelR,boundMotor);
+  boundFun(&wheelL,boundMotor);
+  
+  leftMotorSpeed = LeftMotorSpeedPIController(leftMotorEncoderCnt, wheelL);
+  rightMotorSpeed = RightMotorSpeedPIController(rightMotorEncoderCnt, wheelR);
 
   setLeftMotorSpeed(leftMotorSpeed);
   setRightMotorSpeed(rightMotorSpeed);
-
-
-#if 0
-  edp = eR;
-  eR = wheelR - float(rightMotorEncoderCnt);
-  deR = eR - edp;
-  edp = eL;
-  eL = wheelL - float(leftMotorEncoderCnt);
-  deL = eL - edp;
-
-  upid[0] = wheelR * 10 + (wheelR - float(rightMotorEncoderCnt)) * 12;
-  upid[1] = wheelL * 10 + (wheelL - float(leftMotorEncoderCnt)) * 12;
-  
-  ki[0] += (eR + deR) / (abs(eR + deR) + 1) * 5;
-  ki[1] += (eL + deL) / (abs(eL + deL) + 1) * 5;
-
-  if (ki[0] > KIMAX)
-    ki[0] = KIMAX;
-  else if (ki[0] < -KIMAX)
-    ki[0] = -KIMAX;
-
-  if (ki[1] > KIMAX)
-    ki[1] = KIMAX;
-  else if (ki[1] < -KIMAX)
-    ki[1] = -KIMAX;
-
-  upid[0] += ki[0];
-  upid[1] += ki[1];
-
-  setLeftMotorSpeed(upid[0]);
-  setRightMotorSpeed(upid[1]);
-#endif
 }
 
 
