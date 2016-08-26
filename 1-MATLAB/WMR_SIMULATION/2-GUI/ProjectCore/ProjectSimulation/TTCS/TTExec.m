@@ -13,7 +13,7 @@ function tt_out = TTExec(t,x)
 % @params x - initial states ([x_c y_c theta_c x_r y_r theta_r])
 % @output tt_out
 
-global mode_uct
+global mode_uct SMCMode
 
 % Step 1: Parameter initialisation
 tt_out = zeros(6,1);    % six row, one column
@@ -32,9 +32,14 @@ u_r = genTraj(t);
 % Step 3: Generate control law without uncertainty situation
 % x     - initial states (input param)
 % u_r    - reference trajectory shape (input param)
-u_input = SMCFuncL(x, u_r);
-% u_input = SMCFuncNL(x, u_r);
-
+if SMCMode == 1
+    % Linear controller
+    u_input = SMCFuncL(x, u_r);
+elseif SMCMode == 2
+    % Nonlinear controller
+    u_input = SMCFuncNL(x, u_r);
+end
+    
 % Step 4: Deal with uncertainties, either matched uncertainty (mode_uct = 1) or
 % mismatched uncertainty (mode_uct = 2) not included
 % ONLY DEAL WITH MATCHED UNCERTAINTY ATM

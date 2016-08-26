@@ -14,7 +14,7 @@ function u = SMCFuncNL(x, ur)
 % @output u     - control law of SMC 
 
 % Control global parameters
-global c K eps eta mode_uct kphi;
+global c K1 K2 eps1 eps2 eta1 eta2 mode_uct kphi;
 % global kpsi   % for mismatched uncertainty
 
 % Step 1: Initialise initial states to x_r and x_c
@@ -34,14 +34,14 @@ x_e = T * (x_r - x_c);
 % Step 3: Define nonlinear sliding surfaces
 % sigma_1 = K1 * xe
 % sigma_2 = K2 * theta_e + ye / sqrt(c + ye^2 + xe^2)
-sigma_1 = K(1) * x_e(1);
-sigma_2 = K(2) * x_e(3) + x_e(2) / sqrt(c + x_e(2)^2 + x_e(1)^2);
+sigma_1 = K1 * x_e(1);
+sigma_2 = K2 * x_e(3) + x_e(2) / sqrt(c + x_e(2)^2 + x_e(1)^2);
 
 % Step 4: Define T_F and T_G matrix
 % Notes:    T_G = rho
 %           T_F is acquired from partial derivative
-T_G = [-K(1) K(1)*x_e(2); x_e(1)*x_e(2)/((c+x_e(1)^2+x_e(2)^2)^(3/2)) -x_e(1)/((c+x_e(1)^2+x_e(2)^2)^(1/2))-K(2)];
-T_F = [K(1) 0 0; -x_e(1)*x_e(2)/((c+x_e(1)^2+x_e(2)^2)^(3/2)) (c+x_e(2)^2)/(c+x_e(2)^2+x_e(1)^2)^(3/2) K(2)];
+T_G = [-K1 K1*x_e(2); x_e(1)*x_e(2)/((c+x_e(1)^2+x_e(2)^2)^(3/2)) -x_e(1)/((c+x_e(1)^2+x_e(2)^2)^(1/2))-K2];
+T_F = [K1 0 0; -x_e(1)*x_e(2)/((c+x_e(1)^2+x_e(2)^2)^(3/2)) (c+x_e(2)^2)/(c+x_e(2)^2+x_e(1)^2)^(3/2) K2];
 
 % Step 5: Define F(qe) matrix
 % ur(1) = v_r; ur(2) = w_r; x_e(3) = theta_e
@@ -52,6 +52,7 @@ F_pe = [ur(1)*cos(x_e(3)); ur(1)*sin(x_e(3)); ur(2)];
 F_tx = T_F * F_pe;
 
 % Step 6: Define dp = eta which represents no uncertainty
+eta = [eta1,eta2];
 dp = eta;
 
 % Deal with uncertainties (including matched (mode_uct = 1) or unmatched (mode_uct = 2))
@@ -65,7 +66,7 @@ end
 
 % Step 7: Define sign matrix
 % SEE PAGE 18 of DISSERTATION NOTES 2
-sign_mat = [dp(1)*sats(sigma_1,eps(1)); dp(2)*sats(sigma_2,eps(2))];
+sign_mat = [dp(1)*sats(sigma_1,eps1); dp(2)*sats(sigma_2,eps2)];
 
 % Step 8: Define control law (u)
 % Notes: T_G = rho

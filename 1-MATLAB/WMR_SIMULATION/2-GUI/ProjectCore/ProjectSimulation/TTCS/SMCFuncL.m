@@ -14,7 +14,7 @@ function u = SMCFuncL(x, ur)
 % @output u     - control law of SMC 
 
 % Control global parameters
-global c K eps eta mode_uct kphi;
+global K eps1 eps2 eta1 eta2 mode_uct kphi;
 % global kpsi   % for mismatched uncertainty
 
 % Step 1: Initialise initial states to x_r and x_c
@@ -34,12 +34,12 @@ x_e = T * (x_r - x_c);
 % Step 3: Define linear sliding surfaces
 % sigma_1 = K1 * x_e(2) [i.e., ye] + theta_e
 % sigma_2 = x_e(1) [i.e., xe]
-sigma_1 = K(1) * x_e(2) + x_e(3);
+sigma_1 = K * x_e(2) + x_e(3);
 sigma_2 = x_e(1);
 
 % Step 4: Define S and rho matrices
-S = [0, K(1), 1; 1, 0, 0];
-rho = [0, -K(1)*x_e(1)-1; -1, x_e(2)];
+S = [0, K, 1; 1, 0, 0];
+rho = [0, -K*x_e(1)-1; -1, x_e(2)];
 
 % Step 5: Define F(qe) matrix
 % ur(1) = v_r; ur(2) = w_r; x_e(3) = theta_e
@@ -63,8 +63,7 @@ F_tx = S * F_pe;
 
 % Step 7: Define sign matrix
 % SEE PAGE 18 of DISSERTATION NOTES 2
-eta_tmp = [2, 0.2];
-sign_mat = [eta_tmp(1)*sats(sigma_1,eps(1)); eta_tmp(2)*sats(sigma_2,eps(2))];
+sign_mat = [eta1*sats(sigma_1,eps1); eta2*sats(sigma_2,eps2)];
 
 % Step 8: Define control law (u)
 % Notes: T_G = rho

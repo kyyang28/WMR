@@ -51,7 +51,7 @@ function DisplayDetailResults_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to DisplayDetailResults (see VARARGIN)
-global mode_uct TOUT YOUT x_c x_r x_p x_e Tc u_tmp u_tmp2 phi_tmp u_r sigma_1 sigma_2 K c
+global mode_uct TOUT YOUT x_c x_r x_p x_e Tc u_tmp u_tmp2 phi_tmp u_r sigma_1 sigma_2 K K1 K2 c SMCMode
 cla(handles.stateVariablePlot);
 cla(handles.linearVelocityControlSignalPlot);
 cla(handles.slidingSurfacesPlot);
@@ -85,10 +85,19 @@ u_tmp = [];
 u_tmp2 = [];
 phi_tmp = [];
 u_r = [];
-for i = 1:length(TOUT)
-    u_r = [u_r genTraj(TOUT(i))];
-    u_tmp2 = [u_tmp2 SMCFuncNL(YOUT(i,:)', genTraj(TOUT(i)))];
-    phi_tmp = [phi_tmp genPhi(TOUT(i),YOUT(i,:)',u_r)];
+
+if SMCMode == 1
+    for i = 1:length(TOUT)
+        u_r = [u_r genTraj(TOUT(i))];
+        u_tmp2 = [u_tmp2 SMCFuncL(YOUT(i,:)', genTraj(TOUT(i)))];
+        phi_tmp = [phi_tmp genPhi(TOUT(i),YOUT(i,:)',u_r)];
+    end
+elseif SMCMode == 2
+    for i = 1:length(TOUT)
+        u_r = [u_r genTraj(TOUT(i))];
+        u_tmp2 = [u_tmp2 SMCFuncNL(YOUT(i,:)', genTraj(TOUT(i)))];
+        phi_tmp = [phi_tmp genPhi(TOUT(i),YOUT(i,:)',u_r)];
+    end    
 end
 
 u_tmp = u_tmp2;
@@ -103,8 +112,13 @@ assignin('base', 'phi_tmp', phi_tmp);
 assignin('base', 'u_r', u_r);
 
 % Define function handle of sliding surfaces
-sigma_1 = @(x_e) K(1)*x_e;
-sigma_2 = @(y_e,x_e,theta) K(2).* theta + y_e./sqrt(c + y_e.^2 + x_e.^2);
+if SMCMode == 1
+    sigma_1 = @(y_e,theta) K*y_e + theta;
+    sigma_2 = @(x_e) x_e;
+elseif SMCMode == 2
+    sigma_1 = @(x_e) K1*x_e;
+    sigma_2 = @(y_e,x_e,theta) K2.* theta + y_e./sqrt(c + y_e.^2 + x_e.^2);
+end
 handles.sigma_1 = sigma_1;
 handles.sigma_2 = sigma_2;
 assignin('base', 'sigma_1', sigma_1);
@@ -227,8 +241,13 @@ function plotSlidingSurfacesGraph(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-global TOUT x_e sigma_1 sigma_2
-plot(handles.slidingSurfacesPlot, TOUT, sigma_1(x_e(2,:)), 'r-', TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
+global TOUT x_e sigma_1 sigma_2 SMCMode
+
+if SMCMode == 1
+    plot(handles.slidingSurfacesPlot, TOUT, sigma_1(x_e(2,:), x_e(3,:)), 'r-', TOUT, sigma_2(x_e(1,:)), 'b--');
+elseif SMCMode == 2
+    plot(handles.slidingSurfacesPlot, TOUT, sigma_1(x_e(2,:)), 'r-', TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
+end
 legend(handles.slidingSurfacesPlot, '\sigma_1','\sigma_2')
 xlabel(handles.slidingSurfacesPlot, 'Time (sec)');
 ylabel(handles.slidingSurfacesPlot, 'Sliding surfaces');
@@ -445,7 +464,7 @@ function plotSlidingSurfaceGraph(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-global TOUT tSpan x_e sigma_1 sigma_2
+global TOUT tSpan x_e sigma_1 sigma_2 SMCMode
 
 % % Added by YOUNG - Solve separated plot window override the GUI axes contents
 % fig4 = figure;
@@ -463,10 +482,20 @@ global TOUT tSpan x_e sigma_1 sigma_2
 
 fig = figure;
 movegui(fig,'northeast');
-plot(TOUT, sigma_1(x_e(2,:)), 'r-');
-hold on;
-plot(TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
-hold off;
+
+% Linear
+if SMCMode == 1
+    plot(TOUT, sigma_1(x_e(2,:),x_e(3,:)), 'r-');
+    hold on;
+    plot(TOUT, sigma_2(x_e(1,:)), 'b--');
+    hold off;
+elseif SMCMode == 2 % Nonlinear
+    plot(TOUT, sigma_1(x_e(2,:)), 'r-');
+    hold on;
+    plot(TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
+    hold off;
+end
+
 xlim(tSpan);
 legend('\sigma_1','\sigma_2')
 xlabel('Time (sec)');
