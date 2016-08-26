@@ -239,6 +239,36 @@ function confirmBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to confirmBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global c K1 K2 eps1 eps2 eta1 eta2 kphi SMCModeFlag
+
+dlgTitle = 'Quit';
+dlgQuestion = 'Do you want to confirm and quit the config window?';
+choice = questdlg(dlgQuestion, dlgTitle, 'Yes', 'No', 'Yes');
+switch choice
+    case 'Yes'
+        c = str2num(get(handles.contantText,'String'));
+        K1 = str2num(get(handles.gain1Text,'String'));
+        K2 = str2num(get(handles.gain2Text,'String'));
+        eps1 = str2num(get(handles.eps1Text,'String'));
+        eps2 = str2num(get(handles.eps2Text,'String'));
+        eta1 = str2num(get(handles.eta1Text,'String'));
+        eta2 = str2num(get(handles.eta2Text,'String'));
+        kphi = str2num(get(handles.kphiText,'String'));
+
+        assignin('base','c',c);
+        assignin('base','K1',K1);
+        assignin('base','K2',K2);
+        assignin('base','eps1',eps1);
+        assignin('base','eps2',eps2);
+        assignin('base','eta1',eta1);
+        assignin('base','eta2',eta2);
+        assignin('base','kphi',kphi);
+        
+        SMCModeFlag = 1;
+        assignin('base','SMCModeFlag',SMCModeFlag);
+        close;
+    case 'No'
+end
 
 
 % --- Executes on button press in quitBtn.

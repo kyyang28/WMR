@@ -54,11 +54,14 @@ function WMR_TT_SIM_OpeningFcn(hObject, eventdata, handles, varargin)
 clc;
 % set(handles.trajectoryTrackingResult, 'XLim', [-2,1], 'YLim', [-1,2]);
 % set(handles.trajectoryTrackingResult, 'XLim', [-1,3], 'YLim', [-1,3]);
-global SMCMode
+global SMCMode SMCModeFlag
 % Choose default command line output for WMR_TT_SIM
 handles.output = hObject;
 handles.trajectoryType = 0;
 handles.flag = 0;
+handles.SMCModeFlag = 0;
+SMCModeFlag = 0;
+assignin('base','SMCModeFlag',SMCModeFlag);
 handles.SMCMode = 1;
 SMCMode = 1;
 assignin('base','SMCMode',SMCMode);
@@ -587,7 +590,7 @@ function runSimulation(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global duration c K K1 K2 eps1 eps2 eta1 eta2 mode_uct mode_tjt kphi frameSize tSpan circle;
-global vrVal wrVal x_r x_c YOUT
+global SMCModeFlag vrVal wrVal x_r x_c YOUT
 
 handles = guidata(hObject);
 
@@ -639,58 +642,65 @@ if handles.SMCMode == 1
 %    Linear controller
     % Linear sliding mode controller parameters
     % save SMC parameters to handles
-    handles.K = 1;          % Sliding function parameters
-    handles.eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
-    handles.eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
-    handles.eta1 = 2;           % Reaching gain
-    handles.eta2 = 2;           % Reaching gain
-    handles.kphi = 0.5;                      % parameter for matched uncertainty
-    % kpsi = 0.1;                                   % parameter for mismatched uncertainty
+    if SMCModeFlag == 0
+        SMCModeFlag = 1;
+        assignin('base','SMCModeFlag',SMCModeFlag);
+        handles.K = 1;          % Sliding function parameters
+        handles.eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
+        handles.eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
+        handles.eta1 = 2;           % Reaching gain
+        handles.eta2 = 2;           % Reaching gain
+        handles.kphi = 0.5;                      % parameter for matched uncertainty
+        % kpsi = 0.1;                                   % parameter for mismatched uncertainty
 
-    K = 1;          % Sliding function parameters
-    eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
-    eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
-    eta1 = 2;           % Reaching gain 1
-    eta2 = 2;           % Reaching gain 2
-    kphi = 0.5;                      % parameter for matched uncertainty
-    % kpsi = 0.1;                                   % parameter for mismatched uncertainty
-    assignin('base','K',K);
-    assignin('base','eps1',eps1);
-    assignin('base','eps2',eps2);
-    assignin('base','eta1',eta1);
-    assignin('base','eta2',eta2);
-    assignin('base','kphi',kphi);
-
+        K = 1;          % Sliding function parameters
+        eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
+        eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
+        eta1 = 2;           % Reaching gain 1
+        eta2 = 2;           % Reaching gain 2
+        kphi = 0.5;                      % parameter for matched uncertainty
+        % kpsi = 0.1;                                   % parameter for mismatched uncertainty
+        assignin('base','K',K);
+        assignin('base','eps1',eps1);
+        assignin('base','eps2',eps2);
+        assignin('base','eta1',eta1);
+        assignin('base','eta2',eta2);
+        assignin('base','kphi',kphi);
+    end
 elseif handles.SMCMode == 2
 %    Nonlinear controller
     % save SMC parameters to handles
-    handles.K1 = 1;          % Sliding function parameters
-    handles.K2 = 1;          % Sliding function parameters
-    handles.eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
-    handles.eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
-    handles.eta1 = 4;           % Reaching gain
-    handles.eta2 = 4;           % Reaching gain
-    handles.kphi = 0.5;                      % parameter for matched uncertainty
-    % kpsi = 0.1;                                   % parameter for mismatched uncertainty
-    handles.const = 1;                 % constant parameter
+    if SMCModeFlag == 0
+        SMCModeFlag = 1;
+        assignin('base','SMCModeFlag',SMCModeFlag);
+        handles.K1 = 1;          % Sliding function parameters
+        handles.K2 = 1;          % Sliding function parameters
+        handles.eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
+        handles.eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
+        handles.eta1 = 4;           % Reaching gain
+        handles.eta2 = 4;           % Reaching gain
+        handles.kphi = 0.5;                      % parameter for matched uncertainty
+        % kpsi = 0.1;                                   % parameter for mismatched uncertainty
+        handles.const = 1;                 % constant parameter
 
-    K1 = 1;          % Sliding function parameters
-    K2 = 1;          % Sliding function parameters
-    eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
-    eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
-    eta1 = 4;           % Reaching gain 1
-    eta2 = 4;           % Reaching gain 2
-    kphi = 0.5;                      % parameter for matched uncertainty
-    % kpsi = 0.1;                                   % parameter for mismatched uncertainty
-    c = 1;                 % constant parameter
-    assignin('base','K1',K1);
-    assignin('base','K2',K2);
-    assignin('base','eps1',eps1);
-    assignin('base','eps2',eps2);
-    assignin('base','eta1',eta1);
-    assignin('base','eta2',eta2);
-    assignin('base','kphi',kphi);
-    assignin('base','c',c);
+        K1 = 1;          % Sliding function parameters
+        K2 = 1;          % Sliding function parameters
+        eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
+        eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
+        eta1 = 4;           % Reaching gain 1
+        eta2 = 4;           % Reaching gain 2
+        kphi = 0.5;                      % parameter for matched uncertainty
+        % kpsi = 0.1;                                   % parameter for mismatched uncertainty
+        c = 1;                 % constant parameter
+        assignin('base','K1',K1);
+        assignin('base','K2',K2);
+        assignin('base','eps1',eps1);
+        assignin('base','eps2',eps2);
+        assignin('base','eta1',eta1);
+        assignin('base','eta2',eta2);
+        assignin('base','kphi',kphi);
+        assignin('base','c',c);
+    end
 end
 
 % save duration of simulation to handles
