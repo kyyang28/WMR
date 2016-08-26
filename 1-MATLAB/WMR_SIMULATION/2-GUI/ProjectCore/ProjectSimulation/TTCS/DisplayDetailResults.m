@@ -87,7 +87,7 @@ phi_tmp = [];
 u_r = [];
 for i = 1:length(TOUT)
     u_r = [u_r genTraj(TOUT(i))];
-    u_tmp2 = [u_tmp2 SMCFunc(YOUT(i,:)', genTraj(TOUT(i)))];
+    u_tmp2 = [u_tmp2 SMCFuncNL(YOUT(i,:)', genTraj(TOUT(i)))];
     phi_tmp = [phi_tmp genPhi(TOUT(i),YOUT(i,:)',u_r)];
 end
 

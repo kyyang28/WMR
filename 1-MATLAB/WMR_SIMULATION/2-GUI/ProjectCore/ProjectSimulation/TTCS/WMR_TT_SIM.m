@@ -734,7 +734,7 @@ patch(carModelTriReal(1,:), carModelTriReal(2,:), 'green');
 % handles = guidata(hObject);
 % output = handles.carShape
 
-legend('Reference trajectory','WMR trajectory','Intial point of the reference trajectory','Initial point of the robot','Location','northwest')
+legend('Reference trajectory','WMR trajectory','Initial point of the reference trajectory','Initial point of the robot','Location','northwest')
 % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
 xlabel('XOUT(m)');
 ylabel('YOUT(m)');
@@ -747,7 +747,7 @@ set(handles.runAnimation,'enable','on');
 if handles.trajectoryType == 0
     uiwait(msgbox('Line simulation is finished!!!','Done','modal'));
 elseif handles.trajectoryType == 1
-    uiwait(msgbox('Circle simulation is finished!!!','Done','modal'));    
+    uiwait(msgbox('Circle simulation is finished!!!','Done','modal'));
 end
 
 

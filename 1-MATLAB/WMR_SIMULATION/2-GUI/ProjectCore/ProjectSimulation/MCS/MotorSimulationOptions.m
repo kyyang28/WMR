@@ -93,7 +93,7 @@ function positionSimulationBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to positionSimulationBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+uiwait(msgbox('To be available','OK','modal'));
 
 % --- Executes on button press in quitBtn.
 function quitBtn_Callback(hObject, eventdata, handles)

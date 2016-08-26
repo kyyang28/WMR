@@ -32,7 +32,8 @@ u_r = genTraj(t);
 % Step 3: Generate control law without uncertainty situation
 % x     - initial states (input param)
 % u_r    - reference trajectory shape (input param)
-u_input = SMCFunc(x, u_r);
+u_input = SMCFuncL(x, u_r);
+% u_input = SMCFuncNL(x, u_r);
 
 % Step 4: Deal with uncertainties, either matched uncertainty (mode_uct = 1) or
 % mismatched uncertainty (mode_uct = 2) not included
@@ -56,12 +57,14 @@ x_c = x(4:6);
 % x_r_dot = u_r(1)*cos(x_r(3)) = v_r*cos(theta_r)
 % y_r_dot = u_r(1)*sin(x_r(3)) = v_r*sin(theta_r)
 % theta_r_dot = u_r(2) = w_r
+% [RATE OF CHANGE OF REFERENCE WMR POSTURsE WITH RESPECT TO TIME]
 x_r_dot = [u_r(1)*cos(x_r(3)); u_r(1)*sin(x_r(3)); u_r(2)];
 
 % Derivative of x_c = [x_c_dot, y_c_dot, theta_c_dot]
-% x_c_dot = u_r(1)*cos(x_r(3)) = v_r*cos(theta_c)
-% y_c_dot = u_r(1)*sin(x_r(3)) = v_r*sin(theta_r)
-% theta_c_dot = u(2) = w_r
+% x_c_dot = u_input(1)*cos(x_c(3)) = v_c*cos(theta_c)
+% y_c_dot = u_input(1)*sin(x_c(3)) = v_c*sin(theta_c)
+% theta_c_dot = u_input(2) = w_c
+% [RATE OF CHANGE OF CURRENT WMR POSTURE WITH RESPECT TO TIME]
 x_c_dot = [u_input(1)*cos(x_c(3)); u_input(1)*sin(x_c(3)); u_input(2)];
 
 
