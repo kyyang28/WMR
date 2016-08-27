@@ -1,13 +1,13 @@
 
 void RefCal() {
-  vr = 0.3;
-  wr = 0.3;
+  vr = vrVal;
+  wr = wrVal;
   //Time += tt;
 }
 
 void WMRParaIni() {
-  eta[0] = 10;
-  eta[1] = 10;
+  eta[0] = 4;
+  eta[1] = 4;
   eps[0] = 0.1;
   eps[1] = 0.1;
 }
@@ -19,7 +19,7 @@ float edp;
 
 void TrajectoryTrackingAlgo()
 {
-  /* omege_R = v / r + w*b / r = 2*pi / 32 * wheelR */
+  /* v_constant = 1920 / 100(time) / diameter of wheel(0.12m) / pi */
   const static float v_constant = 19.2 / 0.12 / PI;
   const static float w_constant = 19.2 * 23.0 / 2.0 / PI / 12.0;
   //const static float v_constant = 32.0 / 0.063 / PI;
@@ -132,8 +132,8 @@ void TrajectoryTrackingAlgo()
 #endif
   
   /* wheelR = w_R, wheelL = w_L */
-  wheelR = uctrl[0] * v_constant + uctrl[1] * w_constant;
   wheelL = uctrl[0] * v_constant - uctrl[1] * w_constant;
+  wheelR = uctrl[0] * v_constant + uctrl[1] * w_constant;
 
   boundFun(&wheelR,boundMotor);
   boundFun(&wheelL,boundMotor);

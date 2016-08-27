@@ -34,8 +34,8 @@ x_e = T * (x_r - x_c);
 % Step 3: Define nonlinear sliding surfaces
 % sigma_1 = K1 * xe
 % sigma_2 = K2 * theta_e + ye / sqrt(c + ye^2 + xe^2)
-sigma_1 = K1 * x_e(1)
-sigma_2 = K2 * x_e(3) + x_e(2) / sqrt(c + x_e(2)^2 + x_e(1)^2)
+sigma_1 = K1 * x_e(1);
+sigma_2 = K2 * x_e(3) + x_e(2) / sqrt(c + x_e(2)^2 + x_e(1)^2);
 
 % Step 4: Define T_F and T_G matrix
 % Notes:    T_G = rho

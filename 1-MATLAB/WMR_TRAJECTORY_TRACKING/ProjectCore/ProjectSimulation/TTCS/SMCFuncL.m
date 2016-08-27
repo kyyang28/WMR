@@ -34,10 +34,10 @@ x_e = T * (x_r - x_c);
 % Step 3: Define linear sliding surfaces
 % sigma_1 = K1 * x_e(2) [i.e., ye] + K2 * theta_e
 % sigma_2 = x_e(1) [i.e., xe]
-sigma_1 = x_e(1)
+sigma_1 = x_e(1);
 % sigma_1 = K1 * x_e(2) + K2 * x_e(3);
 % sigma_1 = K * x_e(2) + x_e(3);
-sigma_2 = K1 * x_e(2) + K2 * x_e(3)
+sigma_2 = K1 * x_e(2) + K2 * x_e(3);
 
 % Step 4: Define S and rho matrices
 S = [1, 0, 0; 0, K1, K2];
@@ -56,7 +56,7 @@ rho = [-1, x_e(2); 0, -K1*x_e(1)-K2];
 F_pe = [ur(1)*cos(x_e(3)); ur(1)*sin(x_e(3)); ur(2)];
 
 % F_tx represents F(t,x)
-F_tx = S * F_pe
+F_tx = S * F_pe;
 
 % Step 6: Define uncertainty = eta which represents no uncertainty
 % uncertainty = eta;
@@ -73,10 +73,9 @@ end
 
 % Step 7: Define sign matrix
 % SEE PAGE 18 of DISSERTATION NOTES 2
-temp1 = sats(sigma_1,eps1)
-temp2 = sats(sigma_2,eps2)
-sign_mat = [uncertainty(1)*sats(sigma_1,0); uncertainty(2)*sats(sigma_2,0)];
-% sign_mat = [eta1*sats(sigma_1,eps1); eta2*sats(sigma_2,eps2)];
+
+% sign_mat = [uncertainty(1)*sats(sigma_1,0); uncertainty(2)*sats(sigma_2,0)];
+sign_mat = [eta1*sats(sigma_1,eps1); eta2*sats(sigma_2,eps2)];
 
 % Step 8: Define control law (u)
 % Notes: T_G = rho

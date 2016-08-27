@@ -531,8 +531,8 @@ handles.TOUT = TOUT;
 handles.YOUT = YOUT;
 guidata(hObject, handles);
 
-save resultsDataFile.mat TOUT YOUT
-% save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
+% save resultsDataFile.mat TOUT YOUT
+save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
 
 
 % --- Executes on button press in detailResults.
@@ -598,6 +598,47 @@ global SMCMode LinearSMCModeFlag NonlinearSMCModeFlag vrVal wrVal x_r x_c YOUT
 
 handles = guidata(hObject);
 
+% Setup the initial condition
+% theta_0 = atan(1);
+init_x_c = str2num(get(handles.xcText,'String'));
+init_y_c = str2num(get(handles.ycText,'String'));
+init_theta_c = str2num(get(handles.thetacText,'String'));
+init_x_r = str2num(get(handles.xrText,'String'));
+init_y_r = str2num(get(handles.yrText,'String'));
+init_theta_r = str2num(get(handles.thetarText,'String'));
+
+% if init_x_c < 0
+%     xlim_min_line = init_x_c - 1;
+%     xlim_max_line = abs(init_x_c) + 1;
+% elseif init_x_c > 0
+%     xlim_min_line = init_x_c - 1;
+%     xlim_max_line = init_x_c + 1;
+% else
+%     xlim_min_line = init_x_c - 1;
+%     xlim_max_line = init_x_c + 1;
+% end
+% 
+% if init_y_c < 0
+%     ylim_min_line = init_y_c - 1;
+%     ylim_max_line = abs(init_y_c) + 1;
+% elseif init_y_c > 0
+%     ylim_min_line = init_y_c - 1;
+%     ylim_max_line = init_y_c + 1;
+% else
+%     ylim_min_line = init_y_c - 1;
+%     ylim_max_line = init_y_c + 1;
+% end
+
+% xlim_min_line = -2;
+% xlim_max_line = 4;
+% ylim_min_line = -2;
+% ylim_max_line = 4;
+% 
+% xlim_min_circle = -2;
+% xlim_max_circle = 2;
+% ylim_min_circle = -2;
+% ylim_max_circle = 2;
+
 trajectoryType = get(handles.typePanel, 'SelectedObject');
 trajectoryTypeSelection = get(trajectoryType,'String');
 
@@ -611,8 +652,32 @@ switch trajectoryTypeSelection
         assignin('base','mode_tjt',mode_tjt);
 
         % line frame size
-        handles.frameSize = [-1 3 -1 3];       % Line
-        frameSize = [-1 3 -1 3];
+        if init_x_c < 0
+            xlim_min_line = init_x_c - 0.5;
+            xlim_max_line = abs(init_x_c) + 3;
+        elseif init_x_c > 0
+            xlim_min_line = init_x_c - 2.5;
+            xlim_max_line = init_x_c + 3;
+        else
+            xlim_min_line = init_x_c - 0.5;
+            xlim_max_line = init_x_c + 5;
+        end
+
+        if init_y_c < 0
+            ylim_min_line = init_y_c - 0.5;
+            ylim_max_line = abs(init_y_c) + 3;
+        elseif init_y_c > 0
+            ylim_min_line = init_y_c - 2.5;
+            ylim_max_line = init_y_c + 3;
+        else
+            ylim_min_line = init_y_c - 2;
+            ylim_max_line = init_y_c + 2;
+        end
+        
+%         frameSize = [-1 3 -1 3];
+%         handles.frameSize = [-1 3 -1 3];       % Line
+        frameSize = [xlim_min_line xlim_max_line ylim_min_line ylim_max_line];
+        handles.frameSize = frameSize;       % Line
 
         % save handles.frameSize to workspace
         assignin('base','frameSize',frameSize);
@@ -635,8 +700,47 @@ switch trajectoryTypeSelection
         assignin('base','mode_tjt',mode_tjt);
 
         % circle frame size
-        handles.frameSize = [-2 1 -1 2];     % Circle
-        frameSize = [-2 1 -1 2];
+        if init_x_c < 0
+            xlim_min_circle = init_x_c - 0.5;
+            xlim_max_circle = abs(init_x_c) - 1;
+        else
+            xlim_min_circle = init_x_c - 1;
+            xlim_max_circle = init_x_c;
+        end
+        
+        if init_y_c < 0
+            ylim_min_circle = init_y_c - 0.5;
+            ylim_max_circle = abs(init_y_c);
+        else            
+            ylim_min_circle = init_y_c - 0.5;
+            ylim_max_circle = init_y_c;
+        end
+%         if init_x_c < 0
+%             xlim_min_circle = init_x_c - 1;
+%             xlim_max_circle = abs(init_x_c) + 1;
+%         elseif init_x_c > 0
+%             xlim_min_circle = init_x_c - 1;
+%             xlim_max_circle = init_x_c + 1;
+%         else
+%             xlim_min_circle = init_x_c - 1;
+%             xlim_max_circle = init_x_c + 1;
+%         end
+% 
+%         if init_y_c < 0
+%             ylim_min_circle = init_y_c - 1;
+%             ylim_max_circle = abs(init_y_c) + 1;
+%         elseif init_y_c > 0
+%             ylim_min_circle = init_y_c - 1;
+%             ylim_max_circle = init_y_c + 1;
+%         else
+%             ylim_min_circle = init_y_c - 1;
+%             ylim_max_circle = init_y_c + 1;
+%         end
+        
+%         frameSize = [-2 1 -1 2];
+%         handles.frameSize = [-2 1 -1 2];     % Circle
+        frameSize = [xlim_min_circle xlim_max_circle ylim_min_circle ylim_max_circle];
+        handles.frameSize = frameSize;     % Circle
 
         % save handles.frameSize to workspace
         assignin('base','frameSize',frameSize);
@@ -739,15 +843,6 @@ elseif get(handles.matchedUncertainty, 'Value') == 1
     assignin('base','mode_uct',mode_uct);
 end
 
-
-% Setup the initial condition
-% theta_0 = atan(1);
-init_x_c = str2num(get(handles.xcText,'String'));
-init_y_c = str2num(get(handles.ycText,'String'));
-init_theta_c = str2num(get(handles.thetacText,'String'));
-init_x_r = str2num(get(handles.xrText,'String'));
-init_y_r = str2num(get(handles.yrText,'String'));
-init_theta_r = str2num(get(handles.thetarText,'String'));
 
 % init_theta_c = atan(1) + pi/8
 xc_init = [init_x_c; init_y_c; init_theta_c];       % forward tracking

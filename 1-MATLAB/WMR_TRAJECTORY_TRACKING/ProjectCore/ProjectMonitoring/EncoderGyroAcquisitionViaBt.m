@@ -100,8 +100,6 @@ fopen(b);
 
 set(handles.btstatus,'String','Bluetooth3 is connected!!!');
 
-% Synchronising character 'S' with Arduino Due board to start the program
-fprintf(b, 'S');
 
 % Receiving the all the initialisation information from Arduino Due and
 % display on the listbox GUI component
@@ -136,33 +134,6 @@ fprintf(b, 'S');
 % newStr7 = strvcat(newStr6, info8);
 % set(handles.initInfo,'String',newStr7);
 
-% if strcmp(info8, 'Encoder setup finished.') == 1
-%     msgbox('Ack is received!!!');
-% end
-
-% x_r = evalin('base','x_r');
-% x_c = evalin('base','x_c');
-% plot(x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
-
-%  xr = zeros(1,1000);
-%  yr = zeros(1,1000);
-%  
-%  h = plot(xr,yr,'*-.');
-% 
-%  for i = 1:1000;
-% %     fopen(b);
-%     ~isempty(fscanf(b))
-%     if ~isempty(fscanf(b))
-%         xr(i) = fscanf(b,'%f');
-%         yr(i) = fscanf(b,'%f');
-% %         xlim([i-9 i])
-%         refreshdata(h,'caller');
-%         drawnow;
-%     end
-%  end
-% fclose(b);
-
-% t = linspace(1:0.01:10);
 v_r = str2num(get(handles.vrText,'String'))
 w_r = str2num(get(handles.wrText,'String'))
 x_r_0 = str2num(get(handles.xrText,'String'))
@@ -174,13 +145,22 @@ assignin('base','x_r_0',x_r_0);
 assignin('base','y_r_0',y_r_0);
 assignin('base','theta_r_0',theta_r_0);
 
+% fprintf(b, '%d', v_r);
+% fprintf(b, w_r);
+% fprintf(b, x_r_0);
+% fprintf(b, y_r_0);
+% fprintf(b, theta_r_0);
+
+% Synchronising character 'S' with Arduino Due board to start the program
+fprintf(b, '%c', 'S');
+
 tt = 0:0.01:30;
 
 theta_r = w_r * tt;
 xr = x_r_0 + v_r * cos(theta_r);
 yr = y_r_0 + v_r * sin(theta_r);
 % theta_r = theta_r_0 + w_r * tt;
-% xr = x_r_0 + v_r * cos(theta_r) .* tt;
+% xr = x_r_0 + v_r * cos(theta_r) .* tt;w
 % yr = y_r_0 + v_r * sin(theta_r) .* tt;
 plot(xr,yr,'r','LineWidth',2);
 hold on;
@@ -192,8 +172,8 @@ len = size(tt);
 while (i < len(2))
     i = i + 1;
 %     if ~isempty(fscanf(b))
-        xc(i) = fscanf(b,'%f')
-        yc(i) = fscanf(b,'%f')
+        xc(i) = fscanf(b,'%f');
+        yc(i) = fscanf(b,'%f');
         drawnow;
         plot(xc,yc,'b--');
         hold on;

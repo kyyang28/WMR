@@ -3,7 +3,7 @@
 #include "MPU6050.h"
 //#include "VectorQuaternion.h"
 
-#define BT_DEBUG    1
+#define BT_DEBUG    0
 
 #define KCONSTANT 19.2/200/PI
 #define PWM_FREQ          20000
@@ -21,7 +21,7 @@ typedef struct {
   float x;
   float y;
   float z;
-}g_Posture;
+} g_Posture;
 
 g_Posture qc;
 g_Posture qr;
@@ -88,6 +88,7 @@ BytInt16 gx, gy, gz;
 
 int cmdMode = 0;
 int startMode = 0;
+float recvData = 0;
 
 /* Algorithm Variables */
 
@@ -119,6 +120,9 @@ float gammaF[2];
 float wheelR;
 float wheelL;
 
+float vrVal = 0.0;
+float wrVal = 0.0;
+
 void setup()
 {
   /* WARNING: When using HC-05 BLUETOOTH, make sure to employ serial 9600 baudrate, not 38400 */
@@ -145,62 +149,78 @@ void setup()
   //digitalWrite(RightMotorINA, HIGH);
   //digitalWrite(RightMotorINB, LOW);
 
-  qc.x = 0.2;
+  qc.x = 0.0;
   qc.y = 0.0;
-  qc.z = 1.0;
+  qc.z = 0.0;
   qr.x = 0.0;
   qr.y = 0.0;
-  qr.z = 0.6;
+  qr.z = 0.0;
+
+  vrVal = 0.1;
+  wrVal = 0.2;
 
 #if BT_DEBUG
-  /*
-      WARNING: Wait for BT to connect WMR in order to start the program
-      Synchronising Arduino with MATLAB via Bluetooth3(BT3)
-      Sending initialisation information to listbox of MATLAB GUI
-  */
+
   while (1) {
-    if (Serial3.available() > 0) {
+      if (Serial3.available() > 0) {
 
-      startMode = Serial3.read();
+        recvData = Serial3.read();
+        
+        /* Receving v_r value */
+        vrVal = recvData;
 
-      /* Sychronisation character 'S' */
-      if (startMode == 'S') {
-
-        /* Config MPU6050 */
-        ConfigMPU6050();
-
-        /* LED PWM setup */
-        MOTOR_PWM_Setup();
-
-        /* Encoder setup */
-        EncoderInit();
-
-        /* Timer Init */
-        TimerInit();
-
-        /* Start the timer */
-        TimerStart();
-
-        /* Initialise once */
         break;
       }
-    }
   }
+
+    /*
+        WARNING: Wait for BT to connect WMR in order to start the program
+        Synchronising Arduino with MATLAB via Bluetooth3(BT3)
+        Sending initialisation information to listbox of MATLAB GUI
+    */
+    while (1) {
+      if (Serial3.available() > 0) {
+
+        startMode = Serial3.read();
+
+        /* Sychronisation character 'S' */
+        if (startMode == 'S') {
+
+          /* Config MPU6050 */
+          ConfigMPU6050();
+
+          /* LED PWM setup */
+          MOTOR_PWM_Setup();
+
+          /* Encoder setup */
+          EncoderInit();
+
+          /* Timer Init */
+          TimerInit();
+
+          /* Start the timer */
+          TimerStart();
+
+          /* Initialise once */
+          break;
+        }
+      }
+    }
 #else
-    /* Config MPU6050 */
-    ConfigMPU6050();
-    
-    /* LED PWM setup */
-    MOTOR_PWM_Setup();
-    
-    /* Encoder setup */
-    EncoderInit();
-    
-    /* Timer Init */
-    TimerInit();
-    
-    /* Start the timer */
-    TimerStart();
+  /* Config MPU6050 */
+  ConfigMPU6050();
+
+  /* LED PWM setup */
+  MOTOR_PWM_Setup();
+
+  /* Encoder setup */
+  EncoderInit();
+
+  /* Timer Init */
+  TimerInit();
+
+  /* Start the timer */
+  TimerStart();
 #endif
 
   /* WMR program starts 2s after initialisation processes are finished */
@@ -215,13 +235,13 @@ void motorTest()
   //LeftMotorReferenceSpeed+=float(rightMotorEncoderCnt)/5.0;
   //LeftMotorReferenceSpeed=round(LeftMotorReferenceSpeed);
   /*if(rightMotorEncoderCnt>0) LeftMotorReferenceSpeed=30;
-  else if(rightMotorEncoderCnt<0) LeftMotorReferenceSpeed=0;*/
+    else if(rightMotorEncoderCnt<0) LeftMotorReferenceSpeed=0;*/
 
-  RightMotorReferenceSpeed+=float(leftMotorEncoderCnt)/5.0;
-  RightMotorReferenceSpeed=round(RightMotorReferenceSpeed);
+  RightMotorReferenceSpeed += float(leftMotorEncoderCnt) / 5.0;
+  RightMotorReferenceSpeed = round(RightMotorReferenceSpeed);
   /*if(leftMotorEncoderCnt>0) RightMotorReferenceSpeed=30;
-  else if(leftMotorEncoderCnt<0) RightMotorReferenceSpeed=0;*/
-  
+    else if(leftMotorEncoderCnt<0) RightMotorReferenceSpeed=0;*/
+
   //leftMotorSpeed = LeftMotorSpeedPIController(leftMotorEncoderCnt, (int)LeftMotorReferenceSpeed);
   rightMotorSpeed = RightMotorSpeedPIController(rightMotorEncoderCnt, RightMotorReferenceSpeed);
   //setLeftMotorSpeed(leftMotorSpeed);
@@ -264,15 +284,15 @@ void loop()
   }
 
 #if 0
-  if(TimerFlag){
+  if (TimerFlag) {
     TimerFlag = false;
     //motorTest();
     TrajectoryTrackingAlgo();
     /*Serial.print(leftMotorEncoderCnt);
-    Serial.print('\t');
-    Serial.print(rightMotorEncoderCnt);
-    Serial.print('\t');
-    Serial.println(gz.num);*/
+      Serial.print('\t');
+      Serial.print(rightMotorEncoderCnt);
+      Serial.print('\t');
+      Serial.println(gz.num);*/
     //Serial.print('\n');
   }
 #endif
@@ -359,7 +379,7 @@ float LeftMotorSpeedPIController(int LeftRawCnts, float LeftSpeedRef)
 
   /* Based on incremental discrete equation of PI controller */
   intPart += Ki * currError;
-  boundFun(&intPart,intPartLimit);
+  boundFun(&intPart, intPartLimit);
   LeftMotorPWM = Kp * currError + intPart + Kd * (currError - prevError);
   /* Update prevError variable to currError for next round */
   prevError = currError;
@@ -400,9 +420,9 @@ float RightMotorSpeedPIController(int RightRawCnts, float RightSpeedRef)
 
   /* Based on incremental discrete equation of PI controller */
   intPart += Ki * currError;
-  boundFun(&intPart,intPartLimit);
+  boundFun(&intPart, intPartLimit);
   /*if(intPart > INTLIMIT) intPart = INTLIMIT;
-  else if(intPart < -INTLIMIT) intPart = -INTLIMIT;*/
+    else if(intPart < -INTLIMIT) intPart = -INTLIMIT;*/
   RightMotorPWM = Kp * currError + intPart + Kd * (currError - prevError);
 
   /* Update prevError variable to currError for next round */
@@ -431,7 +451,7 @@ float RightMotorSpeedPIController(int RightRawCnts, float RightSpeedRef)
   return RightMotorPWM;
 }
 
-template<class T> int boundFun(T* pData, T bound){
+template<class T> int boundFun(T* pData, T bound) {
   if (*pData > bound) *pData = bound;
   else if (*pData < -bound) *pData = -bound;
   return 0;
