@@ -239,7 +239,7 @@ function confirmBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to confirmBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global c K1 K2 eps1 eps2 eta1 eta2 kphi SMCModeFlag
+global c K1 K2 eps1 eps2 eta1 eta2 kphi NonlinearSMCModeFlag
 
 dlgTitle = 'Quit';
 dlgQuestion = 'Do you want to confirm and quit the config window?';
@@ -264,8 +264,8 @@ switch choice
         assignin('base','eta2',eta2);
         assignin('base','kphi',kphi);
         
-        SMCModeFlag = 1;
-        assignin('base','SMCModeFlag',SMCModeFlag);
+        NonlinearSMCModeFlag = 1;
+        assignin('base','NonlinearSMCModeFlag',NonlinearSMCModeFlag);
         close;
     case 'No'
 end

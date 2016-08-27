@@ -54,18 +54,21 @@ function WMR_TT_SIM_OpeningFcn(hObject, eventdata, handles, varargin)
 clc;
 % set(handles.trajectoryTrackingResult, 'XLim', [-2,1], 'YLim', [-1,2]);
 % set(handles.trajectoryTrackingResult, 'XLim', [-1,3], 'YLim', [-1,3]);
-global SMCMode SMCModeFlag
+global SMCMode LinearSMCModeFlag NonlinearSMCModeFlag
 % Choose default command line output for WMR_TT_SIM
 handles.output = hObject;
 handles.trajectoryType = 0;
 handles.flag = 0;
-handles.SMCModeFlag = 0;
-SMCModeFlag = 0;
-assignin('base','SMCModeFlag',SMCModeFlag);
+handles.LinearSMCModeFlag = 0;
+handles.NonlinearSMCModeFlag = 0;
+LinearSMCModeFlag = 0;
+NonlinearSMCModeFlag = 0;
+assignin('base','LinearSMCModeFlag',LinearSMCModeFlag);
+assignin('base','NonlinearSMCModeFlag',NonlinearSMCModeFlag);
 handles.SMCMode = 1;
 SMCMode = 1;
 assignin('base','SMCMode',SMCMode);
-handles.K = 0;
+% handles.K = 0;
 handles.K1 = 0;
 handles.K2 = 0;
 handles.eps1 = 0;
@@ -527,8 +530,8 @@ handles.TOUT = TOUT;
 handles.YOUT = YOUT;
 guidata(hObject, handles);
 
-save resultsDataFile.mat TOUT YOUT
-% save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
+% save resultsDataFile.mat TOUT YOUT
+save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
 
 
 % --- Executes on button press in detailResults.
@@ -589,8 +592,8 @@ function runSimulation(hObject, eventdata, handles)
 % hObject    handle to configUncertainty (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global duration c K K1 K2 eps1 eps2 eta1 eta2 mode_uct mode_tjt kphi frameSize tSpan circle;
-global SMCModeFlag vrVal wrVal x_r x_c YOUT
+global duration c K1 K2 eps1 eps2 eta1 eta2 mode_uct mode_tjt kphi frameSize tSpan circle;
+global SMCMode LinearSMCModeFlag NonlinearSMCModeFlag vrVal wrVal x_r x_c YOUT
 
 handles = guidata(hObject);
 
@@ -638,14 +641,15 @@ switch trajectoryTypeSelection
         assignin('base','frameSize',frameSize);
 end
 
-if handles.SMCMode == 1
+if SMCMode == 1
 %    Linear controller
     % Linear sliding mode controller parameters
     % save SMC parameters to handles
-    if SMCModeFlag == 0
-        SMCModeFlag = 1;
-        assignin('base','SMCModeFlag',SMCModeFlag);
-        handles.K = 1;          % Sliding function parameters
+    if LinearSMCModeFlag == 0
+        LinearSMCModeFlag = 1;
+        assignin('base','LinearSMCModeFlag',LinearSMCModeFlag);
+        handles.K1 = 1;          % Sliding function parameters
+        handles.K2 = 1;          % Sliding function parameters
         handles.eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
         handles.eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
         handles.eta1 = 2;           % Reaching gain
@@ -653,26 +657,28 @@ if handles.SMCMode == 1
         handles.kphi = 0.5;                      % parameter for matched uncertainty
         % kpsi = 0.1;                                   % parameter for mismatched uncertainty
 
-        K = 1;          % Sliding function parameters
+        K1 = 1;          % Sliding function parameters
+        K2 = 1;          % Sliding function parameters
         eps1 = 0.1;            % Boundary parameters to alleviate chattering effect
         eps2 = 0.1;            % Boundary parameters to alleviate chattering effect
         eta1 = 2;           % Reaching gain 1
         eta2 = 2;           % Reaching gain 2
         kphi = 0.5;                      % parameter for matched uncertainty
         % kpsi = 0.1;                                   % parameter for mismatched uncertainty
-        assignin('base','K',K);
+        assignin('base','K1',K1);
+        assignin('base','K2',K2);
         assignin('base','eps1',eps1);
         assignin('base','eps2',eps2);
         assignin('base','eta1',eta1);
         assignin('base','eta2',eta2);
         assignin('base','kphi',kphi);
     end
-elseif handles.SMCMode == 2
+elseif SMCMode == 2
 %    Nonlinear controller
     % save SMC parameters to handles
-    if SMCModeFlag == 0
-        SMCModeFlag = 1;
-        assignin('base','SMCModeFlag',SMCModeFlag);
+    if NonlinearSMCModeFlag == 0
+        NonlinearSMCModeFlag = 1;
+        assignin('base','NonlinearSMCModeFlag',NonlinearSMCModeFlag);
         handles.K1 = 1;          % Sliding function parameters
         handles.K2 = 1;          % Sliding function parameters
         handles.eps1 = 0.1;            % Boundary parameters to alleviate chattering effect

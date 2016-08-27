@@ -22,7 +22,7 @@ function varargout = SMCLConfig(varargin)
 
 % Edit the above text to modify the response to help SMCLConfig
 
-% Last Modified by GUIDE v2.5 26-Aug-2016 06:22:35
+% Last Modified by GUIDE v2.5 27-Aug-2016 00:41:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -143,18 +143,18 @@ end
 
 
 
-function gainText_Callback(hObject, eventdata, handles)
-% hObject    handle to gainText (see GCBO)
+function gain1Text_Callback(hObject, eventdata, handles)
+% hObject    handle to gain1Text (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of gainText as text
-%        str2double(get(hObject,'String')) returns contents of gainText as a double
+% Hints: get(hObject,'String') returns contents of gain1Text as text
+%        str2double(get(hObject,'String')) returns contents of gain1Text as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function gainText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to gainText (see GCBO)
+function gain1Text_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gain1Text (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -239,28 +239,30 @@ function confirmBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to confirmBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global K eps1 eps2 eta1 eta2 kphi SMCModeFlag
+global K1 K2 eps1 eps2 eta1 eta2 kphi LinearSMCModeFlag
 
 dlgTitle = 'Quit';
 dlgQuestion = 'Do you want to confirm and quit the config window?';
 choice = questdlg(dlgQuestion, dlgTitle, 'Yes', 'No', 'Yes');
 switch choice
     case 'Yes'
-        K = str2num(get(handles.gainText,'String'));
+        K1 = str2num(get(handles.gain1Text,'String'));
+        K2 = str2num(get(handles.gain2Text,'String'));
         eps1 = str2num(get(handles.eps1Text,'String'));
         eps2 = str2num(get(handles.eps2Text,'String'));
         eta1 = str2num(get(handles.eta1Text,'String'));
         eta2 = str2num(get(handles.eta2Text,'String'));
         kphi = str2num(get(handles.kphiText,'String'));
-        assignin('base','K',K);
+        assignin('base','K1',K1);
+        assignin('base','K2',K2);
         assignin('base','eps1',eps1);
         assignin('base','eps2',eps2);
         assignin('base','eta1',eta1);
         assignin('base','eta2',eta2);
         assignin('base','kphi',kphi);
 
-        SMCModeFlag = 1;
-        assignin('base','SMCModeFlag',SMCModeFlag);
+        LinearSMCModeFlag = 1;
+        assignin('base','LinearSMCModeFlag',LinearSMCModeFlag);
         close;
     case 'No'
 end
@@ -280,3 +282,26 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 movegui('center');
+
+
+
+function gain2Text_Callback(hObject, eventdata, handles)
+% hObject    handle to gain2Text (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of gain2Text as text
+%        str2double(get(hObject,'String')) returns contents of gain2Text as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function gain2Text_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gain2Text (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

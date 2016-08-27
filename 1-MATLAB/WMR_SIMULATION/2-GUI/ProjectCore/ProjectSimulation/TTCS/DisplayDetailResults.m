@@ -51,7 +51,7 @@ function DisplayDetailResults_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to DisplayDetailResults (see VARARGIN)
-global mode_uct TOUT YOUT x_c x_r x_p x_e Tc u_tmp u_tmp2 phi_tmp u_r sigma_1 sigma_2 K K1 K2 c SMCMode
+global mode_uct TOUT YOUT x_c x_r x_p x_e Tc u_tmp u_tmp2 phi_tmp u_r sigma_1 sigma_2 K1 K2 c SMCMode
 cla(handles.stateVariablePlot);
 cla(handles.linearVelocityControlSignalPlot);
 cla(handles.slidingSurfacesPlot);
@@ -113,8 +113,8 @@ assignin('base', 'u_r', u_r);
 
 % Define function handle of sliding surfaces
 if SMCMode == 1
-    sigma_1 = @(y_e,theta) K*y_e + theta;
-    sigma_2 = @(x_e) x_e;
+    sigma_1 = @(x_e) x_e;
+    sigma_2 = @(y_e,theta) K1*y_e + K2*theta;
 elseif SMCMode == 2
     sigma_1 = @(x_e) K1*x_e;
     sigma_2 = @(y_e,x_e,theta) K2.* theta + y_e./sqrt(c + y_e.^2 + x_e.^2);
@@ -244,7 +244,7 @@ function plotSlidingSurfacesGraph(hObject, eventdata, handles)
 global TOUT x_e sigma_1 sigma_2 SMCMode
 
 if SMCMode == 1
-    plot(handles.slidingSurfacesPlot, TOUT, sigma_1(x_e(2,:), x_e(3,:)), 'r-', TOUT, sigma_2(x_e(1,:)), 'b--');
+    plot(handles.slidingSurfacesPlot, TOUT, sigma_1(x_e(1,:)), 'r-', TOUT, sigma_2(x_e(2,:), x_e(3,:)), 'b--');
 elseif SMCMode == 2
     plot(handles.slidingSurfacesPlot, TOUT, sigma_1(x_e(2,:)), 'r-', TOUT, sigma_2(x_e(1,:), x_e(2,:), x_e(3,:)), 'b--');
 end
@@ -485,9 +485,9 @@ movegui(fig,'northeast');
 
 % Linear
 if SMCMode == 1
-    plot(TOUT, sigma_1(x_e(2,:),x_e(3,:)), 'r-');
+    plot(TOUT, sigma_1(x_e(1,:)), 'r-');
     hold on;
-    plot(TOUT, sigma_2(x_e(1,:)), 'b--');
+    plot(TOUT, sigma_2(x_e(2,:),x_e(3,:)), 'b--');
     hold off;
 elseif SMCMode == 2 % Nonlinear
     plot(TOUT, sigma_1(x_e(2,:)), 'r-');
