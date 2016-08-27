@@ -1,7 +1,9 @@
 
 #include "I2Cdev.h"
 #include "MPU6050.h"
-#include "VectorQuaternion.h"
+//#include "VectorQuaternion.h"
+
+#define BT_DEBUG    1
 
 #define KCONSTANT 19.2/200/PI
 #define PWM_FREQ          20000
@@ -14,6 +16,16 @@ typedef union {
   int16_t num;
   byte byt[2];
 } BytInt16;
+
+typedef struct {
+  float x;
+  float y;
+  float z;
+}g_Posture;
+
+g_Posture qc;
+g_Posture qr;
+g_Posture xe;
 
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
@@ -63,6 +75,7 @@ float RightMotorReferenceSpeed = 0;
 int stopMotorSpeed = PWM_DUTY_CYCLE;  // stopMotorSpeed = 1200
 
 const float intPartLimit = INTLIMIT;
+const float boundMotor = MOTORMAX;
 
 int cnt = 0;
 
@@ -77,14 +90,18 @@ int cmdMode = 0;
 int startMode = 0;
 
 /* Algorithm Variables */
-vectorJMu<float> qc(-.1, -.1, 0.6);
-vectorJMu<float> qr(0, 0, 0);
-vectorJMu<float> xe;
-vectorJMu<float> dxe;
+
+//vectorJMu<float> qc(-0.1, -0.1, 0.8);
+//vectorJMu<float> qc(-.1, -.1, 0.3491);    // 20 degree = 0.3491
+//vectorJMu<float> qc(-.1, -.1, 1.4071);  // pi/2 = 1.5708
+//vectorJMu<float> qc(-.1, -.1, 0.6);
+//vectorJMu<float> qr(0, 0, 0);
+//vectorJMu<float> xe;
+//vectorJMu<float> dxe;
 float vr;
 float wr;
 float tt = 0.01;    // 0.01s = 10ms
-float Time;
+//float Time;
 
 float eta[2];
 float eps[2];
@@ -101,8 +118,6 @@ float gammaF[2];
 
 float wheelR;
 float wheelL;
-
-const float boundMotor = MOTORMAX;
 
 void setup()
 {
@@ -130,7 +145,14 @@ void setup()
   //digitalWrite(RightMotorINA, HIGH);
   //digitalWrite(RightMotorINB, LOW);
 
-#if 0
+  qc.x = 0.2;
+  qc.y = 0.0;
+  qc.z = 1.0;
+  qr.x = 0.0;
+  qr.y = 0.0;
+  qr.z = 0.6;
+
+#if BT_DEBUG
   /*
       WARNING: Wait for BT to connect WMR in order to start the program
       Synchronising Arduino with MATLAB via Bluetooth3(BT3)
@@ -209,21 +231,11 @@ void motorTest()
 
 void loop()
 {
-  if(TimerFlag){
-    TimerFlag=false;
-    //motorTest();
-    TrajectoryTrackingAlgo();
-    /*Serial.print(leftMotorEncoderCnt);
-    Serial.print('\t');
-    Serial.print(rightMotorEncoderCnt);
-    Serial.print('\t');
-    Serial.println(gz.num);*/
-    Serial.print('\n');
-  }
-#if 0
   if (TimerFlag) {
+    TimerFlag = false;
     TrajectoryTrackingAlgo();
 
+#if 0
     Serial3.println(leftMotorEncoderCnt);
     Serial3.println(rightMotorEncoderCnt);
     Serial3.println(wheelL);
@@ -231,8 +243,37 @@ void loop()
     Serial3.println(leftMotorSpeed);
     Serial3.println(rightMotorSpeed);
     Serial3.println(gz.num);
-    //Serial3.println(upid[0]);
-    //Serial3.println(upid[1]);
+#endif
+
+#if 0
+    Serial.print(leftMotorEncoderCnt);
+    Serial.print('\t');
+    Serial.print(rightMotorEncoderCnt);
+    Serial.print('\t');
+    Serial.print(wheelL);
+    Serial.print('\t');
+    Serial.print(wheelR);
+    Serial.print('\t');
+    Serial.print(leftMotorSpeed);
+    Serial.print('\t');
+    Serial.print(rightMotorSpeed);
+    Serial.print('\t');
+    Serial.print(gz.num);
+    Serial.print('\n');
+#endif
+  }
+
+#if 0
+  if(TimerFlag){
+    TimerFlag = false;
+    //motorTest();
+    TrajectoryTrackingAlgo();
+    /*Serial.print(leftMotorEncoderCnt);
+    Serial.print('\t');
+    Serial.print(rightMotorEncoderCnt);
+    Serial.print('\t');
+    Serial.println(gz.num);*/
+    //Serial.print('\n');
   }
 #endif
 
@@ -323,7 +364,7 @@ float LeftMotorSpeedPIController(int LeftRawCnts, float LeftSpeedRef)
   /* Update prevError variable to currError for next round */
   prevError = currError;
 
-#if 1
+#if 0
   Serial.print(LeftRawCnts);
   //Serial.print("(LeftEncoderVal)");
   Serial.print('\t');
@@ -367,7 +408,7 @@ float RightMotorSpeedPIController(int RightRawCnts, float RightSpeedRef)
   /* Update prevError variable to currError for next round */
   prevError = currError;
 
-#if 1
+#if 0
   Serial.print(RightRawCnts);
   //Serial.print("(RightEncoderVal)");
   Serial.print('\t');

@@ -69,7 +69,7 @@ void EncoderInit()
     TC_Start(pTc[i], 0);
     TC_Start(pTc[i], 1);
 
-    Serial3.println("Encoder setup finished.");
+    //Serial3.println("Encoder setup finished.");
   }  
 }
 

@@ -1,14 +1,14 @@
 
 void RefCal() {
-  vr = 0.2;
-  wr = 0;
-  Time += tt;
+  vr = 0.3;
+  wr = 0.3;
+  //Time += tt;
 }
 
 void WMRParaIni() {
   eta[0] = 10;
   eta[1] = 10;
-  eps[0] = 0.01;
+  eps[0] = 0.1;
   eps[1] = 0.1;
 }
 
@@ -31,6 +31,8 @@ void TrajectoryTrackingAlgo()
   RefCal();
 
   /* Convert to radian */
+  //w_enL = float(leftMotorEncoderCnt) * PI / 9.6;
+  //w_enR = float(rightMotorEncoderCnt) * PI / 9.6;
   w_enL = float(leftMotorEncoderCnt) * PI / 16;
   w_enR = float(rightMotorEncoderCnt) * PI / 16;
   //w_enL = float(leftMotorEncoderCnt) * 2*PI / 32;
@@ -54,6 +56,11 @@ void TrajectoryTrackingAlgo()
   qc.y += v_WMR * sin(qc.z) * tt;
   qc.z += dTheta * tt;
 
+#if BT_DEBUG
+  Serial3.println(qc.x);
+  Serial3.println(qc.y);
+#endif
+  
   if (qc.z > 2 * PI) {
     qc.z -= 2 * PI;
   } else if (qc.z <= 0) {
@@ -63,6 +70,21 @@ void TrajectoryTrackingAlgo()
   qr.x += vr * cos(qr.z) * tt;
   qr.y += vr * sin(qr.z) * tt;
   qr.z += wr * tt;
+#if 0
+  Serial.print(qr.x);
+  Serial.print('\t');
+  Serial.print(qr.y);
+  Serial.print('\t');
+  Serial.println(qr.z);
+#else
+  //Serial3.println(qr.x);
+  //Serial3.println(qr.y);
+  //Serial.print(qr.x);
+  //Serial.print('\t');
+  //Serial.println(qr.y);
+  //Serial.print('\t');
+  //Serial.println(qr.z);
+#endif
 
   /* Saturation */
   if (qr.z > 2 * PI) {

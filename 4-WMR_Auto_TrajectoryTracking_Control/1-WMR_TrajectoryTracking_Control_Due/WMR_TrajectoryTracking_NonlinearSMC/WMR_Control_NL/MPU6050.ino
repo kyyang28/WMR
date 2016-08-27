@@ -1,5 +1,5 @@
 
-const int AccGyroOffset[6] = {501, 234, 1654, 67, 26, 11};
+const int AccGyroOffset[6] = {503, 259, 1670, 67, 27, 12};
 
 void ConfigMPU6050()
 {
@@ -11,14 +11,14 @@ void ConfigMPU6050()
   Wire1.begin();
 #endif
 
-  Serial3.println("Initializing accgyro device.");
+  //Serial3.println("Initializing accgyro device.");
 
   accelgyro.initialize();
 
-  Serial3.println("Testing device connections...");
+  //Serial3.println("Testing device connections...");
 
   bool isConnected = accelgyro.testConnection();
-  Serial3.println(isConnected ? "MPU6050 connection successful" : "MPU6050 connection failed");
+  //Serial3.println(isConnected ? "MPU6050 connection successful" : "MPU6050 connection failed");
 
   if (!isConnected) {
     Serial.println("Please reset the Arduino or MPU6050");
@@ -27,7 +27,7 @@ void ConfigMPU6050()
   /* Calibrate MPU6050 */
   calibrateMPU6050();
 
-  Serial3.println("MPU6050 setup finished.");
+  //Serial3.println("MPU6050 setup finished.");
 }
 
 void calibrateMPU6050()
