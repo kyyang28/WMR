@@ -12,6 +12,8 @@ sh = figure;
 fp = axes('Parent', sh);
 % sh = figure(fig_num);
 
+cla(sh);
+
 % fig = figure;
 % fp = axes('Parent', fig);
 

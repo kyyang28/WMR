@@ -925,6 +925,7 @@ assignin('base','x_c',x_c);
 
 % plot the motion
 axis(handles.trajectoryTrackingResult);
+cla(handles.trajectoryTrackingResult);
 plot(handles.trajectoryTrackingResult, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
 
 % carModelRecRef = draw2DCarModelRec(hObject, eventdata, handles, x_r);
