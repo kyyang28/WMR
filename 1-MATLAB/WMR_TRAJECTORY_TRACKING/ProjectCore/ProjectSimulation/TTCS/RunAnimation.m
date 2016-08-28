@@ -51,7 +51,7 @@ xlabel('x(m)');
 ylabel('y(m)')
 set(gca,'NextPlot','replacechildren');
 WMR_REF = WMR2DModel('q',x_r(:,1),'size',[0.25 0.2],'color','r');
-WMR_CURR = WMR2DModel('q',x_r(:,1),'size',[0.25 0.2],'color','g');
+WMR_CURR = WMR2DModel('q',x_c(:,1),'size',[0.25 0.2],'color','g');
 % WMR_REF = WMR2DModel('q',x_r_tmp(:,1),'size',[0.25 0.2],'color','r');
 % WMR_CURR = WMR2DModel('q',x_r_tmp(:,1),'size',[0.25 0.2],'color','g');
 WMR_REF.initialise(fig_num);

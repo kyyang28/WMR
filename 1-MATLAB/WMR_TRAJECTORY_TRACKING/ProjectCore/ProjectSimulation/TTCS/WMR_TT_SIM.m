@@ -22,7 +22,7 @@ function varargout = WMR_TT_SIM(varargin)
 
 % Edit the above text to modify the response to help WMR_TT_SIM
 
-% Last Modified by GUIDE v2.5 26-Aug-2016 03:18:08
+% Last Modified by GUIDE v2.5 28-Aug-2016 03:00:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,6 +55,22 @@ clc;
 % set(handles.trajectoryTrackingResult, 'XLim', [-2,1], 'YLim', [-1,2]);
 % set(handles.trajectoryTrackingResult, 'XLim', [-1,3], 'YLim', [-1,3]);
 global SMCMode LinearSMCModeFlag NonlinearSMCModeFlag
+global linearMode nonlinearMode l_lineTrojectory l_circleTrajectory 
+global nl_lineTrojectory nl_circleTrajectory
+
+linearMode = 0;
+nonlinearMode = 0;
+l_lineTrojectory = 0;
+l_circleTrajectory = 0;
+nl_lineTrojectory = 0;
+nl_circleTrajectory = 0;
+assignin('base','linearMode',linearMode);
+assignin('base','nonlinearMode',nonlinearMode);
+assignin('base','l_lineTrojectory',l_lineTrojectory);
+assignin('base','l_circleTrajectory',l_circleTrajectory);
+assignin('base','nl_lineTrojectory',nl_lineTrojectory);
+assignin('base','nl_circleTrajectory',nl_circleTrajectory);
+
 % Choose default command line output for WMR_TT_SIM
 handles.output = hObject;
 handles.trajectoryType = 0;
@@ -531,8 +547,8 @@ handles.TOUT = TOUT;
 handles.YOUT = YOUT;
 guidata(hObject, handles);
 
-% save resultsDataFile.mat TOUT YOUT
-save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
+save resultsDataFile.mat TOUT YOUT
+% save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
 
 
 % --- Executes on button press in detailResults.
@@ -549,7 +565,12 @@ function runAnimation_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % RunAnimationGUI;
-run RunAnimation.m
+global compareFlag
+if compareFlag == 1
+    run RunAnimationCompare.m
+else
+    run RunAnimation.m
+end
 
 % --- Executes on button press in unmatchedUncertainty.
 function unmatchedUncertainty_Callback(hObject, eventdata, handles)
@@ -595,6 +616,9 @@ function runSimulation(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global duration c K1 K2 eps1 eps2 eta1 eta2 mode_uct mode_tjt kphi frameSize tSpan circle;
 global SMCMode LinearSMCModeFlag NonlinearSMCModeFlag vrVal wrVal x_r x_c YOUT
+global linearMode nonlinearMode l_lineTrojectory l_circleTrajectory 
+global nl_lineTrojectory nl_circleTrajectory x_r_l_line x_c_l_line
+global x_r_nl_line x_c_nl_line x_r_l_circle x_c_l_circle x_r_nl_circle x_c_nl_circle
 
 handles = guidata(hObject);
 
@@ -607,37 +631,6 @@ init_x_r = str2num(get(handles.xrText,'String'));
 init_y_r = str2num(get(handles.yrText,'String'));
 init_theta_r = str2num(get(handles.thetarText,'String'));
 
-% if init_x_c < 0
-%     xlim_min_line = init_x_c - 1;
-%     xlim_max_line = abs(init_x_c) + 1;
-% elseif init_x_c > 0
-%     xlim_min_line = init_x_c - 1;
-%     xlim_max_line = init_x_c + 1;
-% else
-%     xlim_min_line = init_x_c - 1;
-%     xlim_max_line = init_x_c + 1;
-% end
-% 
-% if init_y_c < 0
-%     ylim_min_line = init_y_c - 1;
-%     ylim_max_line = abs(init_y_c) + 1;
-% elseif init_y_c > 0
-%     ylim_min_line = init_y_c - 1;
-%     ylim_max_line = init_y_c + 1;
-% else
-%     ylim_min_line = init_y_c - 1;
-%     ylim_max_line = init_y_c + 1;
-% end
-
-% xlim_min_line = -2;
-% xlim_max_line = 4;
-% ylim_min_line = -2;
-% ylim_max_line = 4;
-% 
-% xlim_min_circle = -2;
-% xlim_max_circle = 2;
-% ylim_min_circle = -2;
-% ylim_max_circle = 2;
 
 trajectoryType = get(handles.typePanel, 'SelectedObject');
 trajectoryTypeSelection = get(trajectoryType,'String');
@@ -871,6 +864,60 @@ guidata(hObject,handles);
 % [TOUT YOUT] = ode45(@TTExec, handles.tSpan, handles.X_0, handles.options);
 callODE(hObject, eventdata, handles);
 
+if SMCMode == 1
+    % linear controller
+    linearMode = 1;
+    assignin('base','linearMode',linearMode);
+    
+    if mode_tjt == 0
+       % line trajectory
+        l_lineTrojectory = 1;
+        l_circleTrajectory = 0;
+        assignin('base','l_lineTrojectory',l_lineTrojectory);
+        assignin('base','l_circleTrajectory',l_circleTrajectory);
+        x_r_l_line = YOUT(:,1:3)';
+        x_c_l_line = YOUT(:,4:6)';
+        assignin('base','x_r_l_line',x_r_l_line);
+        assignin('base','x_c_l_line',x_c_l_line);        
+    elseif mode_tjt == 1
+       % circle trajectory
+       l_circleTrajectory = 1;
+       l_lineTrojectory = 0;
+        assignin('base','l_circleTrajectory',l_circleTrajectory);
+        assignin('base','l_lineTrojectory',l_lineTrojectory);
+        x_r_l_circle = YOUT(:,1:3)';
+        x_c_l_circle = YOUT(:,4:6)';
+        assignin('base','x_r_l_circle',x_r_l_circle);
+        assignin('base','x_c_l_circle',x_c_l_circle);
+    end    
+elseif SMCMode == 2
+    % nonlinear controller
+    nonlinearMode = 1;
+    assignin('base','nonlinearMode',nonlinearMode);
+
+    if mode_tjt == 0
+       % line trajectory
+        nl_lineTrojectory = 1;
+        nl_circleTrajectory = 0;
+        assignin('base','nl_lineTrojectory',nl_lineTrojectory);
+        assignin('base','nl_circleTrajectory',nl_circleTrajectory);
+        x_r_nl_line = YOUT(:,1:3)';
+        x_c_nl_line = YOUT(:,4:6)';
+        assignin('base','x_r_nl_line',x_r_nl_line);
+        assignin('base','x_c_nl_line',x_c_nl_line);        
+    elseif mode_tjt == 1
+       % circle trajectory
+       nl_circleTrajectory = 1;
+       nl_lineTrojectory = 0;
+        assignin('base','nl_circleTrajectory',nl_circleTrajectory);
+        assignin('base','nl_lineTrojectory',nl_lineTrojectory);
+        x_r_nl_circle = YOUT(:,1:3)';
+        x_c_nl_circle = YOUT(:,4:6)';
+        assignin('base','x_r_nl_circle',x_r_nl_circle);
+        assignin('base','x_c_nl_circle',x_c_nl_circle);
+    end    
+end
+
 x_r = YOUT(:,1:3)';
 x_c = YOUT(:,4:6)';
 assignin('base','x_r',x_r);
@@ -906,6 +953,11 @@ if handles.trajectoryType == 0
     uiwait(msgbox('Line simulation is finished!!!','Done','modal'));
 elseif handles.trajectoryType == 1
     uiwait(msgbox('Circle simulation is finished!!!','Done','modal'));
+end
+
+if (l_lineTrojectory == 1 && nl_lineTrojectory == 1) || (l_circleTrajectory == 1 && nl_circleTrajectory == 1)
+   % both linear line trajectory and nonlinear line trajectory results are saved to workspace
+    set(handles.compareResultsBtn,'enable','on');
 end
 
 
@@ -1015,3 +1067,80 @@ switch SMCDesignSelection
 end
 
 guidata(hObject,handles);
+
+
+% --- Executes on button press in compareResultsBtn.
+function compareResultsBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to compareResultsBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global l_lineTrojectory l_circleTrajectory nl_lineTrojectory
+global nl_circleTrajectory x_r_l_line x_c_l_line x_r_nl_line x_c_nl_line
+global x_r_l_circle x_c_l_circle x_r_nl_circle x_c_nl_circle
+global compareFlag
+
+compareFlag = 1;
+assignin('base','compareFlag',compareFlag);
+
+% plot the motion
+axis(handles.trajectoryTrackingResult);
+
+if l_lineTrojectory == 1 && nl_lineTrojectory == 1
+    % Plot linear and nonlinear line trajectories
+    plot(handles.trajectoryTrackingResult, x_r_l_line(1,:),x_r_l_line(2,:),'r',x_c_l_line(1,:),x_c_l_line(2,:),'b-.');
+    legend('Reference trajectory','WMR using linear sliding mode controller','WMR using nonlinear sliding mode controller','Location','northwest')
+    % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
+    xlabel('XOUT(m)');
+    ylabel('YOUT(m)');
+    title('Trajectory tracking of the WMR');
+
+    hold on
+    plot(handles.trajectoryTrackingResult, x_r_nl_line(1,:),x_r_nl_line(2,:),'r',x_c_nl_line(1,:),x_c_nl_line(2,:),'m--');
+
+    carModelTriRef1 = draw2DCarModelTri(hObject, eventdata, handles, x_r_l_line);
+    carModelTriReal1 = draw2DCarModelTri(hObject, eventdata, handles, x_c_l_line);
+    carModelTriRef2 = draw2DCarModelTri(hObject, eventdata, handles, x_r_nl_line);
+    carModelTriReal2 = draw2DCarModelTri(hObject, eventdata, handles, x_c_nl_line);
+
+    % draw the graph based on the rotationed matrix of robot
+    patch(carModelTriRef1(1,:), carModelTriRef1(2,:), 'red');
+    patch(carModelTriRef2(1,:), carModelTriRef1(2,:), 'magenta');
+    patch(carModelTriReal1(1,:), carModelTriReal1(2,:), 'blue');
+    patch(carModelTriReal2(1,:), carModelTriReal2(2,:), 'green');
+    
+elseif l_circleTrajectory == 1 && nl_circleTrajectory == 1
+    % Plot linear and nonlinear circle trajectories
+    plot(handles.trajectoryTrackingResult, x_r_l_circle(1,:),x_r_l_circle(2,:),'r',x_c_l_circle(1,:),x_c_l_circle(2,:),'b-.');
+    legend('Reference trajectory','WMR using linear sliding mode controller','WMR using nonlinear sliding mode controller','Location','northwest')
+    % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
+    xlabel('XOUT(m)');
+    ylabel('YOUT(m)');
+    title('Trajectory tracking of the WMR');
+
+    hold on
+    plot(handles.trajectoryTrackingResult, x_r_nl_circle(1,:),x_r_nl_circle(2,:),'r',x_c_nl_circle(1,:),x_c_nl_circle(2,:),'m--');
+
+    carModelTriRef1 = draw2DCarModelTri(hObject, eventdata, handles, x_r_l_circle);
+    carModelTriReal1 = draw2DCarModelTri(hObject, eventdata, handles, x_c_l_circle);
+    carModelTriRef2 = draw2DCarModelTri(hObject, eventdata, handles, x_r_nl_circle);
+    carModelTriReal2 = draw2DCarModelTri(hObject, eventdata, handles, x_c_nl_circle);
+
+    % draw the graph based on the rotationed matrix of robot
+    patch(carModelTriRef1(1,:), carModelTriRef1(2,:), 'red');
+    patch(carModelTriRef2(1,:), carModelTriRef1(2,:), 'magenta');
+    patch(carModelTriReal1(1,:), carModelTriReal1(2,:), 'blue');
+    patch(carModelTriReal2(1,:), carModelTriReal2(2,:), 'green');    
+end
+
+% carModelTriRef = draw2DCarModelTri(hObject, eventdata, handles, x_r);
+% carModelTriReal = draw2DCarModelTri(hObject, eventdata, handles, x_c);
+
+% draw the graph based on the rotationed matrix of robot
+% patch(carModelTriRef(1,:), carModelTriRef(2,:), 'red');
+% patch(carModelTriReal(1,:), carModelTriReal(2,:), 'green');
+
+legend('Reference trajectory','WMR trajectory','Initial point of the reference trajectory','Initial point of the robot','Location','northwest')
+% legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
+xlabel('XOUT(m)');
+ylabel('YOUT(m)');
+title('Trajectory tracking of the WMR');
