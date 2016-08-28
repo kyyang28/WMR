@@ -6,10 +6,10 @@ void RefCal() {
 }
 
 void WMRParaIni() {
-  eta[0] = 4;
-  eta[1] = 4;
+  eta[0] = 1;
+  eta[1] = 2;
   eps[0] = 0.1;
-  eps[1] = 0.1;
+  eps[1] = 0.5;
 }
 
 float eR = 0;
@@ -31,18 +31,18 @@ void TrajectoryTrackingAlgo()
   RefCal();
 
   /* Convert to radian */
-  //w_enL = float(leftMotorEncoderCnt) * PI / 9.6;
-  //w_enR = float(rightMotorEncoderCnt) * PI / 9.6;
-  w_enL = float(leftMotorEncoderCnt) * PI / 16;
-  w_enR = float(rightMotorEncoderCnt) * PI / 16;
+  w_enL = float(leftMotorEncoderCnt) * PI / 9.6;
+  w_enR = float(rightMotorEncoderCnt) * PI / 9.6;
+  //w_enL = float(leftMotorEncoderCnt) * PI / 16;
+  //w_enR = float(rightMotorEncoderCnt) * PI / 16;
   //w_enL = float(leftMotorEncoderCnt) * 2*PI / 32;
   //w_enR = float(rightMotorEncoderCnt) * 2*PI / 32;
-
-  v_WMR = (w_enL + w_enR) * 0.06 / 4;   // why divide 4?
+  
+  v_WMR = (w_enL + w_enR) * 0.12 / 4;
   //v_WMR = (w_enL + w_enR) * 0.063 / 4;
-  //w_WMR = (w_enR - w_enL) * 0.063 / 0.2;
+  w_WMR = (w_enR - w_enL) * 0.12 / 0.23;
 
-  dTheta = -float(gz.num) * gRes;
+  dTheta = float(gz.num) * gRes;
   if (abs(dTheta) < 0.01 ) {
     dTheta = 0;
   }
@@ -57,10 +57,11 @@ void TrajectoryTrackingAlgo()
   qc.z += dTheta * tt;
 
 #if BT_DEBUG
+    //Serial3.println('C');
   Serial3.println(qc.x);
   Serial3.println(qc.y);
 #endif
-  
+
   if (qc.z > 2 * PI) {
     qc.z -= 2 * PI;
   } else if (qc.z <= 0) {
@@ -70,6 +71,7 @@ void TrajectoryTrackingAlgo()
   qr.x += vr * cos(qr.z) * tt;
   qr.y += vr * sin(qr.z) * tt;
   qr.z += wr * tt;
+  
 #if 0
   Serial.print(qr.x);
   Serial.print('\t');
@@ -125,37 +127,39 @@ void TrajectoryTrackingAlgo()
 
   gammaF[0] = vr * cos(xe.z) + eta[0] * xe.x / (abs(xe.x) + eps[0]);
   gammaF[1] = wr - (1 + xe.x * xe.x) / cpSqrt * vr * sin(xe.z) - xe.y * xe.x / cpSqrt * vr * cos(xe.z) + eta[1] * s2 / (abs(s2) + eps[1]);
-
+  
   for (int ic = 0; ic < 2; ic++) {
     uctrl[ic] = -(gammaG[ic][0] * gammaF[0] + gammaG[ic][1] * gammaF[1]);
   }
 #endif
-  
   /* wheelR = w_R, wheelL = w_L */
   wheelL = uctrl[0] * v_constant - uctrl[1] * w_constant;
   wheelR = uctrl[0] * v_constant + uctrl[1] * w_constant;
 
+  /*Serial.print(uctrl[1]);
+  Serial.print('\t');
+  Serial.print(dTheta);
+  Serial.print('\t');
+  Serial.print(w_WMR);*/
+  
+  /*Serial.print(wheelL);
+  Serial.print('\t');
+  Serial.print(wheelR);*/
+  
   boundFun(&wheelR,boundMotor);
   boundFun(&wheelL,boundMotor);
   
   leftMotorSpeed = LeftMotorSpeedPIController(leftMotorEncoderCnt, wheelL);
   rightMotorSpeed = RightMotorSpeedPIController(rightMotorEncoderCnt, wheelR);
 
+  /*Serial.print('\t');
+  Serial.print(leftMotorSpeed);
+  Serial.print('\t');
+  Serial.print(rightMotorSpeed);*/
+
+  Serial.print('\n');
+  
   setLeftMotorSpeed(leftMotorSpeed);
   setRightMotorSpeed(rightMotorSpeed);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

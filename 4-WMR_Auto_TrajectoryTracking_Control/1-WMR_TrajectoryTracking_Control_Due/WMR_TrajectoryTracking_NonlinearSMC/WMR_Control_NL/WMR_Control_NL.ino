@@ -3,7 +3,7 @@
 #include "MPU6050.h"
 //#include "VectorQuaternion.h"
 
-#define BT_DEBUG    0
+#define BT_DEBUG    1
 
 #define KCONSTANT 19.2/200/PI
 #define PWM_FREQ          20000
@@ -81,7 +81,8 @@ int cnt = 0;
 
 int buzzerPin = 12;
 
-#define gRes 500.*PI/180./32768.
+//#define gRes 500.*PI/180./32768.
+#define gRes 250.*PI/180./32768.
 MPU6050 accelgyro;
 BytInt16 ax, ay, az;
 BytInt16 gx, gy, gz;
@@ -125,12 +126,15 @@ float wrVal = 0.0;
 
 void setup()
 {
-  /* WARNING: When using HC-05 BLUETOOTH, make sure to employ serial 9600 baudrate, not 38400 */
+  /* Default serial port */
   Serial.begin(115200);
 
+  WMRParaIni();
+  
+  /* WARNING: When using HC-05 BLUETOOTH, make sure to employ serial 9600 baudrate, not 38400 */
   /* Bluetooth 1 and 2 serial initialisation */
   Serial2.begin(9600);
-  Serial3.begin(9600);
+  Serial3.begin(38400);
 
   /* Motors pin setup */
   pinMode(LeftMotorPWMPin, OUTPUT);
@@ -149,18 +153,30 @@ void setup()
   //digitalWrite(RightMotorINA, HIGH);
   //digitalWrite(RightMotorINB, LOW);
 
+#if 0
   qc.x = 0.0;
   qc.y = 0.0;
-  qc.z = 0.0;
+  qc.z = 1.2;
   qr.x = 0.0;
   qr.y = 0.0;
-  qr.z = 0.0;
+  qr.z = 0.4;
+#else
+  qc.x = -0.5;
+  qc.y = -0.11;
+  qc.z = PI/2;
+  qr.x = 0.0;
+  qr.y = 0.0;
+  qr.z = PI/2;
+  //qr.z = 0.0;
+#endif
 
-  vrVal = 0.1;
-  wrVal = 0.2;
+  vrVal = 0.2;
+  //wrVal = 0.0;
+  wrVal = 0.4;
 
 #if BT_DEBUG
 
+#if 0
   while (1) {
       if (Serial3.available() > 0) {
 
@@ -172,7 +188,8 @@ void setup()
         break;
       }
   }
-
+#endif
+  
     /*
         WARNING: Wait for BT to connect WMR in order to start the program
         Synchronising Arduino with MATLAB via Bluetooth3(BT3)
@@ -254,6 +271,12 @@ void loop()
   if (TimerFlag) {
     TimerFlag = false;
     TrajectoryTrackingAlgo();
+    //Serial.println(float(gz.num)*gRes);
+    /*Serial.print(qc.x);
+    Serial.print('\t');
+    Serial.print(qc.y);
+    Serial.print('\t');
+    Serial.println(qc.z);*/
 
 #if 0
     Serial3.println(leftMotorEncoderCnt);

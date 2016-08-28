@@ -154,43 +154,46 @@ assignin('base','theta_r_0',theta_r_0);
 % Synchronising character 'S' with Arduino Due board to start the program
 fprintf(b, '%c', 'S');
 
-tt = 0:0.01:30;
+tt = 0:0.01:60;
+% tt = 0:0.01:5;
 
-theta_r = w_r * tt;
-xr = x_r_0 + v_r * cos(theta_r);
-yr = y_r_0 + v_r * sin(theta_r);
+% % circle
+x_r_tmp = x_r_0 - v_r/w_r*sin(theta_r_0);
+y_r_tmp = y_r_0 + v_r/w_r*cos(theta_r_0);
+
+theta_r = theta_r_0 + w_r * tt;
+xr = x_r_tmp + v_r/w_r * sin(theta_r);
+yr = y_r_tmp - v_r/w_r * cos(theta_r);
+
+% % line
 % theta_r = theta_r_0 + w_r * tt;
-% xr = x_r_0 + v_r * cos(theta_r) .* tt;w
+% xr = x_r_0 + v_r * cos(theta_r) .* tt;
 % yr = y_r_0 + v_r * sin(theta_r) .* tt;
+
 plot(xr,yr,'r','LineWidth',2);
 hold on;
 
 i = 0;
 len = size(tt);
 
+% x_c_0 = -0.2;
+% y_c_0 = -0.11;
+% theta_c_0 = 0.6;
+% 
+% xc(1) = x_c_0;
+% yc(1) = y_c_0;
 
 while (i < len(2))
     i = i + 1;
-%     if ~isempty(fscanf(b))
         xc(i) = fscanf(b,'%f');
         yc(i) = fscanf(b,'%f');
-        drawnow;
-        plot(xc,yc,'b--');
-        hold on;
-%     end
+        if mod(i,20)==0
+            plot(xc,yc,'b--','LineWidth',2);
+            axis([-2 1 -1.5 1.5]);
+            drawnow;
+        end
 
-%     plot(yr,'b--');
-%     plot(handles.axes1, xr,yr,'*-.');
-%     hold on;
-%     theta_r = fscanf(b,'%f')
-%     fprintf(b, '1');  % send '1' to arduino for receiving encoders' value
-%     leftEncoderData = fscanf(b,'%d')
-%     rightEncoderData = fscanf(b,'%d')
-%     set(handles.leftEncoderText,'String',num2str(rightEncoderData));
-%     set(handles.rightEncoderText,'String',num2str(leftEncoderData));
-%     pause(0.5);    % 0.01s = 10ms
 end
-
 fclose(b);
 delete(b);
 
