@@ -183,7 +183,7 @@ void setup()
         //wrVal = 0.8;
         //Serial.println("Line trajectory setting is completed");
       } else if (startMode == 2) {
-        /* Circle trajectory settings */
+        /* Circle of radius 25cm trajectory settings */
         //qc.x = 0.0;
         //qc.y = 0.0;
         qc.x = -0.25;
@@ -194,6 +194,19 @@ void setup()
         qr.z = PI / 2;
         vrVal = 0.2;
         wrVal = 0.8;
+        //Serial.println("Circle trajectory setting is completed");
+      } else if (startMode == 3) {
+        /* Circle of radius 50cm trajectory settings */
+        //qc.x = 0.0;
+        //qc.y = 0.0;
+        qc.x = -0.50;
+        qc.y = -0.11;
+        qc.z = PI / 2;
+        qr.x = 0.0;
+        qr.y = 0.0;
+        qr.z = PI / 2;
+        vrVal = 0.2;
+        wrVal = 0.4;
         //Serial.println("Circle trajectory setting is completed");
       } else if (startMode == 'S') {
 

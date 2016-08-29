@@ -22,7 +22,7 @@ function varargout = EncoderGyroAcquisitionViaBt(varargin)
 
 % Edit the above text to modify the response to help EncoderGyroAcquisitionViaBt
 
-% Last Modified by GUIDE v2.5 29-Aug-2016 03:09:06
+% Last Modified by GUIDE v2.5 29-Aug-2016 15:10:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -75,7 +75,34 @@ handles.circle_vr = 0.0;
 handles.circle_wr = 0.0;
 
 handles.lineTrajectoryMode = 0;
-handles.circleTrajectoryMode = 0;
+handles.circle25cmTrajectoryMode = 0;
+handles.circle50cmTrajectoryMode = 0;
+
+
+line_v_r = str2num(get(handles.vrLineText,'String'));
+line_w_r = str2num(get(handles.wrLineText,'String'));
+line_x_r_0 = str2num(get(handles.xrLineText,'String'));
+line_y_r_0 = str2num(get(handles.yrLineText,'String'));
+line_theta_r_0 = str2num(get(handles.thetarLineText,'String'));
+assignin('base','line_v_r',line_v_r);
+assignin('base','line_w_r',line_w_r);
+assignin('base','line_x_r_0',line_x_r_0);
+assignin('base','line_y_r_0',line_y_r_0);
+assignin('base','line_theta_r_0',line_theta_r_0);
+
+circle_v_r = str2num(get(handles.vrCircleText,'String'));
+circle_w_r = str2num(get(handles.wrCircleText,'String'));
+circle_x_r_0 = str2num(get(handles.xrCircleText,'String'));
+circle_y_r_0 = str2num(get(handles.yrCircleText,'String'));
+circle_theta_r_0 = str2num(get(handles.thetarCircleText,'String'));
+handles.circle_v_r = circle_v_r;
+handles.circle_w_r = circle_w_r;
+assignin('base','circle_v_r',circle_v_r);
+assignin('base','circle_w_r',circle_w_r);
+assignin('base','circle_x_r_0',circle_x_r_0);
+assignin('base','circle_y_r_0',circle_y_r_0);
+assignin('base','circle_theta_r_0',circle_theta_r_0);
+    
 
 % Update handles structure
 guidata(hObject, handles);
@@ -102,9 +129,13 @@ function btconnect_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global b line_v_r line_w_r line_x_r_0 line_y_r_0 line_theta_r_0 circle_v_r 
 global circle_w_r circle_x_r_0 circle_y_r_0 circle_theta_r_0
+
+set(handles.btconnect,'Enable','off');
+
 b = Bluetooth('WMR_BT',1);
 % b = Bluetooth('WMR_BT_TEST',1);
 
+% Connect bluetooth installed on WMR
 fopen(b);
 
 % fid = fopen(b);
@@ -115,8 +146,6 @@ fopen(b);
 
 set(handles.btstatus,'String','Bluetooth3 is connected!!!');
 
-set(handles.lineTrajectoryBtn,'Enable','on');
-set(handles.circleTrajectoryBtn,'Enable','on');
 set(handles.btdisconnect,'Enable','on');
 
 % Receiving the all the initialisation information from Arduino Due and
@@ -164,9 +193,10 @@ set(handles.btdisconnect,'Enable','on');
 handles = guidata(hObject);
 
 lineTrajectoryMode = handles.lineTrajectoryMode;
-circleTrajectoryMode = handles.circleTrajectoryMode;
+circle25cmTrajectoryMode = handles.circle25cmTrajectoryMode;
+circle50cmTrajectoryMode = handles.circle50cmTrajectoryMode;
 
-if lineTrajectoryMode == 1 && circleTrajectoryMode == 0
+if lineTrajectoryMode == 1 && circle25cmTrajectoryMode == 0 && circle50cmTrajectoryMode == 0
 %     Line trajectory
     fprintf(b, '%c', lineTrajectoryMode);   % Send line trajectory command to WMR
     
@@ -181,15 +211,34 @@ if lineTrajectoryMode == 1 && circleTrajectoryMode == 0
     assignin('base','line_y_r_0',line_y_r_0);
     assignin('base','line_theta_r_0',line_theta_r_0);
     
-elseif circleTrajectoryMode == 2 && lineTrajectoryMode == 0
-%     Circle trajectory
-    fprintf(b, '%c', circleTrajectoryMode); % Send circle trajectory command to WMR
+elseif circle25cmTrajectoryMode == 2 && lineTrajectoryMode == 0 && circle50cmTrajectoryMode == 0
+%     Circle of radius 25cm trajectory
+    fprintf(b, '%c', circle25cmTrajectoryMode); % Send circle trajectory command to WMR
 
     circle_v_r = str2num(get(handles.vrCircleText,'String'));
     circle_w_r = str2num(get(handles.wrCircleText,'String'));
     circle_x_r_0 = str2num(get(handles.xrCircleText,'String'));
     circle_y_r_0 = str2num(get(handles.yrCircleText,'String'));
     circle_theta_r_0 = str2num(get(handles.thetarCircleText,'String'));
+    handles.circle_v_r = circle_v_r;
+    handles.circle_w_r = circle_w_r;
+    assignin('base','circle_v_r',circle_v_r);
+    assignin('base','circle_w_r',circle_w_r);
+    assignin('base','circle_x_r_0',circle_x_r_0);
+    assignin('base','circle_y_r_0',circle_y_r_0);
+    assignin('base','circle_theta_r_0',circle_theta_r_0);
+
+elseif circle50cmTrajectoryMode == 3 && lineTrajectoryMode == 0 && circle25cmTrajectoryMode == 0
+%     Circle of radius 50cm trajectory
+    fprintf(b, '%c', circle50cmTrajectoryMode); % Send circle trajectory command to WMR
+
+    circle_v_r = str2num(get(handles.vrCircleText,'String'));
+    circle_w_r = str2num(get(handles.wrCircleText,'String'));
+    circle_x_r_0 = str2num(get(handles.xrCircleText,'String'));
+    circle_y_r_0 = str2num(get(handles.yrCircleText,'String'));
+    circle_theta_r_0 = str2num(get(handles.thetarCircleText,'String'));
+    handles.circle_v_r = circle_v_r;
+    handles.circle_w_r = circle_w_r;
     assignin('base','circle_v_r',circle_v_r);
     assignin('base','circle_w_r',circle_w_r);
     assignin('base','circle_x_r_0',circle_x_r_0);
@@ -198,19 +247,31 @@ elseif circleTrajectoryMode == 2 && lineTrajectoryMode == 0
 
 end
 
+guidata(hObject, handles);
+
 % Send 'S'(start command) to WMR
 fprintf(b, '%c', 'S');
 
 cla(handles.axes1);
 
-if lineTrajectoryMode == 1 && circleTrajectoryMode == 0
+if lineTrajectoryMode == 1 && circle25cmTrajectoryMode == 0 && circle50cmTrajectoryMode == 0
     % line
     tt = 0:0.01:30;
     line_theta_r = line_theta_r_0 + line_w_r * tt;
     line_xr = line_x_r_0 + line_v_r * cos(line_theta_r) .* tt;
     line_yr = line_y_r_0 + line_v_r * sin(line_theta_r) .* tt;
     plot(line_xr,line_yr,'r','LineWidth',4);
-elseif circleTrajectoryMode == 2 && lineTrajectoryMode == 0
+elseif circle25cmTrajectoryMode == 2 && lineTrajectoryMode == 0 && circle50cmTrajectoryMode == 0
+    % circle
+    tt = 0:0.01:60;
+    circle_x_r_tmp = circle_x_r_0 - circle_v_r/circle_w_r * sin(circle_theta_r_0);
+    circle_y_r_tmp = circle_y_r_0 + circle_v_r/circle_w_r * cos(circle_theta_r_0);
+    
+    circle_theta_r = circle_theta_r_0 + circle_w_r * tt;
+    circle_xr = circle_x_r_tmp + circle_v_r/circle_w_r * sin(circle_theta_r);
+    circle_yr = circle_y_r_tmp - circle_v_r/circle_w_r * cos(circle_theta_r);
+    plot(circle_xr,circle_yr,'r','LineWidth',4);
+elseif circle50cmTrajectoryMode == 3 && lineTrajectoryMode == 0 && circle25cmTrajectoryMode == 0
     % circle
     tt = 0:0.01:60;
     circle_x_r_tmp = circle_x_r_0 - circle_v_r/circle_w_r * sin(circle_theta_r_0);
@@ -234,19 +295,28 @@ while (i < len(2))
     xc(i) = fscanf(b,'%f');
     yc(i) = fscanf(b,'%f');
     if mod(i,20)==0
-        plot(xc,yc,'b--','LineWidth',2);
+        plot(xc,yc,'b*');
+%         plot(xc,yc,'b*','LineWidth',2);
 
-        if lineTrajectoryMode == 1 && circleTrajectoryMode == 0
-            axis([-1 8 -1 8]);
-        elseif circleTrajectoryMode == 2 && lineTrajectoryMode == 0
-            axis([-0.6 0.2 -0.3 0.3]);
+        if lineTrajectoryMode == 1 && circle25cmTrajectoryMode == 0 && circle50cmTrajectoryMode == 0
+            axis([-0.5 4 -1 4]);
+        elseif circle25cmTrajectoryMode == 2 && lineTrajectoryMode == 0 && circle50cmTrajectoryMode == 0
+%             2*circle_v_r/circle_w_r = diameter of circle
+            axis([-2*circle_v_r/circle_w_r-0.2 circle_x_r_0+0.2 circle_y_r_0-circle_v_r/circle_w_r-0.3 circle_y_r_0+circle_v_r/circle_w_r+0.2]);
+        elseif circle50cmTrajectoryMode == 3 && circle25cmTrajectoryMode == 0 && lineTrajectoryMode == 0
+%             2*circle_v_r/circle_w_r = diameter of circle
+            axis([-2*circle_v_r/circle_w_r-0.2 circle_x_r_0+0.2 circle_y_r_0-circle_v_r/circle_w_r-0.3 circle_y_r_0+circle_v_r/circle_w_r+0.2]);
         end
         drawnow;
     end
 end
 
-fclose(b);
-delete(b);
+% fclose(b);
+% delete(b);
+
+set(handles.lineTrajectoryBtn,'Enable','on');
+set(handles.circle25cmTrajectoryBtn,'Enable','on');
+set(handles.circle50cmTrajectoryBtn,'Enable','on');
 
 % 
 % pause(2);
@@ -277,9 +347,15 @@ function btdisconnect_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global b;
 set(handles.btstatus,'String','Bluetooth is disconnected!!!');
+set(handles.btconnect,'Enable','on');
+set(handles.lineTrajectoryBtn,'Enable','on');
+set(handles.circle25cmTrajectoryBtn,'Enable','on');
+set(handles.circle50cmTrajectoryBtn,'Enable','on');
 fclose(b);
 delete(b);
 clear all;
+clc;
+
 
 % --- Executes on button press in readEncoderVals.
 function readEncoderVals_Callback(hObject, eventdata, handles)
@@ -613,27 +689,41 @@ function lineTrajectoryBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 handles = guidata(hObject);
-set(handles.circleTrajectoryBtn,'Enable','off');
+set(handles.circle25cmTrajectoryBtn,'Enable','off');
+set(handles.circle50cmTrajectoryBtn,'Enable','off');
 set(handles.btconnect,'Enable','on');
 
 handles.lineTrajectoryMode = 1;
-handles.circleTrajectoryMode = 0;
+handles.circle25cmTrajectoryMode = 0;
+handles.circle50cmTrajectoryMode = 0;
 guidata(hObject, handles);
 
 
-% --- Executes on button press in circleTrajectoryBtn.
-function circleTrajectoryBtn_Callback(hObject, eventdata, handles)
-% hObject    handle to circleTrajectoryBtn (see GCBO)
+% --- Executes on button press in circle25cmTrajectoryBtn.
+function circle25cmTrajectoryBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to circle25cmTrajectoryBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+global circle_v_r circle_w_r
 handles = guidata(hObject);
-set(handles.lineTrajectoryBtn,'Enable','off');
-set(handles.btconnect,'Enable','on');
 
-handles.circleTrajectoryMode = 2;
-handles.lineTrajectoryMode = 0;
-guidata(hObject, handles);
+circle_v_r = str2num(get(handles.vrCircleText,'String'));
+circle_w_r = str2num(get(handles.wrCircleText,'String'));
+assignin('base','circle_v_r',circle_v_r);
+assignin('base','circle_w_r',circle_w_r);
+
+if (circle_v_r == 0.2) && (circle_w_r == 0.8)
+    set(handles.lineTrajectoryBtn,'Enable','off');
+    set(handles.circle50cmTrajectoryBtn,'Enable','off');
+    set(handles.btconnect,'Enable','on');
+
+    handles.lineTrajectoryMode = 0;
+    handles.circle25cmTrajectoryMode = 2;
+    handles.circle50cmTrajectoryMode = 0;
+    guidata(hObject, handles);    
+else
+    uiwait(msgbox('Please setup the v_r and w_r to 0.2 and 0.8 respectively','Setup','Modal'));
+end
 
 
 % --- Executes on button press in pushbutton16.
@@ -824,4 +914,43 @@ function xcCircleText_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in circle50cmTrajectoryBtn.
+function circle50cmTrajectoryBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to circle50cmTrajectoryBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global circle_v_r circle_w_r
+
+handles = guidata(hObject);
+% v_r = handles.circle_v_r
+% w_r = handles.circle_w_r
+% handles.circle_v_r
+% handles.circle_w_r
+% v_r = evalin('base','circle_v_r');
+% w_r = evalin('base','circle_w_r');
+
+circle_v_r = str2num(get(handles.vrCircleText,'String'));
+circle_w_r = str2num(get(handles.wrCircleText,'String'));
+assignin('base','circle_v_r',circle_v_r);
+assignin('base','circle_w_r',circle_w_r);
+
+if (circle_v_r == 0.2) && (circle_w_r == 0.4)
+    set(handles.lineTrajectoryBtn,'Enable','off');
+    set(handles.circle25cmTrajectoryBtn,'Enable','off');
+    set(handles.btconnect,'Enable','on');
+
+    handles.lineTrajectoryMode = 0;
+    handles.circle25cmTrajectoryMode = 0;
+    handles.circle50cmTrajectoryMode = 3;
+    guidata(hObject, handles);    
+else
+    h = msgbox('Please setup the v_r and w_r to 0.2 and 0.4 respectively','Setup','Modal');
+%     set(h, 'position', [350 400 400 50]); %makes box bigger
+%     ah = get( h, 'CurrentAxes' );
+%     ch = get( ah, 'Children' );
+%     set( ch, 'FontSize', 10 );
+    uiwait(h);
 end
