@@ -6,10 +6,17 @@ void RefCal() {
 }
 
 void WMRParaIni() {
+#if 1  
   eta[0] = 1;
-  eta[1] = 2;
+  eta[1] = 4;   // maximum eta(2) value is 5, otherwise the car will run uncontrolled
   eps[0] = 0.1;
   eps[1] = 0.5;
+#else  
+  //eta[0] = 0.25;
+  //eta[1] = 2;
+  //eps[0] = 0.1;
+  //eps[1] = 0.5;
+#endif  
 }
 
 float eR = 0;
