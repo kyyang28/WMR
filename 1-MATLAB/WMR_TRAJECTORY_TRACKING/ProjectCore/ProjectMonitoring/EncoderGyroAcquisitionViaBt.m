@@ -5,7 +5,7 @@ function varargout = EncoderGyroAcquisitionViaBt(varargin)
 %
 %      H = ENCODERGYROACQUISITIONVIABT returns the handle to a new ENCODERGYROACQUISITIONVIABT or the handle to
 %      the existing singleton*.
-%
+%    
 %      ENCODERGYROACQUISITIONVIABT('CALLBACK',hObject,eventData,handles,...) calls the local
 %      function named CALLBACK in ENCODERGYROACQUISITIONVIABT.M with the given input arguments.
 %
@@ -168,7 +168,7 @@ circleTrajectoryMode = handles.circleTrajectoryMode;
 
 if lineTrajectoryMode == 1 && circleTrajectoryMode == 0
 %     Line trajectory
-    fprintf(b, '%c', lineTrajectoryMode);
+    fprintf(b, '%c', lineTrajectoryMode);   % Send line trajectory command to WMR
     
     line_v_r = str2num(get(handles.vrLineText,'String'));
     line_w_r = str2num(get(handles.wrLineText,'String'));
@@ -183,7 +183,7 @@ if lineTrajectoryMode == 1 && circleTrajectoryMode == 0
     
 elseif circleTrajectoryMode == 2 && lineTrajectoryMode == 0
 %     Circle trajectory
-    fprintf(b, '%c', circleTrajectoryMode);
+    fprintf(b, '%c', circleTrajectoryMode); % Send circle trajectory command to WMR
 
     circle_v_r = str2num(get(handles.vrCircleText,'String'));
     circle_w_r = str2num(get(handles.wrCircleText,'String'));
