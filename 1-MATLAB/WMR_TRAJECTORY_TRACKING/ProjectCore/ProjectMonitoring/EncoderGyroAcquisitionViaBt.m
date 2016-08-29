@@ -22,7 +22,7 @@ function varargout = EncoderGyroAcquisitionViaBt(varargin)
 
 % Edit the above text to modify the response to help EncoderGyroAcquisitionViaBt
 
-% Last Modified by GUIDE v2.5 27-Aug-2016 16:26:22
+% Last Modified by GUIDE v2.5 29-Aug-2016 03:09:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -51,17 +51,31 @@ function EncoderGyroAcquisitionViaBt_OpeningFcn(hObject, eventdata, handles, var
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to EncoderGyroAcquisitionViaBt (see VARARGIN)
+clc;
 
 % Choose default command line output for EncoderGyroAcquisitionViaBt
 handles.output = hObject;
-handles.xc = 0.0;
-handles.yc = 0.0;
-handles.thetac = 0.0;
-handles.xr = 0.0;
-handles.yr = 0.0;
-handles.thetar = 0.0;
-handles.vr = 0.0;
-handles.wr = 0.0;
+
+handles.line_xc = 0.0;
+handles.line_yc = 0.0;
+handles.line_thetac = 0.0;
+handles.line_xr = 0.0;
+handles.line_yr = 0.0;
+handles.line_thetar = 0.0;
+handles.line_vr = 0.0;
+handles.line_wr = 0.0;
+
+handles.circle_xc = 0.0;
+handles.circle_yc = 0.0;
+handles.circle_thetac = 0.0;
+handles.circle_xr = 0.0;
+handles.circle_yr = 0.0;
+handles.circle_thetar = 0.0;
+handles.circle_vr = 0.0;
+handles.circle_wr = 0.0;
+
+handles.lineTrajectoryMode = 0;
+handles.circleTrajectoryMode = 0;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -86,7 +100,8 @@ function btconnect_Callback(hObject, eventdata, handles)
 % hObject    handle to btconnect (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global b v_r w_r x_r_0 y_r_0 theta_r_0
+global b line_v_r line_w_r line_x_r_0 line_y_r_0 line_theta_r_0 circle_v_r 
+global circle_w_r circle_x_r_0 circle_y_r_0 circle_theta_r_0
 b = Bluetooth('WMR_BT',1);
 % b = Bluetooth('WMR_BT_TEST',1);
 
@@ -100,6 +115,9 @@ fopen(b);
 
 set(handles.btstatus,'String','Bluetooth3 is connected!!!');
 
+set(handles.lineTrajectoryBtn,'Enable','on');
+set(handles.circleTrajectoryBtn,'Enable','on');
+set(handles.btdisconnect,'Enable','on');
 
 % Receiving the all the initialisation information from Arduino Due and
 % display on the listbox GUI component
@@ -134,16 +152,6 @@ set(handles.btstatus,'String','Bluetooth3 is connected!!!');
 % newStr7 = strvcat(newStr6, info8);
 % set(handles.initInfo,'String',newStr7);
 
-v_r = str2num(get(handles.vrText,'String'))
-w_r = str2num(get(handles.wrText,'String'))
-x_r_0 = str2num(get(handles.xrText,'String'))
-y_r_0 = str2num(get(handles.yrText,'String'))
-theta_r_0 = str2num(get(handles.thetarText,'String'))
-assignin('base','v_r',v_r);
-assignin('base','w_r',w_r);
-assignin('base','x_r_0',x_r_0);
-assignin('base','y_r_0',y_r_0);
-assignin('base','theta_r_0',theta_r_0);
 
 % fprintf(b, '%d', v_r);
 % fprintf(b, w_r);
@@ -152,48 +160,91 @@ assignin('base','theta_r_0',theta_r_0);
 % fprintf(b, theta_r_0);
 
 % Synchronising character 'S' with Arduino Due board to start the program
+
+handles = guidata(hObject);
+
+lineTrajectoryMode = handles.lineTrajectoryMode;
+circleTrajectoryMode = handles.circleTrajectoryMode;
+
+if lineTrajectoryMode == 1 && circleTrajectoryMode == 0
+%     Line trajectory
+    fprintf(b, '%c', lineTrajectoryMode);
+    
+    line_v_r = str2num(get(handles.vrLineText,'String'));
+    line_w_r = str2num(get(handles.wrLineText,'String'));
+    line_x_r_0 = str2num(get(handles.xrLineText,'String'));
+    line_y_r_0 = str2num(get(handles.yrLineText,'String'));
+    line_theta_r_0 = str2num(get(handles.thetarLineText,'String'));
+    assignin('base','line_v_r',line_v_r);
+    assignin('base','line_w_r',line_w_r);
+    assignin('base','line_x_r_0',line_x_r_0);
+    assignin('base','line_y_r_0',line_y_r_0);
+    assignin('base','line_theta_r_0',line_theta_r_0);
+    
+elseif circleTrajectoryMode == 2 && lineTrajectoryMode == 0
+%     Circle trajectory
+    fprintf(b, '%c', circleTrajectoryMode);
+
+    circle_v_r = str2num(get(handles.vrCircleText,'String'));
+    circle_w_r = str2num(get(handles.wrCircleText,'String'));
+    circle_x_r_0 = str2num(get(handles.xrCircleText,'String'));
+    circle_y_r_0 = str2num(get(handles.yrCircleText,'String'));
+    circle_theta_r_0 = str2num(get(handles.thetarCircleText,'String'));
+    assignin('base','circle_v_r',circle_v_r);
+    assignin('base','circle_w_r',circle_w_r);
+    assignin('base','circle_x_r_0',circle_x_r_0);
+    assignin('base','circle_y_r_0',circle_y_r_0);
+    assignin('base','circle_theta_r_0',circle_theta_r_0);
+
+end
+
+% Send 'S'(start command) to WMR
 fprintf(b, '%c', 'S');
 
-tt = 0:0.01:60;
-% tt = 0:0.01:5;
+cla(handles.axes1);
 
-% % circle
-x_r_tmp = x_r_0 - v_r/w_r*sin(theta_r_0);
-y_r_tmp = y_r_0 + v_r/w_r*cos(theta_r_0);
+if lineTrajectoryMode == 1 && circleTrajectoryMode == 0
+    % line
+    tt = 0:0.01:30;
+    line_theta_r = line_theta_r_0 + line_w_r * tt;
+    line_xr = line_x_r_0 + line_v_r * cos(line_theta_r) .* tt;
+    line_yr = line_y_r_0 + line_v_r * sin(line_theta_r) .* tt;
+    plot(line_xr,line_yr,'r','LineWidth',4);
+elseif circleTrajectoryMode == 2 && lineTrajectoryMode == 0
+    % circle
+    tt = 0:0.01:60;
+    circle_x_r_tmp = circle_x_r_0 - circle_v_r/circle_w_r * sin(circle_theta_r_0);
+    circle_y_r_tmp = circle_y_r_0 + circle_v_r/circle_w_r * cos(circle_theta_r_0);
+    
+    circle_theta_r = circle_theta_r_0 + circle_w_r * tt;
+    circle_xr = circle_x_r_tmp + circle_v_r/circle_w_r * sin(circle_theta_r);
+    circle_yr = circle_y_r_tmp - circle_v_r/circle_w_r * cos(circle_theta_r);
+    plot(circle_xr,circle_yr,'r','LineWidth',4);
+end
 
-theta_r = theta_r_0 + w_r * tt;
-xr = x_r_tmp + v_r/w_r * sin(theta_r);
-yr = y_r_tmp - v_r/w_r * cos(theta_r);
-
-% % line
-% theta_r = theta_r_0 + w_r * tt;
-% xr = x_r_0 + v_r * cos(theta_r) .* tt;
-% yr = y_r_0 + v_r * sin(theta_r) .* tt;
-
-plot(xr,yr,'r','LineWidth',2);
 hold on;
 
 i = 0;
 len = size(tt);
 
-% x_c_0 = -0.2;
-% y_c_0 = -0.11;
-% theta_c_0 = 0.6;
-% 
-% xc(1) = x_c_0;
-% yc(1) = y_c_0;
-
 while (i < len(2))
     i = i + 1;
-        xc(i) = fscanf(b,'%f');
-        yc(i) = fscanf(b,'%f');
-        if mod(i,20)==0
-            plot(xc,yc,'b--','LineWidth',2);
-            axis([-2 1 -1.5 1.5]);
-            drawnow;
-        end
+    
+%     Receiving real-time current posture data from WMR
+    xc(i) = fscanf(b,'%f');
+    yc(i) = fscanf(b,'%f');
+    if mod(i,20)==0
+        plot(xc,yc,'b--','LineWidth',2);
 
+        if lineTrajectoryMode == 1 && circleTrajectoryMode == 0
+            axis([-1 8 -1 8]);
+        elseif circleTrajectoryMode == 2 && lineTrajectoryMode == 0
+            axis([-0.6 0.2 -0.3 0.3]);
+        end
+        drawnow;
+    end
 end
+
 fclose(b);
 delete(b);
 
@@ -217,6 +268,7 @@ delete(b);
 %     set(handles.gyroText,'String',num2str(gyroData));
 %     pause(0.5);
 % end
+
 
 % --- Executes on button press in btdisconnect.
 function btdisconnect_Callback(hObject, eventdata, handles)
@@ -350,18 +402,18 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 movegui('center');
 
 
-function xcText_Callback(hObject, eventdata, handles)
-% hObject    handle to xcText (see GCBO)
+function xcLineText_Callback(hObject, eventdata, handles)
+% hObject    handle to xcLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of xcText as text
-%        str2double(get(hObject,'String')) returns contents of xcText as a double
+% Hints: get(hObject,'String') returns contents of xcLineText as text
+%        str2double(get(hObject,'String')) returns contents of xcLineText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function xcText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to xcText (see GCBO)
+function xcLineText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to xcLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -373,18 +425,18 @@ end
 
 
 
-function ycText_Callback(hObject, eventdata, handles)
-% hObject    handle to ycText (see GCBO)
+function ycLineText_Callback(hObject, eventdata, handles)
+% hObject    handle to ycLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of ycText as text
-%        str2double(get(hObject,'String')) returns contents of ycText as a double
+% Hints: get(hObject,'String') returns contents of ycLineText as text
+%        str2double(get(hObject,'String')) returns contents of ycLineText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function ycText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to ycText (see GCBO)
+function ycLineText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to ycLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -396,18 +448,18 @@ end
 
 
 
-function thetacText_Callback(hObject, eventdata, handles)
-% hObject    handle to thetacText (see GCBO)
+function thetacLineText_Callback(hObject, eventdata, handles)
+% hObject    handle to thetacLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of thetacText as text
-%        str2double(get(hObject,'String')) returns contents of thetacText as a double
+% Hints: get(hObject,'String') returns contents of thetacLineText as text
+%        str2double(get(hObject,'String')) returns contents of thetacLineText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function thetacText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to thetacText (see GCBO)
+function thetacLineText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to thetacLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -419,18 +471,18 @@ end
 
 
 
-function xrText_Callback(hObject, eventdata, handles)
-% hObject    handle to xrText (see GCBO)
+function xrLineText_Callback(hObject, eventdata, handles)
+% hObject    handle to xrLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of xrText as text
-%        str2double(get(hObject,'String')) returns contents of xrText as a double
+% Hints: get(hObject,'String') returns contents of xrLineText as text
+%        str2double(get(hObject,'String')) returns contents of xrLineText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function xrText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to xrText (see GCBO)
+function xrLineText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to xrLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -442,18 +494,18 @@ end
 
 
 
-function yrText_Callback(hObject, eventdata, handles)
-% hObject    handle to yrText (see GCBO)
+function yrLineText_Callback(hObject, eventdata, handles)
+% hObject    handle to yrLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of yrText as text
-%        str2double(get(hObject,'String')) returns contents of yrText as a double
+% Hints: get(hObject,'String') returns contents of yrLineText as text
+%        str2double(get(hObject,'String')) returns contents of yrLineText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function yrText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to yrText (see GCBO)
+function yrLineText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to yrLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -465,18 +517,18 @@ end
 
 
 
-function thetarText_Callback(hObject, eventdata, handles)
-% hObject    handle to thetarText (see GCBO)
+function thetarLineText_Callback(hObject, eventdata, handles)
+% hObject    handle to thetarLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of thetarText as text
-%        str2double(get(hObject,'String')) returns contents of thetarText as a double
+% Hints: get(hObject,'String') returns contents of thetarLineText as text
+%        str2double(get(hObject,'String')) returns contents of thetarLineText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function thetarText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to thetarText (see GCBO)
+function thetarLineText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to thetarLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -488,18 +540,18 @@ end
 
 
 
-function vrText_Callback(hObject, eventdata, handles)
-% hObject    handle to vrText (see GCBO)
+function vrLineText_Callback(hObject, eventdata, handles)
+% hObject    handle to vrLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of vrText as text
-%        str2double(get(hObject,'String')) returns contents of vrText as a double
+% Hints: get(hObject,'String') returns contents of vrLineText as text
+%        str2double(get(hObject,'String')) returns contents of vrLineText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function vrText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to vrText (see GCBO)
+function vrLineText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to vrLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -511,18 +563,18 @@ end
 
 
 
-function wrText_Callback(hObject, eventdata, handles)
-% hObject    handle to wrText (see GCBO)
+function wrLineText_Callback(hObject, eventdata, handles)
+% hObject    handle to wrLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of wrText as text
-%        str2double(get(hObject,'String')) returns contents of wrText as a double
+% Hints: get(hObject,'String') returns contents of wrLineText as text
+%        str2double(get(hObject,'String')) returns contents of wrLineText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function wrText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to wrText (see GCBO)
+function wrLineText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to wrLineText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -548,7 +600,228 @@ function pushbutton12_Callback(hObject, eventdata, handles)
 
 
 % --- Executes on button press in close.
-function pushbutton13_Callback(hObject, eventdata, handles)
+function pushbutton13_Callback(hObject, eventdata, ~)
 % hObject    handle to close (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in lineTrajectoryBtn.
+function lineTrajectoryBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to lineTrajectoryBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles = guidata(hObject);
+set(handles.circleTrajectoryBtn,'Enable','off');
+set(handles.btconnect,'Enable','on');
+
+handles.lineTrajectoryMode = 1;
+handles.circleTrajectoryMode = 0;
+guidata(hObject, handles);
+
+
+% --- Executes on button press in circleTrajectoryBtn.
+function circleTrajectoryBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to circleTrajectoryBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles = guidata(hObject);
+set(handles.lineTrajectoryBtn,'Enable','off');
+set(handles.btconnect,'Enable','on');
+
+handles.circleTrajectoryMode = 2;
+handles.lineTrajectoryMode = 0;
+guidata(hObject, handles);
+
+
+% --- Executes on button press in pushbutton16.
+function pushbutton16_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton16 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function wrCircleText_Callback(hObject, eventdata, handles)
+% hObject    handle to wrCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of wrCircleText as text
+%        str2double(get(hObject,'String')) returns contents of wrCircleText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function wrCircleText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to wrCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function vrCircleText_Callback(hObject, eventdata, handles)
+% hObject    handle to vrCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of vrCircleText as text
+%        str2double(get(hObject,'String')) returns contents of vrCircleText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function vrCircleText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to vrCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function thetarCircleText_Callback(hObject, eventdata, handles)
+% hObject    handle to thetarCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of thetarCircleText as text
+%        str2double(get(hObject,'String')) returns contents of thetarCircleText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function thetarCircleText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to thetarCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function yrCircleText_Callback(hObject, eventdata, handles)
+% hObject    handle to yrCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of yrCircleText as text
+%        str2double(get(hObject,'String')) returns contents of yrCircleText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function yrCircleText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to yrCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function xrCircleText_Callback(hObject, eventdata, handles)
+% hObject    handle to xrCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of xrCircleText as text
+%        str2double(get(hObject,'String')) returns contents of xrCircleText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function xrCircleText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to xrCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function thetacCircleText_Callback(hObject, eventdata, handles)
+% hObject    handle to thetacCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of thetacCircleText as text
+%        str2double(get(hObject,'String')) returns contents of thetacCircleText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function thetacCircleText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to thetacCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function ycCircleText_Callback(hObject, eventdata, handles)
+% hObject    handle to ycCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of ycCircleText as text
+%        str2double(get(hObject,'String')) returns contents of ycCircleText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function ycCircleText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to ycCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function xcCircleText_Callback(hObject, eventdata, handles)
+% hObject    handle to xcCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of xcCircleText as text
+%        str2double(get(hObject,'String')) returns contents of xcCircleText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function xcCircleText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to xcCircleText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

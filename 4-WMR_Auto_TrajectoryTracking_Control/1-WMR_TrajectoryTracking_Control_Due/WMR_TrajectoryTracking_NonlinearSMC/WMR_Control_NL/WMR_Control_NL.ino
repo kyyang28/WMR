@@ -1,9 +1,9 @@
 
 #include "I2Cdev.h"
 #include "MPU6050.h"
-//#include "VectorQuaternion.h"
 
 #define BT_DEBUG    1
+#define UART_DEBUG  0
 
 #define KCONSTANT 19.2/200/PI
 #define PWM_FREQ          20000
@@ -93,13 +93,6 @@ float recvData = 0;
 
 /* Algorithm Variables */
 
-//vectorJMu<float> qc(-0.1, -0.1, 0.8);
-//vectorJMu<float> qc(-.1, -.1, 0.3491);    // 20 degree = 0.3491
-//vectorJMu<float> qc(-.1, -.1, 1.4071);  // pi/2 = 1.5708
-//vectorJMu<float> qc(-.1, -.1, 0.6);
-//vectorJMu<float> qr(0, 0, 0);
-//vectorJMu<float> xe;
-//vectorJMu<float> dxe;
 float vr;
 float wr;
 float tt = 0.01;    // 0.01s = 10ms
@@ -130,7 +123,7 @@ void setup()
   Serial.begin(115200);
 
   WMRParaIni();
-  
+
   /* WARNING: When using HC-05 BLUETOOTH, make sure to employ serial 9600 baudrate, not 38400 */
   /* Bluetooth 1 and 2 serial initialisation */
   Serial2.begin(9600);
@@ -153,76 +146,79 @@ void setup()
   //digitalWrite(RightMotorINA, HIGH);
   //digitalWrite(RightMotorINB, LOW);
 
-#if 0
-  qc.x = 0.0;
-  qc.y = 0.0;
-  qc.z = 1.2;
-  qr.x = 0.0;
-  qr.y = 0.0;
-  qr.z = 0.4;
+#if 1
+
 #else
-  qc.x = -0.5;
-  qc.y = -0.11;
-  qc.z = PI/2;
-  qr.x = 0.0;
-  qr.y = 0.0;
-  qr.z = PI/2;
-  //qr.z = 0.0;
+
 #endif
 
-  vrVal = 0.2;
-  //wrVal = 0.0;
-  wrVal = 0.4;
+  /* The radius of circle trajectory R = vrVal / wrVal */
 
 #if BT_DEBUG
 
-#if 0
+  /*
+      WARNING: Wait for BT to connect WMR in order to start the program
+      Synchronising Arduino with MATLAB via Bluetooth3(BT3)
+      Sending initialisation information to listbox of MATLAB GUI
+  */
   while (1) {
-      if (Serial3.available() > 0) {
+    if (Serial3.available() > 0) {
 
-        recvData = Serial3.read();
-        
-        /* Receving v_r value */
-        vrVal = recvData;
+      startMode = Serial3.read();
 
+      /* Sychronisation character 'S' */
+      if (startMode == 1) {
+        /* Line trajectory settings */
+        //qc.x = -0.3;
+        //qc.y = -0.3;
+        qc.x = -0.2;
+        qc.y = -0.2;
+        qc.z = 1.5708;  // 90 degree
+        qr.x = 0.0;
+        qr.y = 0.0;
+        //qr.z = 0.0;
+        qr.z = 0.7854;  // 45 degree
+        vrVal = 0.2;
+        wrVal = 0.0;
+        //wrVal = 0.8;
+        //Serial.println("Line trajectory setting is completed");
+      } else if (startMode == 2) {
+        /* Circle trajectory settings */
+        //qc.x = 0.0;
+        //qc.y = 0.0;
+        qc.x = -0.25;
+        qc.y = -0.11;
+        qc.z = PI / 2;
+        qr.x = 0.0;
+        qr.y = 0.0;
+        qr.z = PI / 2;
+        vrVal = 0.2;
+        wrVal = 0.8;
+        //Serial.println("Circle trajectory setting is completed");
+      } else if (startMode == 'S') {
+
+        /* Config MPU6050 */
+        ConfigMPU6050();
+
+        /* LED PWM setup */
+        MOTOR_PWM_Setup();
+
+        /* Encoder setup */
+        EncoderInit();
+
+        /* Timer Init */
+        TimerInit();
+
+        /* Start the timer */
+        TimerStart();
+
+        //Serial.println("Initialisations are completed");
+
+        /* Initialise once */
         break;
       }
-  }
-#endif
-  
-    /*
-        WARNING: Wait for BT to connect WMR in order to start the program
-        Synchronising Arduino with MATLAB via Bluetooth3(BT3)
-        Sending initialisation information to listbox of MATLAB GUI
-    */
-    while (1) {
-      if (Serial3.available() > 0) {
-
-        startMode = Serial3.read();
-
-        /* Sychronisation character 'S' */
-        if (startMode == 'S') {
-
-          /* Config MPU6050 */
-          ConfigMPU6050();
-
-          /* LED PWM setup */
-          MOTOR_PWM_Setup();
-
-          /* Encoder setup */
-          EncoderInit();
-
-          /* Timer Init */
-          TimerInit();
-
-          /* Start the timer */
-          TimerStart();
-
-          /* Initialise once */
-          break;
-        }
-      }
     }
+  }
 #else
   /* Config MPU6050 */
   ConfigMPU6050();
@@ -273,10 +269,10 @@ void loop()
     TrajectoryTrackingAlgo();
     //Serial.println(float(gz.num)*gRes);
     /*Serial.print(qc.x);
-    Serial.print('\t');
-    Serial.print(qc.y);
-    Serial.print('\t');
-    Serial.println(qc.z);*/
+      Serial.print('\t');
+      Serial.print(qc.y);
+      Serial.print('\t');
+      Serial.println(qc.z);*/
 
 #if 0
     Serial3.println(leftMotorEncoderCnt);
@@ -305,20 +301,6 @@ void loop()
     Serial.print('\n');
 #endif
   }
-
-#if 0
-  if (TimerFlag) {
-    TimerFlag = false;
-    //motorTest();
-    TrajectoryTrackingAlgo();
-    /*Serial.print(leftMotorEncoderCnt);
-      Serial.print('\t');
-      Serial.print(rightMotorEncoderCnt);
-      Serial.print('\t');
-      Serial.println(gz.num);*/
-    //Serial.print('\n');
-  }
-#endif
 
 #if 0
   if (Serial3.available() > 0) {
@@ -365,8 +347,8 @@ void calcEncoderRadian()
       32 means for double edges of one channel results in 32 counts per revolution
       of the motor shaft
   */
-  leftEncoderRadian = (float)leftMotorEncoderCnt * 2 * PI / 32;
-  rightEncoderRadian = (float)rightMotorEncoderCnt * 2 * PI / 32;
+  leftEncoderRadian = (float)leftMotorEncoderCnt * 2 * PI / 19.2;
+  rightEncoderRadian = (float)rightMotorEncoderCnt * 2 * PI / 19.2;
 }
 
 void showEncoderCnt()
