@@ -60,16 +60,18 @@ if l_lineTrojectory == 1 && nl_lineTrojectory == 1
     % ycs = x_c_tmp(2,1);
 
     fh1 = plot(fp,xrs_l,yrs_l,'r','XDataSource','xrs_l','YDataSource','yrs_l');
+    fh2 = plot(fp,xrs_nl,yrs_nl,'r','XDataSource','xrs_nl','YDataSource','yrs_nl');
     hold on;
-    fh2 = plot(fp,xcs_nl,ycs_nl,'b-.','XDataSource','xcs_nl','YDataSource','ycs_nl');
+    fh3 = plot(fp,xcs_l,ycs_l,'b-.','XDataSource','xcs_l','YDataSource','ycs_l');
+    fh4 = plot(fp,xcs_nl,ycs_nl,'b-.','XDataSource','xcs_nl','YDataSource','ycs_nl');
     hold off;
     xlabel('x(m)');
     ylabel('y(m)')
     set(gca,'NextPlot','replacechildren');
-    WMR_REF_l = WMR2DModel('q',x_r_l_line(:,1),'size',[0.25 0.2],'color','r');
-    WMR_REF_nl = WMR2DModel('q',x_r_nl_line(:,1),'size',[0.25 0.2],'color','m');
-    WMR_CURR_l = WMR2DModel('q',x_c_l_line(:,1),'size',[0.25 0.2],'color','b');
-    WMR_CURR_nl = WMR2DModel('q',x_c_nl_line(:,1),'size',[0.25 0.2],'color','g');
+    WMR_REF_nl = WMR2DModel('q',x_r_nl_line(:,1),'size',[0.20 0.15],'color','m');
+    WMR_REF_l = WMR2DModel('q',x_r_l_line(:,1),'size',[0.20 0.15],'color','r');
+    WMR_CURR_nl = WMR2DModel('q',x_c_nl_line(:,1),'size',[0.20 0.15],'color','g');
+    WMR_CURR_l = WMR2DModel('q',x_c_l_line(:,1),'size',[0.20 0.15],'color','b');
     % WMR_REF = WMR2DModel('q',x_r_tmp(:,1),'size',[0.25 0.2],'color','r');
     % WMR_CURR = WMR2DModel('q',x_r_tmp(:,1),'size',[0.25 0.2],'color','g');
     WMR_REF_l.initialise(fig_num);
@@ -87,7 +89,7 @@ if l_lineTrojectory == 1 && nl_lineTrojectory == 1
     [h,w,p] = size(F.cdata);
     rect = [0 0 w h];
 
-    for i = 1+10:10:25000
+    for i = 1+10:24:5400
     % for i = 1+10:10:2501
 
         xrs_l = x_r_l_line(1,1:i);
@@ -109,8 +111,8 @@ if l_lineTrojectory == 1 && nl_lineTrojectory == 1
         refreshdata;
 
         WMR_REF_l.mov(x_r_l_line(:,i));
-        WMR_REF_nl.mov(x_r_nl_line(:,i));
         WMR_CURR_l.mov(x_c_l_line(:,i));
+        WMR_REF_nl.mov(x_r_nl_line(:,i));
         WMR_CURR_nl.mov(x_c_nl_line(:,i));
     %     WMR_REF.mov(x_r_tmp(:,i));
     %     WMR_CURR.mov(x_c_tmp(:,i));
@@ -179,7 +181,7 @@ elseif l_circleTrajectory == 1 && nl_circleTrajectory == 1
     [h,w,p] = size(F.cdata);
     rect = [0 0 w h];
 
-    for i = 1+10:10:25000
+    for i = 1+10:24:5400
     % for i = 1+10:10:2501
 
         xrs_l = x_r_l_circle(1,1:i);

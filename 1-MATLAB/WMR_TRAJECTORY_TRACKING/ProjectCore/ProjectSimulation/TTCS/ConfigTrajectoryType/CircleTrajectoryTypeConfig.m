@@ -22,7 +22,7 @@ function varargout = CircleTrajectoryTypeConfig(varargin)
 
 % Edit the above text to modify the response to help CircleTrajectoryTypeConfig
 
-% Last Modified by GUIDE v2.5 21-Aug-2016 04:54:29
+% Last Modified by GUIDE v2.5 30-Aug-2016 00:46:47
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -74,18 +74,18 @@ varargout{1} = handles.output;
 
 
 
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function vrText_Callback(hObject, eventdata, handles)
+% hObject    handle to vrText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+% Hints: get(hObject,'String') returns contents of vrText as text
+%        str2double(get(hObject,'String')) returns contents of vrText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function vrText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to vrText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -97,18 +97,18 @@ end
 
 
 
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function wrText_Callback(hObject, eventdata, handles)
+% hObject    handle to wrText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
+% Hints: get(hObject,'String') returns contents of wrText as text
+%        str2double(get(hObject,'String')) returns contents of wrText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function wrText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to wrText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -131,7 +131,20 @@ function confirmBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to confirmBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global vrVal wrVal
 
+dlgTitle = 'Quit';
+dlgQuestion = 'Do you want to confirm and quit the config window?';
+choice = questdlg(dlgQuestion, dlgTitle, 'Yes', 'No', 'Yes');
+switch choice
+    case 'Yes'
+        vrVal = str2num(get(handles.vrText,'String'));
+        wrVal = str2num(get(handles.wrText,'String'));
+        assignin('base', 'vrVal', vrVal);
+        assignin('base', 'wrVal', wrVal);
+        close;
+    case 'No'
+end
 
 % --- Executes during object creation, after setting all properties.
 function figure1_CreateFcn(hObject, eventdata, handles)

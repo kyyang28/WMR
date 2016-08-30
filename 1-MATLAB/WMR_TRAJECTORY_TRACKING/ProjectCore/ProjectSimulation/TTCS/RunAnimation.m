@@ -52,8 +52,10 @@ hold off;
 xlabel('x(m)');
 ylabel('y(m)')
 set(gca,'NextPlot','replacechildren');
-WMR_REF = WMR2DModel('q',x_r(:,1),'size',[0.25 0.2],'color','r');
-WMR_CURR = WMR2DModel('q',x_c(:,1),'size',[0.25 0.2],'color','g');
+WMR_REF = WMR2DModel('q',x_r(:,1),'size',[0.20 0.15],'color','r');
+WMR_CURR = WMR2DModel('q',x_c(:,1),'size',[0.20 0.15],'color','g');
+% WMR_REF = WMR2DModel('q',x_r(:,1),'size',[0.25 0.2],'color','r');
+% WMR_CURR = WMR2DModel('q',x_c(:,1),'size',[0.25 0.2],'color','g');
 % WMR_REF = WMR2DModel('q',x_r_tmp(:,1),'size',[0.25 0.2],'color','r');
 % WMR_CURR = WMR2DModel('q',x_r_tmp(:,1),'size',[0.25 0.2],'color','g');
 WMR_REF.initialise(fig_num);
@@ -69,8 +71,8 @@ im = frame2im(F);
 [h,w,p] = size(F.cdata);
 rect = [0 0 w h];
 
-for i = 1+10:10:25000
-% for i = 1+10:10:2501
+% for i = 1+10:10:25000
+for i = 1+10:24:5400
         
     xrs = x_r(1,1:i);
     yrs = x_r(2,1:i);

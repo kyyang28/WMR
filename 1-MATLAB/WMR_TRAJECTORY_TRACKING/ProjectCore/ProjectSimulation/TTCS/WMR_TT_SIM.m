@@ -56,7 +56,7 @@ clc;
 % set(handles.trajectoryTrackingResult, 'XLim', [-1,3], 'YLim', [-1,3]);
 global SMCMode LinearSMCModeFlag NonlinearSMCModeFlag
 global linearMode nonlinearMode l_lineTrojectory l_circleTrajectory 
-global nl_lineTrojectory nl_circleTrajectory
+global nl_lineTrojectory nl_circleTrajectory vrVal wrVal
 
 linearMode = 0;
 nonlinearMode = 0;
@@ -64,12 +64,23 @@ l_lineTrojectory = 0;
 l_circleTrajectory = 0;
 nl_lineTrojectory = 0;
 nl_circleTrajectory = 0;
+vrVal = 0.2;
+wrVal = 0.0;
 assignin('base','linearMode',linearMode);
 assignin('base','nonlinearMode',nonlinearMode);
 assignin('base','l_lineTrojectory',l_lineTrojectory);
 assignin('base','l_circleTrajectory',l_circleTrajectory);
 assignin('base','nl_lineTrojectory',nl_lineTrojectory);
 assignin('base','nl_circleTrajectory',nl_circleTrajectory);
+assignin('base','vrVal',vrVal);
+assignin('base','wrVal',wrVal);
+
+mode_tjt = 1;
+inLine = 1;
+inCircle = 0;
+assignin('base','inLine',inLine);
+assignin('base','inCircle',inCircle);
+assignin('base','mode_tjt',mode_tjt);
 
 % Choose default command line output for WMR_TT_SIM
 handles.output = hObject;
@@ -494,11 +505,17 @@ function typePanel_SelectionChangedFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global vrVal wrVal
+global inLine inCircle
 
 trajectoryType = get(handles.typePanel, 'SelectedObject');
 trajectoryTypeSelection = get(trajectoryType,'String');
 
 handles = guidata(hObject);
+
+init_x_c = str2num(get(handles.xcText,'String'));
+init_y_c = str2num(get(handles.ycText,'String'));
+init_x_r = str2num(get(handles.xrText,'String'));
+init_y_r = str2num(get(handles.yrText,'String'));
 
 switch trajectoryTypeSelection
     case 'Line'
@@ -508,10 +525,48 @@ switch trajectoryTypeSelection
         handles.trajectoryType = 0;
         mode_tjt = 0;
         assignin('base','mode_tjt',mode_tjt);
-
+        
+        inLine = 1;
+        inCircle = 0;
+        assignin('base','inLine',inLine);
+        assignin('base','inCircle',inCircle);
+        
+        LineTrajectoryTypeConfig;
+%         vrVal = 0.8;
+%         wrVal = 0.0;
+%         assignin('base','vrVal',vrVal);
+%         assignin('base','wrVal',wrVal);
+        
         % line frame size
-        handles.frameSize = [-1 3 -1 3];       % Line
-        frameSize = [-1 3 -1 3];
+%         handles.frameSize = [-1 3 -1 3];       % Line
+%         frameSize = [-1 3 -1 3];
+        % line frame size
+        if init_x_c < 0
+            xlim_min_line = init_x_c - 0.5;
+            xlim_max_line = abs(init_x_c) + 3;
+        elseif init_x_c > 0
+            xlim_min_line = init_x_c - 2.5;
+            xlim_max_line = init_x_c + 3;
+        else
+            xlim_min_line = init_x_c - 0.5;
+            xlim_max_line = init_x_c + 5;
+        end
+
+        if init_y_c < 0
+            ylim_min_line = init_y_c - 0.5;
+            ylim_max_line = abs(init_y_c) + 3;
+        elseif init_y_c > 0
+            ylim_min_line = init_y_c - 2.5;
+            ylim_max_line = init_y_c + 3;
+        else
+            ylim_min_line = init_y_c - 2;
+            ylim_max_line = init_y_c + 2;
+        end
+        
+%         frameSize = [-1 3 -1 3];
+%         handles.frameSize = [-1 3 -1 3];       % Line
+        frameSize = [xlim_min_line xlim_max_line ylim_min_line ylim_max_line];
+        handles.frameSize = frameSize;       % Line
 
         % save handles.frameSize to workspace
         assignin('base','frameSize',frameSize);
@@ -524,9 +579,42 @@ switch trajectoryTypeSelection
         mode_tjt = 1;
         assignin('base','mode_tjt',mode_tjt);
 
+        inCircle = 1;
+        inLine = 0;
+        assignin('base','inCircle',inCircle);        
+        assignin('base','inLine',inLine);        
+        
+        CircleTrajectoryTypeConfig;
+        
+%         vrVal = 0.8;
+%         wrVal = 0.0;
+%         assignin('base','vrVal',vrVal);
+%         assignin('base','wrVal',wrVal);
+                
         % circle frame size
-        handles.frameSize = [-2 1 -1 2];     % Circle
-        frameSize = [-2 1 -1 2];
+        if init_x_c < 0 && (init_x_r - 2*vrVal/wrVal) >= init_x_c
+            xlim_min_circle = init_x_c - 0.2;
+        elseif init_x_c < 0 && (init_x_r - 2*vrVal/wrVal) < init_x_c
+            xlim_min_circle = -2*vrVal/wrVal - 0.2;
+        end
+%         xlim_min_circle = -2*vrVal/wrVal-0.2;
+%         xlim_max_circle = init_x_c+0.2;
+        xlim_max_circle = init_x_r + vrVal/wrVal;
+        
+        if init_y_c < 0 && (init_y_r - vrVal/wrVal) > init_y_c
+            ylim_min_circle = init_y_c - 0.2;
+        elseif init_y_c < 0 && (init_y_r - vrVal/wrVal) < init_y_c
+            ylim_min_circle = -vrVal/wrVal - 0.2;
+        end
+        
+%         ylim_min_circle = init_y_r-vrVal/wrVal-0.3;
+        ylim_max_circle = init_y_r + 2*vrVal/wrVal + 0.2;
+        
+        frameSize = [xlim_min_circle xlim_max_circle ylim_min_circle ylim_max_circle];
+        handles.frameSize = frameSize;     % Circle
+
+%         handles.frameSize = [-2 1 -1 2];     % Circle
+%         frameSize = [-2 1 -1 2];
 
         % save handles.frameSize to workspace
         assignin('base','frameSize',frameSize);
@@ -547,8 +635,8 @@ handles.TOUT = TOUT;
 handles.YOUT = YOUT;
 guidata(hObject, handles);
 
-save resultsDataFile.mat TOUT YOUT
-% save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
+% save resultsDataFile.mat TOUT YOUT
+save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
 
 
 % --- Executes on button press in detailResults.
@@ -567,6 +655,8 @@ function runAnimation_Callback(hObject, eventdata, handles)
 % RunAnimationGUI;
 global compareFlag
 if compareFlag == 1
+    compareFlag = 0;
+    assignin('base','compareFlag',compareFlag);
     run RunAnimationCompare.m
 else
     run RunAnimation.m
@@ -619,17 +709,76 @@ global SMCMode LinearSMCModeFlag NonlinearSMCModeFlag vrVal wrVal x_r x_c YOUT
 global linearMode nonlinearMode l_lineTrojectory l_circleTrajectory 
 global nl_lineTrojectory nl_circleTrajectory x_r_l_line x_c_l_line
 global x_r_nl_line x_c_nl_line x_r_l_circle x_c_l_circle x_r_nl_circle x_c_nl_circle
+global inLine inCircle
 
-handles = guidata(hObject);
-
-% Setup the initial condition
-% theta_0 = atan(1);
 init_x_c = str2num(get(handles.xcText,'String'));
 init_y_c = str2num(get(handles.ycText,'String'));
 init_theta_c = str2num(get(handles.thetacText,'String'));
 init_x_r = str2num(get(handles.xrText,'String'));
 init_y_r = str2num(get(handles.yrText,'String'));
 init_theta_r = str2num(get(handles.thetarText,'String'));
+
+inLine = evalin('base','inLine');
+inCircle = evalin('base','inCircle');
+
+if inLine == 1 && inCircle == 0
+%     axis([-2.5, 5, -2.5, 5])   % axis to fit line
+        % line frame size
+    if init_x_c < 0
+        xlim_min_line = init_x_c - 0.5;
+        xlim_max_line = abs(init_x_c) + 3;
+    elseif init_x_c > 0
+        xlim_min_line = init_x_c - 2.5;
+        xlim_max_line = init_x_c + 3;
+    else
+        xlim_min_line = init_x_c - 0.5;
+        xlim_max_line = init_x_c + 5;
+    end
+
+    if init_y_c < 0
+        ylim_min_line = init_y_c - 0.5;
+        ylim_max_line = abs(init_y_c) + 3;
+    elseif init_y_c > 0
+        ylim_min_line = init_y_c - 2.5;
+        ylim_max_line = init_y_c + 3;
+    else
+        ylim_min_line = init_y_c - 2;
+        ylim_max_line = init_y_c + 2;
+    end
+
+%         frameSize = [-1 3 -1 3];
+%         handles.frameSize = [-1 3 -1 3];       % Line
+    frameSize = [xlim_min_line xlim_max_line ylim_min_line ylim_max_line];
+    axis(frameSize);
+        
+elseif inLine == 0 && inCircle == 1
+%     axis([-2.2,1,-2.2,2.2])
+    if init_x_c < 0 && (init_x_r - 2*vrVal/wrVal) >= init_x_c
+        xlim_min_circle = init_x_c - 0.2;
+    elseif init_x_c < 0 && (init_x_r - 2*vrVal/wrVal) < init_x_c
+        xlim_min_circle = -2*vrVal/wrVal - 0.2;
+    end
+%         xlim_min_circle = -2*vrVal/wrVal-0.2;
+%         xlim_max_circle = init_x_c+0.2;
+    xlim_max_circle = init_x_r + vrVal/wrVal;
+
+    if init_y_c < 0 && (init_y_r - vrVal/wrVal) > init_y_c
+        ylim_min_circle = init_y_c - 0.2;
+    elseif init_y_c < 0 && (init_y_r - vrVal/wrVal) < init_y_c
+        ylim_min_circle = -vrVal/wrVal - 0.2;
+    end
+
+%         ylim_min_circle = init_y_r-vrVal/wrVal-0.3;
+    ylim_max_circle = init_y_r + 2*vrVal/wrVal + 0.2;
+
+    frameSize = [xlim_min_circle xlim_max_circle ylim_min_circle ylim_max_circle];
+    axis(frameSize);
+end
+
+handles = guidata(hObject);
+
+% Setup the initial condition
+% theta_0 = atan(1);
 
 
 trajectoryType = get(handles.typePanel, 'SelectedObject');
@@ -693,21 +842,22 @@ switch trajectoryTypeSelection
         assignin('base','mode_tjt',mode_tjt);
 
         % circle frame size
-        if init_x_c < 0
-            xlim_min_circle = init_x_c - 0.5;
-            xlim_max_circle = abs(init_x_c) - 1;
-        else
-            xlim_min_circle = init_x_c - 1;
-            xlim_max_circle = init_x_c;
-        end
-        
-        if init_y_c < 0
-            ylim_min_circle = init_y_c - 0.5;
-            ylim_max_circle = abs(init_y_c);
-        else            
-            ylim_min_circle = init_y_c - 0.5;
-            ylim_max_circle = init_y_c;
-        end
+%         if init_x_c < 0
+%             xlim_min_circle = init_x_c - 0.5;
+%             xlim_max_circle = abs(init_x_c) - 1;
+%         else
+%             xlim_min_circle = init_x_c - 1;
+%             xlim_max_circle = init_x_c;
+%         end
+%         
+%         if init_y_c < 0
+%             ylim_min_circle = init_y_c - 0.5;
+%             ylim_max_circle = abs(init_y_c);
+%         else            
+%             ylim_min_circle = init_y_c - 0.5;
+%             ylim_max_circle = init_y_c;
+%         end
+
 %         if init_x_c < 0
 %             xlim_min_circle = init_x_c - 1;
 %             xlim_max_circle = abs(init_x_c) + 1;
@@ -732,6 +882,24 @@ switch trajectoryTypeSelection
         
 %         frameSize = [-2 1 -1 2];
 %         handles.frameSize = [-2 1 -1 2];     % Circle
+        if init_x_c < 0 && (init_x_r - 2*vrVal/wrVal) >= init_x_c
+            xlim_min_circle = init_x_c - 0.2;
+        elseif init_x_c < 0 && (init_x_r - 2*vrVal/wrVal) < init_x_c
+            xlim_min_circle = -2*vrVal/wrVal - 0.2;
+        end
+%         xlim_min_circle = -2*vrVal/wrVal-0.2;
+%         xlim_max_circle = init_x_c+0.2;
+        xlim_max_circle = init_x_r + vrVal/wrVal;
+        
+        if init_y_c < 0 && (init_y_r - vrVal/wrVal) > init_y_c
+            ylim_min_circle = init_y_c - 0.2;
+        elseif init_y_c < 0 && (init_y_r - vrVal/wrVal) < init_y_c
+            ylim_min_circle = -vrVal/wrVal - 0.2;
+        end
+        
+%         ylim_min_circle = init_y_r-vrVal/wrVal-0.3;
+        ylim_max_circle = init_y_r + 2*vrVal/wrVal + 0.2;
+        
         frameSize = [xlim_min_circle xlim_max_circle ylim_min_circle ylim_max_circle];
         handles.frameSize = frameSize;     % Circle
 
@@ -924,6 +1092,7 @@ assignin('base','x_r',x_r);
 assignin('base','x_c',x_c);
 
 % plot the motion
+% axis(frameSize);
 axis(handles.trajectoryTrackingResult);
 cla(handles.trajectoryTrackingResult);
 plot(handles.trajectoryTrackingResult, x_r(1,:),x_r(2,:),'r',x_c(1,:),x_c(2,:),'b-.');
@@ -1145,3 +1314,5 @@ legend('Reference trajectory','WMR trajectory','Initial point of the reference t
 xlabel('XOUT(m)');
 ylabel('YOUT(m)');
 title('Trajectory tracking of the WMR');
+
+set(handles.compareResultsBtn,'Enable','off');

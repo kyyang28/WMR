@@ -20,8 +20,10 @@ if mode_tjt == 0
     w_r = wrVal;
 elseif mode_tjt == 1
 %   Circle (TBA)
-    v_r = 2 * circle(1) * pi / circle(2);
-    w_r = v_r * circle(1);
+    v_r = vrVal;
+    w_r = wrVal;
+%     v_r = 2 * circle(1) * pi / circle(2);
+%     w_r = v_r * circle(1);
 end
 
 % output results to u_r
