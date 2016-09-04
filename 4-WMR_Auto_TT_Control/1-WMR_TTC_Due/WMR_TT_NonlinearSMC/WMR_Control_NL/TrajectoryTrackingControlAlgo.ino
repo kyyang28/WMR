@@ -176,26 +176,11 @@ void TrajectoryTrackingAlgo()
   wheelL = uctrl[0] * v_constant - uctrl[1] * w_constant;
   wheelR = uctrl[0] * v_constant + uctrl[1] * w_constant;
 
-  /*Serial.print(uctrl[1]);
-    Serial.print('\t');
-    Serial.print(dTheta);
-    Serial.print('\t');
-    Serial.print(w_WMR);*/
-
-  /*Serial.print(wheelL);
-    Serial.print('\t');
-    Serial.print(wheelR);*/
-
   boundFun(&wheelR, boundMotor);
   boundFun(&wheelL, boundMotor);
 
-  leftMotorSpeed = LeftMotorSpeedPIController(leftMotorEncoderCnt, wheelL);
-  rightMotorSpeed = RightMotorSpeedPIController(rightMotorEncoderCnt, wheelR);
-
-  /*Serial.print('\t');
-    Serial.print(leftMotorSpeed);
-    Serial.print('\t');
-    Serial.print(rightMotorSpeed);*/
+  leftMotorSpeed = LeftMotorSpeedPIDController(leftMotorEncoderCnt, wheelL);
+  rightMotorSpeed = RightMotorSpeedPIDController(rightMotorEncoderCnt, wheelR);
 
 #if UART_DEBUG
   Serial.print('\n');

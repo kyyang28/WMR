@@ -184,10 +184,10 @@ void setup()
         //Serial.println("Line trajectory setting is completed");
       } else if (startMode == 2) {
         /* Circle of radius 25cm trajectory settings */
-        //qc.x = 0.0;
-        //qc.y = 0.0;
         qc.x = -0.25;
         qc.y = -0.11;
+        //qc.x = 0.25;
+        //qc.y = -0.25;
         qc.z = PI / 2;
         qr.x = 0.0;
         qr.y = 0.0;
@@ -201,6 +201,8 @@ void setup()
         //qc.y = 0.0;
         qc.x = -0.50;
         qc.y = -0.11;
+        //qc.x = -0.5;
+        //qc.y = -0.75;
         qc.z = PI / 2;
         qr.x = 0.0;
         qr.y = 0.0;
@@ -269,7 +271,7 @@ void motorTest()
     else if(leftMotorEncoderCnt<0) RightMotorReferenceSpeed=0;*/
 
   //leftMotorSpeed = LeftMotorSpeedPIController(leftMotorEncoderCnt, (int)LeftMotorReferenceSpeed);
-  rightMotorSpeed = RightMotorSpeedPIController(rightMotorEncoderCnt, RightMotorReferenceSpeed);
+  rightMotorSpeed = RightMotorSpeedPIDController(rightMotorEncoderCnt, RightMotorReferenceSpeed);
   //setLeftMotorSpeed(leftMotorSpeed);
   setRightMotorSpeed(rightMotorSpeed);
 #endif
@@ -384,7 +386,7 @@ void showEncoderCnt()
   Serial.println(rightEncoderRadian);
 }
 
-float LeftMotorSpeedPIController(int LeftRawCnts, float LeftSpeedRef)
+float LeftMotorSpeedPIDController(int LeftRawCnts, float LeftSpeedRef)
 {
   float currError = 0;
   float LeftMotorPWM;
@@ -425,7 +427,7 @@ float LeftMotorSpeedPIController(int LeftRawCnts, float LeftSpeedRef)
   return LeftMotorPWM;
 }
 
-float RightMotorSpeedPIController(int RightRawCnts, float RightSpeedRef)
+float RightMotorSpeedPIDController(int RightRawCnts, float RightSpeedRef)
 {
   float currError = 0;
   float RightMotorPWM;
