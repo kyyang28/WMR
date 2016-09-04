@@ -37,7 +37,8 @@ if SMCMode == 1
     u_input = SMCFuncL(x, u_r);
 elseif SMCMode == 2
     % Nonlinear controller
-    u_input = SMCFuncNL(x, u_r);
+%     u_input = SMCFuncNL(x, u_r);
+    u_input = SMCFuncNLSimpler(x, u_r);
 end
     
 % Step 4: Deal with uncertainties, either matched uncertainty (mode_uct = 1) or

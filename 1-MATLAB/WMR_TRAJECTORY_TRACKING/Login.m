@@ -70,7 +70,8 @@ addpath('LOGO');
 % UIWAIT makes Login wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
-imshow('WMR_ver3.jpg');
+imshow('coverPic.jpg');
+% imshow('WMR_ver2.jpg');
 % imshow('wifiVehicle.jpg');
 
 

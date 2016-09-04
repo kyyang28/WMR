@@ -22,7 +22,7 @@ function varargout = EncoderGyroAcquisitionViaBt(varargin)
 
 % Edit the above text to modify the response to help EncoderGyroAcquisitionViaBt
 
-% Last Modified by GUIDE v2.5 30-Aug-2016 13:43:52
+% Last Modified by GUIDE v2.5 29-Aug-2016 15:10:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -128,7 +128,7 @@ function btconnect_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global b line_v_r line_w_r line_x_r_0 line_y_r_0 line_theta_r_0 circle_v_r 
-global circle_w_r circle_x_r_0 circle_y_r_0 circle_theta_r_0 circle_x_c_0
+global circle_w_r circle_x_r_0 circle_y_r_0 circle_theta_r_0
 
 set(handles.btconnect,'Enable','off');
 
@@ -264,43 +264,22 @@ if lineTrajectoryMode == 1 && circle25cmTrajectoryMode == 0 && circle50cmTraject
 elseif circle25cmTrajectoryMode == 2 && lineTrajectoryMode == 0 && circle50cmTrajectoryMode == 0
     % circle
     tt = 0:0.01:60;
-    
-%     circle_x_r_tmp = circle_x_r_0 - (circle_v_r/circle_w_r-0.02) * sin(circle_theta_r_0);
-%     circle_y_r_tmp = circle_y_r_0 + (circle_v_r/circle_w_r-0.02) * cos(circle_theta_r_0);
-%     
-%     circle_theta_r = circle_theta_r_0 + circle_w_r * tt;
-%     circle_xr = circle_x_r_tmp + (circle_v_r/circle_w_r-0.02) * sin(circle_theta_r);
-%     circle_yr = circle_y_r_tmp - (circle_v_r/circle_w_r-0.02) * cos(circle_theta_r);
-
-    centre_x = -circle_v_r/circle_w_r;
-    centre_y = 0;
+    circle_x_r_tmp = circle_x_r_0 - circle_v_r/circle_w_r * sin(circle_theta_r_0);
+    circle_y_r_tmp = circle_y_r_0 + circle_v_r/circle_w_r * cos(circle_theta_r_0);
     
     circle_theta_r = circle_theta_r_0 + circle_w_r * tt;
-    circle_xr = centre_x + (circle_v_r/circle_w_r-0.05) * sin(circle_theta_r);
-    circle_yr = centre_y - (circle_v_r/circle_w_r-0.05) * cos(circle_theta_r);
-
-%     circle_theta_r = circle_theta_r_0 + circle_w_r * tt;
-%     circle_xr = circle_x_r_0 + circle_v_r/circle_w_r * sin(circle_theta_r);
-%     circle_yr = circle_y_r_0 - circle_v_r/circle_w_r * cos(circle_theta_r);
-
-    plot(circle_xr,circle_yr,'r','LineWidth',6);
+    circle_xr = circle_x_r_tmp + circle_v_r/circle_w_r * sin(circle_theta_r);
+    circle_yr = circle_y_r_tmp - circle_v_r/circle_w_r * cos(circle_theta_r);
+    plot(circle_xr,circle_yr,'r','LineWidth',4);
 elseif circle50cmTrajectoryMode == 3 && lineTrajectoryMode == 0 && circle25cmTrajectoryMode == 0
     % circle
     tt = 0:0.01:60;
-%     circle_x_r_tmp = circle_x_r_0 - circle_v_r/circle_w_r * sin(circle_theta_r_0);
-%     circle_y_r_tmp = circle_y_r_0 + circle_v_r/circle_w_r * cos(circle_theta_r_0);
-%     
-%     circle_theta_r = circle_theta_r_0 + circle_w_r * tt;
-%     circle_xr = circle_x_r_tmp + circle_v_r/circle_w_r * sin(circle_theta_r);
-%     circle_yr = circle_y_r_tmp - circle_v_r/circle_w_r * cos(circle_theta_r);
-
-    centre_x = -circle_v_r/circle_w_r;
-    centre_y = 0;
+    circle_x_r_tmp = circle_x_r_0 - circle_v_r/circle_w_r * sin(circle_theta_r_0);
+    circle_y_r_tmp = circle_y_r_0 + circle_v_r/circle_w_r * cos(circle_theta_r_0);
     
     circle_theta_r = circle_theta_r_0 + circle_w_r * tt;
-    circle_xr = centre_x + (circle_v_r/circle_w_r-0.03) * sin(circle_theta_r);
-    circle_yr = centre_y - (circle_v_r/circle_w_r-0.03) * cos(circle_theta_r);
-
+    circle_xr = circle_x_r_tmp + circle_v_r/circle_w_r * sin(circle_theta_r);
+    circle_yr = circle_y_r_tmp - circle_v_r/circle_w_r * cos(circle_theta_r);
     plot(circle_xr,circle_yr,'r','LineWidth',4);
 end
 
@@ -315,9 +294,6 @@ while (i < len(2))
 %     Receiving real-time current posture data from WMR
     xc(i) = fscanf(b,'%f');
     yc(i) = fscanf(b,'%f');
-%     set(handles.dataAcquisitionBox,'String',num2str(xc(i)));
-%     newStr = strvcat(num2str(xc(i)), num2str(yc(i)));
-%     set(handles.initInfo,'String',newStr);
     if mod(i,20)==0
         plot(xc,yc,'b*');
 %         plot(xc,yc,'b*','LineWidth',2);
@@ -326,7 +302,7 @@ while (i < len(2))
             axis([-0.5 4 -1 4]);
         elseif circle25cmTrajectoryMode == 2 && lineTrajectoryMode == 0 && circle50cmTrajectoryMode == 0
 %             2*circle_v_r/circle_w_r = diameter of circle
-            axis([-2*circle_v_r/circle_w_r-0.2 circle_x_r_0+0.4 circle_y_r_0-circle_v_r/circle_w_r-0.3 circle_y_r_0+circle_v_r/circle_w_r+0.3]);
+            axis([-2*circle_v_r/circle_w_r-0.2 circle_x_r_0+0.2 circle_y_r_0-circle_v_r/circle_w_r-0.3 circle_y_r_0+circle_v_r/circle_w_r+0.2]);
         elseif circle50cmTrajectoryMode == 3 && circle25cmTrajectoryMode == 0 && lineTrajectoryMode == 0
 %             2*circle_v_r/circle_w_r = diameter of circle
             axis([-2*circle_v_r/circle_w_r-0.2 circle_x_r_0+0.2 circle_y_r_0-circle_v_r/circle_w_r-0.3 circle_y_r_0+circle_v_r/circle_w_r+0.2]);
@@ -977,27 +953,4 @@ else
 %     ch = get( ah, 'Children' );
 %     set( ch, 'FontSize', 10 );
     uiwait(h);
-end
-
-
-% --- Executes on selection change in dataAcquisitionBox.
-function dataAcquisitionBox_Callback(hObject, eventdata, handles)
-% hObject    handle to dataAcquisitionBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns dataAcquisitionBox contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from dataAcquisitionBox
-
-
-% --- Executes during object creation, after setting all properties.
-function dataAcquisitionBox_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to dataAcquisitionBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: listbox controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
 end

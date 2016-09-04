@@ -1,7 +1,7 @@
 
 % close all;
 
-global x_r x_c xrs yrs xcs ycs frameSize
+global x_r x_c xrs yrs xcs ycs frameSize inLine inCircle
 
 % x_r_tmp = x_r;
 % x_c_tmp = x_c;
@@ -50,10 +50,18 @@ hold on;
 fh2 = plot(fp,xcs,ycs,'b-.','XDataSource','xcs','YDataSource','ycs');
 hold off;
 xlabel('x(m)');
-ylabel('y(m)')
+ylabel('y(m)');
 set(gca,'NextPlot','replacechildren');
-WMR_REF = WMR2DModel('q',x_r(:,1),'size',[0.20 0.15],'color','r');
-WMR_CURR = WMR2DModel('q',x_c(:,1),'size',[0.20 0.15],'color','g');
+
+if inLine == 1 && inCircle == 0
+    WMR_REF = WMR2DModel('q',x_r(:,1),'size',[0.25 0.2],'color','r');
+    WMR_CURR = WMR2DModel('q',x_c(:,1),'size',[0.25 0.2],'color','g');
+elseif inLine == 0 && inCircle == 1
+    WMR_REF = WMR2DModel('q',x_r(:,1),'size',[0.10 0.1],'color','r');
+    WMR_CURR = WMR2DModel('q',x_c(:,1),'size',[0.10 0.1],'color','g');
+end
+% WMR_REF = WMR2DModel('q',x_r(:,1),'size',[0.20 0.15],'color','r');
+% WMR_CURR = WMR2DModel('q',x_c(:,1),'size',[0.20 0.15],'color','g');
 % WMR_REF = WMR2DModel('q',x_r(:,1),'size',[0.25 0.2],'color','r');
 % WMR_CURR = WMR2DModel('q',x_c(:,1),'size',[0.25 0.2],'color','g');
 % WMR_REF = WMR2DModel('q',x_r_tmp(:,1),'size',[0.25 0.2],'color','r');
@@ -72,7 +80,7 @@ im = frame2im(F);
 rect = [0 0 w h];
 
 % for i = 1+10:10:25000
-for i = 1+10:24:5400
+for i = 1+10:34:8500
         
     xrs = x_r(1,1:i);
     yrs = x_r(2,1:i);

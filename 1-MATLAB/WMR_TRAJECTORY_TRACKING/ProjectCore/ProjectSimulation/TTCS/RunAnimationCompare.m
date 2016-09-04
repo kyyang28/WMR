@@ -89,7 +89,7 @@ if l_lineTrojectory == 1 && nl_lineTrojectory == 1
     [h,w,p] = size(F.cdata);
     rect = [0 0 w h];
 
-    for i = 1+10:24:5400
+    for i = 1+10:34:8500
     % for i = 1+10:10:2501
 
         xrs_l = x_r_l_line(1,1:i);
@@ -181,7 +181,7 @@ elseif l_circleTrajectory == 1 && nl_circleTrajectory == 1
     [h,w,p] = size(F.cdata);
     rect = [0 0 w h];
 
-    for i = 1+10:24:5400
+    for i = 1+10:24:8500
     % for i = 1+10:10:2501
 
         xrs_l = x_r_l_circle(1,1:i);
