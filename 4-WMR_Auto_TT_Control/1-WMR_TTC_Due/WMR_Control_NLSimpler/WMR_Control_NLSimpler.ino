@@ -5,7 +5,7 @@
 #define BT_DEBUG    1
 #define UART_DEBUG  0
 
-#define KCONSTANT 19.2/200/PI
+#define KCONSTANT         19.2/200/PI
 #define PWM_FREQ          20000
 #define PWM_DUTY_CYCLE    1200
 #define MOTORMAX          50
@@ -100,19 +100,18 @@ float tt = 0.01;    // 0.01s = 10ms
 
 float eta[2];
 float eps[2];
-float uctrl[2];
-float upid[2];
-float ki[2] = {0};
+float u_input[2];
 
 float w_enL, w_enR, dTheta;
 float v_WMR;
 float w_WMR;
 int k1_n = 1;
-float gammaG[2][2];
-float gammaF[2];
+float matG[2][2];
+float invMatG[2][2];
+float matF[2];
 
-float wheelR;
-float wheelL;
+float w_R;
+float w_L;
 
 float vrVal = 0.0;
 float wrVal = 0.0;
@@ -399,7 +398,7 @@ float LeftMotorSpeedPIDController(int LeftRawCnts, float LeftSpeedRef)
 
   /* Based on incremental discrete equation of PI controller */
   intPart += Ki * currError;
-  boundFun(&intPart, intPartLimit);
+  BoundFunc(&intPart, intPartLimit);
   LeftMotorPWM = Kp * currError + intPart + Kd * (currError - prevError);
   /* Update prevError variable to currError for next round */
   prevError = currError;
@@ -440,7 +439,7 @@ float RightMotorSpeedPIDController(int RightRawCnts, float RightSpeedRef)
 
   /* Based on incremental discrete equation of PI controller */
   intPart += Ki * currError;
-  boundFun(&intPart, intPartLimit);
+  BoundFunc(&intPart, intPartLimit);
   /*if(intPart > INTLIMIT) intPart = INTLIMIT;
     else if(intPart < -INTLIMIT) intPart = -INTLIMIT;*/
   RightMotorPWM = Kp * currError + intPart + Kd * (currError - prevError);
@@ -469,12 +468,6 @@ float RightMotorSpeedPIDController(int RightRawCnts, float RightSpeedRef)
 #endif
 
   return RightMotorPWM;
-}
-
-template<class T> int boundFun(T* pData, T bound) {
-  if (*pData > bound) *pData = bound;
-  else if (*pData < -bound) *pData = -bound;
-  return 0;
 }
 
 

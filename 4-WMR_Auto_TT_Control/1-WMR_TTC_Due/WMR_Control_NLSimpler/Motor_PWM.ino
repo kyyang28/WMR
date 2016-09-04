@@ -130,3 +130,10 @@ int setRightMotorSpeed(float rightMotorSpeed)
   PWMC_SetDutyCycle (PWM, rightChan, speed);
 }
 
+template<class T> int BoundFunc(T* pData, T bound) {
+  if (*pData > bound) *pData = bound;
+  else if (*pData < -bound) *pData = -bound;
+  return 0;
+}
+
+
