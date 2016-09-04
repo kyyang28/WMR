@@ -3,7 +3,7 @@ void MOTOR_PWM_Setup()
 {
   uint16_t Half_PWM_duty = PWM_DUTY_CYCLE / 2;
 
-  //Serial3.println("Initializing PWM module...");
+  Serial3.println("Initializing PWM module...");
 
   /* Enable and configure pwm clock */
   pmc_enable_periph_clk(PWM_INTERFACE_ID);
@@ -25,7 +25,7 @@ void MOTOR_PWM_Setup()
                 g_APinDescription[RightMotorPWMPin].ulPin,
                 g_APinDescription[RightMotorPWMPin].ulPinConfiguration);
 
-  //Serial3.println("Synchronizing PWM channel...");
+  Serial3.println("Synchronizing PWM channel...");
 
   PWMC_ConfigureSyncChannel (PWM,
                              (0x1u << leftChan) | (0x1u << rightChan) | PWM_SCM_SYNC0,   //channel
@@ -46,7 +46,7 @@ void MOTOR_PWM_Setup()
 
   PWMC_SetSyncChannelUpdateUnlock(PWM);
 
-  //Serial3.println("PWM module setup finished.");
+  Serial3.println("PWM module setup finished.");
   
 #if 0
   /* Configure LEFT motor PWM channel to employ CLOCKA */
@@ -88,10 +88,12 @@ int setLeftMotorSpeed(float leftMotorSpeed)
 {
   int speed = 0;
   
-  if (abs(leftMotorSpeed) > PWM_DUTY_CYCLE) {
-    speed = PWM_DUTY_CYCLE ;
+  if (leftMotorSpeed > PWM_DUTY_CYCLE) {
+    speed = 0;
+  }else if (leftMotorSpeed < -PWM_DUTY_CYCLE) {
+    speed = 0;
   }else {
-    speed = abs(int(leftMotorSpeed));
+    speed = PWM_DUTY_CYCLE - abs(int(leftMotorSpeed));
   }
 
   if (leftMotorSpeed > 0) {
@@ -110,11 +112,13 @@ int setLeftMotorSpeed(float leftMotorSpeed)
 int setRightMotorSpeed(float rightMotorSpeed)
 {
   int speed = 0;
-  
-  if (abs(rightMotorSpeed) > PWM_DUTY_CYCLE) {
-    speed = PWM_DUTY_CYCLE;
+
+  if (rightMotorSpeed > PWM_DUTY_CYCLE) {
+    speed = 0;
+  }else if (rightMotorSpeed < -PWM_DUTY_CYCLE) {
+    speed = 0;
   }else {
-    speed = abs(int(rightMotorSpeed));
+    speed = PWM_DUTY_CYCLE - abs(int(rightMotorSpeed));
   }
 
   if (rightMotorSpeed > 0) {

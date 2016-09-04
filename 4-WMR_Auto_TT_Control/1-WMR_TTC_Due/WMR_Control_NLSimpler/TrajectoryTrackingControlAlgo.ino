@@ -19,10 +19,6 @@ void WMRParaIni() {
 #endif  
 }
 
-float eR = 0;
-float eL = 0;
-float deR, deL;
-float edp;
 int K1 = 1;
 int K2 = 1;
 int K3 = 1;
@@ -39,9 +35,6 @@ void TrajectoryTrackingAlgo()
   const static float w_param = 19.2 * 23.0 / 2.0 / PI / 12.0;
   //const static float v_param = 32.0 / 0.063 / PI;
   //const static float w_param = 22.5 / 6.3 / PI * 16.0;
-  float dp;
-
-  float cpSqrt, s2;
 
   RefCal();
 
@@ -145,12 +138,6 @@ void TrajectoryTrackingAlgo()
   } else if (xe.z <= -PI) {
     xe.z += 2 * PI;
   }
-
-  dp = (1 + xe.y * xe.y + xe.x * xe.x);
-  s2 = k1_n * xe.z + xe.y / sqrt(dp);
-  cpSqrt = sqrt(dp * dp * dp);
-  /* For inverse rho */
-  //dp=xe.x*xe.x*xe.x+xe.x+cpSqrt;
 
   /* matrix G */
   //matG[0][0] = -K1;
