@@ -11,7 +11,7 @@ void WMRParaIni() {
   eta[1] = 4;   // maximum eta(2) value is 5, otherwise the car will run uncontrolled
   eps[0] = 0.1;
   eps[1] = 0.5;
-#else  
+#else
   //eta[0] = 0.25;
   //eta[1] = 2;
   //eps[0] = 0.1;
@@ -78,7 +78,7 @@ void TrajectoryTrackingAlgo()
   Serial.print(dTheta);
 #endif
 
-  /* For Motor testking */
+  /* Calculate the current car posture */
   qc.x += v_WMR * cos(qc.z) * tt;
   qc.y += v_WMR * sin(qc.z) * tt;
   qc.z += dTheta * tt;
@@ -145,15 +145,23 @@ void TrajectoryTrackingAlgo()
   //matG[1][0] = 0;
   //matG[1][1] = -K2 - K3 * xe.x / (1 + xe.y * xe.y);
 
-  /* Calculate the inverted matrix G */
-  invMatG[0][0] = -K2 - K2*xe.y*xe.y - K3*xe.x;
-  invMatG[0][1] = -K1*xe.y*(1+xe.y*xe.y)/(K1*K2 + K1*K2*xe.y*xe.y + K1*K3*xe.x);
-  invMatG[1][0] = 0;
-  invMatG[1][1] = (-K1 - K1*xe.y*xe.y) / (K1*K2 + K1*K2*xe.y*xe.y + K1*K3*xe.x);
+  tmpParam = 1 + xe.y * xe.y;
 
-  /* Calculate the matrix F */
-  matF[0] = K1 * vr * cos(xe.z) - (eta[0] * K1 * xe.x) / (abs(K1 * xe.x) + eps[0]);
-  matF[1] = K3 * vr * sin(xe.z) / (1 + xe.y * xe.y) + K2 * wr - eta[1] * ((K2 * xe.z + K3 * atan(xe.y)) / (abs(K2 * xe.z + K3 * atan(xe.y)) + eps[1]));
+  /* Calculate the inverted matrix G */
+  invMatG[0][0] = -K2 * tmpParam - K3 * xe.x;
+  invMatG[0][1] = -K1 * xe.y * tmpParam / (K1 * K2 * tmpParam + K1 * K3 * xe.x);
+  invMatG[1][0] = 0;
+  invMatG[1][1] = -tmpParam / (K2 * tmpParam + K3 * xe.x);
+
+  matFParam = K2 * xe.z + K3 * atan(xe.y);
+  
+  /* Applying hyperbolic tangent function */
+  //matF[0] = K1 * vr * cos(xe.z) + eta[0] * tanh(K1 * xe.x);
+  //matF[1] = (K3 * vr * sin(xe.z) / tmpParam) + K2 * wr + eta[1] * tanh(matFParam / 0.8);
+  
+  /* Calculate the matrix F using switching function */
+  matF[0] = K1 * vr * cos(xe.z) + (eta[0] * K1 * xe.x) / (abs(K1 * xe.x) + eps[0]);
+  matF[1] = (K3 * vr * sin(xe.z) / tmpParam) + K2 * wr + eta[1] * (matFParam / (abs(matFParam) + eps[1]));
 
   /* Derive the control input */
   for (int ic = 0; ic < 2; ic++) {

@@ -6,7 +6,7 @@
 % @Version: 001
 % @Date: Aug. 19th, 2016
 %
-function u = SMCFuncNLSimpler(x, ur)
+function u = SMCFuncNL(x, ur)
 % Sliding mode controller (SMC) function
 % @params x     - initial states of the sytem
 % @params ur    - reference linear and rotational velocities
@@ -16,8 +16,6 @@ function u = SMCFuncNLSimpler(x, ur)
 % Control global parameters
 global c K1 K2 eps1 eps2 eta1 eta2 mode_uct kphi;
 % global kpsi   % for mismatched uncertainty
-
-% disp('Invoking SMCFuncNLSimpler');
 
 % Step 1: Initialise initial states to x_r and x_c
 u = zeros(2,1);
@@ -36,19 +34,14 @@ x_e = T * (x_r - x_c);
 % Step 3: Define nonlinear sliding surfaces
 % sigma_1 = K1 * xe
 % sigma_2 = K2 * theta_e + ye / sqrt(c + ye^2 + xe^2)
-sigma_1 = x_e(1);
-sigma_2 = K1 * x_e(3) + K2 * atan(x_e(2));
-% K3 = 1;
-% sigma_1 = K1 * x_e(1);
-% sigma_2 = K2 * x_e(3) + K3 * atan(x_e(2));
+sigma_1 = K1 * x_e(1);
+sigma_2 = K2 * x_e(3) + x_e(2) / sqrt(c + x_e(2)^2 + x_e(1)^2);
 
 % Step 4: Define T_F and T_G matrix
 % Notes:    T_G = rho
 %           T_F is acquired from partial derivative
-T_G = [-1, x_e(2); 0, -K1 - K2*x_e(1)/(1 + (x_e(2))^2)];
-T_F = [1, 0, 0; 0, K2/(1+(x_e(2))^2), K1];
-% T_G = [-K1, K1*x_e(2); 0, -K2 - K3*x_e(1)/(1 + x_e(2)^2)];
-% T_F = [K1, 0, 0; 0, K3/(1+x_e(2)^2), K2];
+T_G = [-K1 K1*x_e(2); x_e(1)*x_e(2)/((c+x_e(1)^2+x_e(2)^2)^(3/2)) -x_e(1)/((c+x_e(1)^2+x_e(2)^2)^(1/2))-K2];
+T_F = [K1 0 0; -x_e(1)*x_e(2)/((c+x_e(1)^2+x_e(2)^2)^(3/2)) (c+x_e(2)^2)/(c+x_e(2)^2+x_e(1)^2)^(3/2) K2];
 
 % Step 5: Define F(qe) matrix
 % ur(1) = v_r; ur(2) = w_r; x_e(3) = theta_e
@@ -73,12 +66,8 @@ end
 
 % Step 7: Define sign matrix
 % SEE PAGE 18 of DISSERTATION NOTES 2
-%% Applying switching function
-sign_mat = [dp(1)*sats(sigma_1,eps1); dp(2)*sats(sigma_2,eps2)];
 
-%% Applying hyperbolic tangent function
-eps_tmp = 0.05;
-sign_mat = [dp(1)*tanh(sigma_1/eps_tmp); dp(2)*tanh(sigma_2/eps_tmp)];
+sign_mat = [dp(1)*sats(sigma_1,eps1); dp(2)*sats(sigma_2,eps2)];
 
 % Step 8: Define control law (u)
 % Notes: T_G = rho

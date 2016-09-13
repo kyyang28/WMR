@@ -519,9 +519,6 @@ init_y_r = str2num(get(handles.yrText,'String'));
 
 switch trajectoryTypeSelection
     case 'Line'
-%         msgbox('Line Trajectory');
-%         set(handles.noUncertainty, 'Enable', 'Off');
-%         set(handles.matchedUncertainty, 'Enable', 'On');
         handles.trajectoryType = 0;
         mode_tjt = 0;
         assignin('base','mode_tjt',mode_tjt);
@@ -532,15 +529,7 @@ switch trajectoryTypeSelection
         assignin('base','inCircle',inCircle);
         
         LineTrajectoryTypeConfig;
-%         vrVal = 0.8;
-%         wrVal = 0.0;
-%         assignin('base','vrVal',vrVal);
-%         assignin('base','wrVal',wrVal);
-        
-        % line frame size
-%         handles.frameSize = [-1 3 -1 3];       % Line
-%         frameSize = [-1 3 -1 3];
-        % line frame size
+
         if init_x_c < 0
             xlim_min_line = init_x_c - 0.5;
             xlim_max_line = abs(init_x_c) + 3;
@@ -562,9 +551,7 @@ switch trajectoryTypeSelection
             ylim_min_line = init_y_c - 2;
             ylim_max_line = init_y_c + 2;
         end
-        
-%         frameSize = [-1 3 -1 3];
-%         handles.frameSize = [-1 3 -1 3];       % Line
+
         frameSize = [xlim_min_line xlim_max_line ylim_min_line ylim_max_line];
         handles.frameSize = frameSize;       % Line
 
@@ -572,9 +559,7 @@ switch trajectoryTypeSelection
         assignin('base','frameSize',frameSize);
         
     case 'Circle'
-%         msgbox('Circle Trajectory');
-%         set(handles.matchedUncertainty, 'Enable', 'Off');
-%         set(handles.noUncertainty, 'Enable', 'On');
+
         handles.trajectoryType = 1;
         mode_tjt = 1;
         assignin('base','mode_tjt',mode_tjt);
@@ -585,11 +570,6 @@ switch trajectoryTypeSelection
         assignin('base','inLine',inLine);        
         
         CircleTrajectoryTypeConfig;
-        
-%         vrVal = 0.8;
-%         wrVal = 0.0;
-%         assignin('base','vrVal',vrVal);
-%         assignin('base','wrVal',wrVal);
                 
         % circle frame size
         if init_x_c < 0 && (init_x_r - 2*vrVal/wrVal) >= init_x_c
@@ -602,10 +582,6 @@ switch trajectoryTypeSelection
             xlim_min_circle = -(init_x_c - init_x_r) - 2*vrVal/wrVal - 0.2;
             xlim_max_circle = init_x_c + 0.3;
         end
-%         xlim_min_circle = -2*vrVal/wrVal-0.2;
-%         xlim_max_circle = init_x_c+0.2;
-
-%         xlim_max_circle = init_x_r + vrVal/wrVal;
         
         if init_y_c < 0 && (init_y_r - vrVal/wrVal) > init_y_c
             ylim_min_circle = init_y_c - 0.2;
@@ -618,9 +594,6 @@ switch trajectoryTypeSelection
         
         frameSize = [xlim_min_circle xlim_max_circle ylim_min_circle ylim_max_circle];
         handles.frameSize = frameSize;     % Circle
-
-%         handles.frameSize = [-2 1 -1 2];     % Circle
-%         frameSize = [-2 1 -1 2];
 
         % save handles.frameSize to workspace
         assignin('base','frameSize',frameSize);
@@ -641,8 +614,8 @@ handles.TOUT = TOUT;
 handles.YOUT = YOUT;
 guidata(hObject, handles);
 
-save resultsDataFile.mat TOUT YOUT
-% save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
+% save resultsDataFile.mat TOUT YOUT
+save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
 
 
 % --- Executes on button press in detailResults.
@@ -808,38 +781,6 @@ switch trajectoryTypeSelection
         mode_tjt = 0;
         assignin('base','mode_tjt',mode_tjt);
 
-        % line frame size
-%         if init_x_c < 0
-%             xlim_min_line = init_x_c - 0.5;
-%             xlim_max_line = abs(init_x_c) + 3;
-%         elseif init_x_c > 0
-%             xlim_min_line = init_x_c - 2.5;
-%             xlim_max_line = init_x_c + 3;
-%         else
-%             xlim_min_line = init_x_c - 0.5;
-%             xlim_max_line = init_x_c + 5;
-%         end
-% 
-%         if init_y_c < 0
-%             ylim_min_line = init_y_c - 0.5;
-%             ylim_max_line = abs(init_y_c) + 3;
-%         elseif init_y_c > 0
-%             ylim_min_line = init_y_c - 2.5;
-%             ylim_max_line = init_y_c + 3;
-%         else
-%             ylim_min_line = init_y_c - 2;
-%             ylim_max_line = init_y_c + 2;
-%         end
-%         
-% %         frameSize = [-1 3 -1 3];
-% %         handles.frameSize = [-1 3 -1 3];       % Line
-%         frameSize = [xlim_min_line xlim_max_line ylim_min_line ylim_max_line];
-%         handles.frameSize = frameSize;       % Line
-
-        % save handles.frameSize to workspace
-%         assignin('base','frameSize',frameSize);
-
-%         handles = guidata(hObject);
         if handles.flag == 0
             handles.flag = 1;
             guidata(hObject,handles);   % save new value to handles
@@ -855,71 +796,6 @@ switch trajectoryTypeSelection
         handles.trajectoryType = 1;
         mode_tjt = 1;
         assignin('base','mode_tjt',mode_tjt);
-
-        % circle frame size
-%         if init_x_c < 0
-%             xlim_min_circle = init_x_c - 0.5;
-%             xlim_max_circle = abs(init_x_c) - 1;
-%         else
-%             xlim_min_circle = init_x_c - 1;
-%             xlim_max_circle = init_x_c;
-%         end
-%         
-%         if init_y_c < 0
-%             ylim_min_circle = init_y_c - 0.5;
-%             ylim_max_circle = abs(init_y_c);
-%         else            
-%             ylim_min_circle = init_y_c - 0.5;
-%             ylim_max_circle = init_y_c;
-%         end
-
-%         if init_x_c < 0
-%             xlim_min_circle = init_x_c - 1;
-%             xlim_max_circle = abs(init_x_c) + 1;
-%         elseif init_x_c > 0
-%             xlim_min_circle = init_x_c - 1;
-%             xlim_max_circle = init_x_c + 1;
-%         else
-%             xlim_min_circle = init_x_c - 1;
-%             xlim_max_circle = init_x_c + 1;
-%         end
-% 
-%         if init_y_c < 0
-%             ylim_min_circle = init_y_c - 1;
-%             ylim_max_circle = abs(init_y_c) + 1;
-%         elseif init_y_c > 0
-%             ylim_min_circle = init_y_c - 1;
-%             ylim_max_circle = init_y_c + 1;
-%         else
-%             ylim_min_circle = init_y_c - 1;
-%             ylim_max_circle = init_y_c + 1;
-%         end
-        
-%         frameSize = [-2 1 -1 2];
-%         handles.frameSize = [-2 1 -1 2];     % Circle
-%         if init_x_c < 0 && (init_x_r - 2*vrVal/wrVal) >= init_x_c
-%             xlim_min_circle = init_x_c - 0.2;
-%         elseif init_x_c < 0 && (init_x_r - 2*vrVal/wrVal) < init_x_c
-%             xlim_min_circle = -2*vrVal/wrVal - 0.2;
-%         end
-% %         xlim_min_circle = -2*vrVal/wrVal-0.2;
-% %         xlim_max_circle = init_x_c+0.2;
-%         xlim_max_circle = init_x_r + vrVal/wrVal;
-%         
-%         if init_y_c < 0 && (init_y_r - vrVal/wrVal) > init_y_c
-%             ylim_min_circle = init_y_c - 0.2;
-%         elseif init_y_c < 0 && (init_y_r - vrVal/wrVal) < init_y_c
-%             ylim_min_circle = -vrVal/wrVal - 0.2;
-%         end
-%         
-% %         ylim_min_circle = init_y_r-vrVal/wrVal-0.3;
-%         ylim_max_circle = init_y_r + 2*vrVal/wrVal + 0.2;
-%         
-%         frameSize = [xlim_min_circle xlim_max_circle ylim_min_circle ylim_max_circle];
-%         handles.frameSize = frameSize;     % Circle
-% 
-%         % save handles.frameSize to workspace
-%         assignin('base','frameSize',frameSize);
 end
 
 if SMCMode == 1
@@ -1191,14 +1067,6 @@ function carModel = draw2DCarModelTri(hObject, eventdata, handles, stateVars)
 % handles    structure with handles and user data (see GUIDATA)
 handles = guidata(hObject);
 
-% xs(1) = stateVars(1) + sqrt(4) / 4 * 0.1 * cos(stateVars(3));
-% xs(2) = stateVars(1) + sqrt(4) / 4 * 0.1 * cos(stateVars(3) + 2 * pi / 3);
-% xs(3) = stateVars(1) + sqrt(4) / 4 * 0.1 * cos(stateVars(3) - 2 * pi / 3);
-% 
-% ys(1) = stateVars(2) + sqrt(3) / 3 * 0.1 * sin(stateVars(3));
-% ys(2) = stateVars(2) + sqrt(3) / 3 * 0.1 * sin(stateVars(3) + 2 * pi / 3);
-% ys(3) = stateVars(2) + sqrt(3) / 3 * 0.1 * sin(stateVars(3) - 2 * pi / 3);
-
 carX(1) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3));
 carX(2) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) + 2 * pi / 3);
 carX(3) = stateVars(1) + sqrt(1) / 1 * 0.1 * cos(stateVars(3) - 2 * pi / 3);
@@ -1316,13 +1184,6 @@ elseif l_circleTrajectory == 1 && nl_circleTrajectory == 1
     patch(carModelTriReal1(1,:), carModelTriReal1(2,:), 'blue');
     patch(carModelTriReal2(1,:), carModelTriReal2(2,:), 'green');    
 end
-
-% carModelTriRef = draw2DCarModelTri(hObject, eventdata, handles, x_r);
-% carModelTriReal = draw2DCarModelTri(hObject, eventdata, handles, x_c);
-
-% draw the graph based on the rotationed matrix of robot
-% patch(carModelTriRef(1,:), carModelTriRef(2,:), 'red');
-% patch(carModelTriReal(1,:), carModelTriReal(2,:), 'green');
 
 legend('Reference trajectory','WMR trajectory','Initial point of the reference trajectory','Initial point of the robot','Location','northwest')
 % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')

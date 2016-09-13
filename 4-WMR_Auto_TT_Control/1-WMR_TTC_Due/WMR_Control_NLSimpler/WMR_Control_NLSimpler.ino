@@ -110,6 +110,9 @@ float matG[2][2];
 float invMatG[2][2];
 float matF[2];
 
+float tmpParam;
+float matFParam;
+
 float w_R;
 float w_L;
 
@@ -469,5 +472,4 @@ float RightMotorSpeedPIDController(int RightRawCnts, float RightSpeedRef)
 
   return RightMotorPWM;
 }
-
 

@@ -47,8 +47,6 @@ sigma_2 = K1 * x_e(3) + K2 * atan(x_e(2));
 %           T_F is acquired from partial derivative
 T_G = [-1, x_e(2); 0, -K1 - K2*x_e(1)/(1 + (x_e(2))^2)];
 T_F = [1, 0, 0; 0, K2/(1+(x_e(2))^2), K1];
-% T_G = [-K1, K1*x_e(2); 0, -K2 - K3*x_e(1)/(1 + x_e(2)^2)];
-% T_F = [K1, 0, 0; 0, K3/(1+x_e(2)^2), K2];
 
 % Step 5: Define F(qe) matrix
 % ur(1) = v_r; ur(2) = w_r; x_e(3) = theta_e
@@ -77,8 +75,8 @@ end
 sign_mat = [dp(1)*sats(sigma_1,eps1); dp(2)*sats(sigma_2,eps2)];
 
 %% Applying hyperbolic tangent function
-eps_tmp = 0.05;
-sign_mat = [dp(1)*tanh(sigma_1/eps_tmp); dp(2)*tanh(sigma_2/eps_tmp)];
+% eps_tmp = 0.05;
+% sign_mat = [dp(1)*tanh(sigma_1/eps_tmp); dp(2)*tanh(sigma_2/eps_tmp)];
 
 % Step 8: Define control law (u)
 % Notes: T_G = rho

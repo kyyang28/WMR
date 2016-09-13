@@ -1,4 +1,5 @@
 
+/* Config motor PWM */
 void MOTOR_PWM_Setup()
 {
   uint16_t Half_PWM_duty = PWM_DUTY_CYCLE / 2;
@@ -47,34 +48,9 @@ void MOTOR_PWM_Setup()
   PWMC_SetSyncChannelUpdateUnlock(PWM);
 
   //Serial3.println("PWM module setup finished.");
-  
-#if 0
-  /* Configure LEFT motor PWM channel to employ CLOCKA */
-  PWMC_ConfigureChannel(PWM_INTERFACE, leftChan, PWM_CMR_CPRE_CLKA, 0, 0);
-
-  /* Setup LEFT motor pwm period to 1200(PWM_DUTY_CYCLE) */
-  PWMC_SetPeriod(PWM_INTERFACE, leftChan, PWM_DUTY_CYCLE);
-
-  /* Initially setup the LEFT motor pwm duty cycle to maximum 1200 (PWM_DUTY_CYCLE) */
-  PWMC_SetDutyCycle(PWM_INTERFACE, leftChan, PWM_DUTY_CYCLE);
-
-  /* Enable LEFT motor PWM channel */
-  PWMC_EnableChannel(PWM_INTERFACE, leftChan);
-
-  /* Configure RIGHT motor PWM channel to employ CLOCKA */
-  PWMC_ConfigureChannel(PWM_INTERFACE, rightChan, PWM_CMR_CPRE_CLKA, 0, 0);
-
-  /* Setup RIGHT motor pwm period to 1200(PWM_DUTY_CYCLE) */
-  PWMC_SetPeriod(PWM_INTERFACE, rightChan, PWM_DUTY_CYCLE);
-
-  /* Initially setup the RIGHT motor pwm duty cycle to maximum 1200 (PWM_DUTY_CYCLE) */
-  PWMC_SetDutyCycle(PWM_INTERFACE, rightChan, PWM_DUTY_CYCLE);
-
-  /* Enable RIGHT motor PWM channel */
-  PWMC_EnableChannel(PWM_INTERFACE, rightChan);
-#endif  
 }
 
+/* Helper function to setup motor pwm channel */
 int SetMotorChan(uint8_t channel, uint16_t _PER, uint16_t _DUTY, uint32_t align, uint32_t polar)
 {
   PWMC_ConfigureChannel (PWM, channel, PWM_CMR_CPRE_CLKA, align,                      //alignment
@@ -84,6 +60,7 @@ int SetMotorChan(uint8_t channel, uint16_t _PER, uint16_t _DUTY, uint32_t align,
   return 0;
 }
 
+/* Setup left motor speed */
 int setLeftMotorSpeed(float leftMotorSpeed)
 {
   int speed = 0;
@@ -107,6 +84,7 @@ int setLeftMotorSpeed(float leftMotorSpeed)
   PWMC_SetDutyCycle (PWM, leftChan, speed);
 }
 
+/* Setup right motor speed */
 int setRightMotorSpeed(float rightMotorSpeed)
 {
   int speed = 0;
@@ -129,11 +107,4 @@ int setRightMotorSpeed(float rightMotorSpeed)
 
   PWMC_SetDutyCycle(PWM, rightChan, speed);
 }
-
-template<class T> int BoundFunc(T* pData, T bound) {
-  if (*pData > bound) *pData = bound;
-  else if (*pData < -bound) *pData = -bound;
-  return 0;
-}
-
 

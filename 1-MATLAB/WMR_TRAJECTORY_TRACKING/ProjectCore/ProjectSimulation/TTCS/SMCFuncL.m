@@ -17,6 +17,8 @@ function u = SMCFuncL(x, ur)
 global K1 K2 eps1 eps2 eta1 eta2 mode_uct kphi;
 % global kpsi   % for mismatched uncertainty
 
+% disp('Invoking SMCFuncL');
+
 % Step 1: Initialise initial states to x_r and x_c
 u = zeros(2,1);
 x_r = x(1:3);       % reference posture
@@ -75,7 +77,12 @@ end
 % SEE PAGE 18 of DISSERTATION NOTES 2
 
 % sign_mat = [uncertainty(1)*sats(sigma_1,0); uncertainty(2)*sats(sigma_2,0)];
-sign_mat = [eta1*sats(sigma_1,eps1); eta2*sats(sigma_2,eps2)];
+%% Applying switching function
+% sign_mat = [eta1*sats(sigma_1,eps1); eta2*sats(sigma_2,eps2)];
+
+%% Applying hyperbolic tangent function
+eps_tmp = 0.8;
+sign_mat = [eta1*tanh(sigma_1/eps_tmp); eta2*tanh(sigma_2/eps_tmp)];
 
 % Step 8: Define control law (u)
 % Notes: T_G = rho

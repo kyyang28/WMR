@@ -149,8 +149,13 @@ void TrajectoryTrackingAlgo()
   invMatG[1][0] = 0;
   invMatG[1][1] = -1 / (K1 * xe.x + K2);
 
-  matF[0] = vr * cos(xe.z) + eta[0] * xe.x / (abs(xe.x) + eps[0]);
-  matF[1] = K1 * vr * sin(xe.z) + K2 * wr + eta[1] * (K1 * xe.y + K2 * xe.z) / (abs(K1 * xe.y + K2 * xe.z) + eps[1]);
+  /* Applying hyperbolic tangent function */
+  matF[0] = vr * cos(xe.z) + eta[0] * tanh(xe.x / 0.8);
+  matF[1] = K1 * vr * sin(xe.z) + K2 * wr + eta[1] * tanh((K1 * xe.y + K2 * xe.z) / 0.8);
+
+  /* Applying switching function */
+  //matF[0] = vr * cos(xe.z) + eta[0] * xe.x / (abs(xe.x) + eps[0]);
+  //matF[1] = K1 * vr * sin(xe.z) + K2 * wr + eta[1] * (K1 * xe.y + K2 * xe.z) / (abs(K1 * xe.y + K2 * xe.z) + eps[1]);
 
   for (int ic = 0; ic < 2; ic++) {
     u_input[ic] = -(invMatG[ic][0] * matF[0] + invMatG[ic][1] * matF[1]);
