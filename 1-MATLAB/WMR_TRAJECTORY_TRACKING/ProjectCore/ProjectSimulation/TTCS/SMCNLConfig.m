@@ -22,7 +22,7 @@ function varargout = SMCNLConfig(varargin)
 
 % Edit the above text to modify the response to help SMCNLConfig
 
-% Last Modified by GUIDE v2.5 26-Aug-2016 06:22:54
+% Last Modified by GUIDE v2.5 14-Feb-2017 13:53:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -53,10 +53,36 @@ function SMCNLConfig_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to SMCNLConfig (see VARARGIN)
 
 % Choose default command line output for SMCNLConfig
+
+global c K1 K2 eps1 eps2 eta1 eta2 kphi
+
 handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
+
+% Check the existence of SMC parameters
+if ((exist('c') == 1) && (exist('K1') == 1) && (exist('K2') == 1) && (exist('eps1') == 1) && (exist('eps2') == 1) && (exist('eta1') == 1) && (exist('eta2') == 1) && (exist('kphi') == 1))
+
+    c = evalin('base','c');
+    K1 = evalin('base','K1');
+    K2 = evalin('base','K2');
+    eps1 = evalin('base','eps1');
+    eps2 = evalin('base','eps2');
+    eta1 = evalin('base','eta1');
+    eta2 = evalin('base','eta2');
+    kphi = evalin('base','kphi');
+    
+    set(handles.constantText, 'String', num2str(c));
+    set(handles.gain1Text, 'String', num2str(K1));
+    set(handles.gain2Text, 'String', num2str(K2));
+    set(handles.eps1Text, 'String', num2str(eps1));
+    set(handles.eps2Text, 'String', num2str(eps2));
+    set(handles.eta1Text, 'String', num2str(eta1));
+    set(handles.eta2Text, 'String', num2str(eta2));
+    set(handles.kphiText, 'String', num2str(kphi));
+
+end
 
 % UIWAIT makes SMCNLConfig wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -166,18 +192,18 @@ end
 
 
 
-function contantText_Callback(hObject, eventdata, handles)
-% hObject    handle to contantText (see GCBO)
+function constantText_Callback(hObject, eventdata, handles)
+% hObject    handle to constantText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of contantText as text
-%        str2double(get(hObject,'String')) returns contents of contantText as a double
+% Hints: get(hObject,'String') returns contents of constantText as text
+%        str2double(get(hObject,'String')) returns contents of constantText as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function contantText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to contantText (see GCBO)
+function constantText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to constantText (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -246,7 +272,7 @@ dlgQuestion = 'Do you want to confirm and quit the config window?';
 choice = questdlg(dlgQuestion, dlgTitle, 'Yes', 'No', 'Yes');
 switch choice
     case 'Yes'
-        c = str2num(get(handles.contantText,'String'));
+        c = str2num(get(handles.constantText,'String'));
         K1 = str2num(get(handles.gain1Text,'String'));
         K2 = str2num(get(handles.gain2Text,'String'));
         eps1 = str2num(get(handles.eps1Text,'String'));
@@ -308,3 +334,41 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 movegui('center');
+
+
+% --- Executes on button press in resetBtn.
+function resetBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to resetBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global c K1 K2 eps1 eps2 eta1 eta2 kphi NonlinearSMCModeFlag
+
+guidata(hObject, handles);
+
+dlgTitle = 'Quit';
+dlgQuestion = 'Do you want to reset the parameters to default configuration?';
+choice = questdlg(dlgQuestion, dlgTitle, 'Yes', 'No', 'Yes');
+switch choice
+    case 'Yes'
+        c = 1;
+        K1 = 1;
+        K2 = 1;
+        eps1 = 0.1;
+        eps2 = 0.1;
+        eta1 = 4;
+        eta2 = 4;
+        kphi = 0.5;
+        set(handles.constantText, 'String', num2str(c));
+        set(handles.gain1Text, 'String', num2str(K1));
+        set(handles.gain2Text, 'String', num2str(K2));
+        set(handles.eps1Text, 'String', num2str(eps1));
+        set(handles.eps2Text, 'String', num2str(eps2));
+        set(handles.eta1Text, 'String', num2str(eta1));
+        set(handles.eta2Text, 'String', num2str(eta2));
+        set(handles.kphiText, 'String', num2str(kphi));
+        
+        NonlinearSMCModeFlag = 1;
+        assignin('base','NonlinearSMCModeFlag',NonlinearSMCModeFlag);
+%         close;
+    case 'No'
+end

@@ -22,7 +22,7 @@ function varargout = SMCLConfig(varargin)
 
 % Edit the above text to modify the response to help SMCLConfig
 
-% Last Modified by GUIDE v2.5 27-Aug-2016 00:41:49
+% Last Modified by GUIDE v2.5 14-Feb-2017 14:01:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -53,11 +53,34 @@ function SMCLConfig_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to SMCLConfig (see VARARGIN)
 
 % Choose default command line output for SMCLConfig
+
+global K1 K2 eps1 eps2 eta1 eta2 kphi
+
 handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
 
+if ((exist('K1') == 1) && (exist('K2') == 1) && (exist('eps1') == 1) && (exist('eps2') == 1) && (exist('eta1') == 1) && (exist('eta2') == 1) && (exist('kphi') == 1))
+
+    K1 = evalin('base','K1');
+    K2 = evalin('base','K2');
+    eps1 = evalin('base','eps1');
+    eps2 = evalin('base','eps2');
+    eta1 = evalin('base','eta1');
+    eta2 = evalin('base','eta2');
+    kphi = evalin('base','kphi');
+    
+    set(handles.gain1Text, 'String', num2str(K1));
+    set(handles.gain2Text, 'String', num2str(K2));
+    set(handles.eps1Text, 'String', num2str(eps1));
+    set(handles.eps2Text, 'String', num2str(eps2));
+    set(handles.eta1Text, 'String', num2str(eta1));
+    set(handles.eta2Text, 'String', num2str(eta2));
+    set(handles.kphiText, 'String', num2str(kphi));
+
+end
+    
 % UIWAIT makes SMCLConfig wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -304,4 +327,40 @@ function gain2Text_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in resetBtn.
+function resetBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to resetBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global K1 K2 eps1 eps2 eta1 eta2 kphi LinearSMCModeFlag
+
+guidata(hObject, handles);
+
+dlgTitle = 'Quit';
+dlgQuestion = 'Do you want to reset the parameters to default configuration?';
+choice = questdlg(dlgQuestion, dlgTitle, 'Yes', 'No', 'Yes');
+switch choice
+    case 'Yes'
+        K1 = 1;
+        K2 = 1;
+        eps1 = 0.1;
+        eps2 = 0.1;
+        eta1 = 4;
+        eta2 = 4;
+        kphi = 0.5;
+        set(handles.gain1Text, 'String', num2str(K1));
+        set(handles.gain2Text, 'String', num2str(K2));
+        set(handles.eps1Text, 'String', num2str(eps1));
+        set(handles.eps2Text, 'String', num2str(eps2));
+        set(handles.eta1Text, 'String', num2str(eta1));
+        set(handles.eta2Text, 'String', num2str(eta2));
+        set(handles.kphiText, 'String', num2str(kphi));
+        
+        LinearSMCModeFlag = 1;
+        assignin('base','LinearSMCModeFlag',LinearSMCModeFlag);
+%         close;
+    case 'No'
 end

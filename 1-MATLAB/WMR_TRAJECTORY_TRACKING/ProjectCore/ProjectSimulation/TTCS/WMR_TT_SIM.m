@@ -57,10 +57,29 @@ clc;
 global SMCMode LinearSMCModeFlag NonlinearSMCModeFlag
 global linearMode nonlinearMode l_lineTrojectory l_circleTrajectory 
 global nl_lineTrojectory nl_circleTrajectory vrVal wrVal
+global c K1 K2 eps1 eps2 eta1 eta2 kphi
+
+c = 1;
+K1 = 1;
+K2 = 1;
+eps1 = 0.1;
+eps2 = 0.1;
+eta1 = 4;
+eta2 = 4;
+kphi = 0.5;
+
+assignin('base','c',c);
+assignin('base','K1',K1);
+assignin('base','K2',K2);
+assignin('base','eps1',eps1);
+assignin('base','eps2',eps2);
+assignin('base','eta1',eta1);
+assignin('base','eta2',eta2);
+assignin('base','kphi',kphi);
 
 linearMode = 0;
 nonlinearMode = 0;
-l_lineTrojectory = 0;
+l_lineTrojectory = 1;   % default setup is linear line trajectory tracking
 l_circleTrajectory = 0;
 nl_lineTrojectory = 0;
 nl_circleTrajectory = 0;
@@ -512,13 +531,36 @@ trajectoryTypeSelection = get(trajectoryType,'String');
 
 handles = guidata(hObject);
 
-init_x_c = str2num(get(handles.xcText,'String'));
-init_y_c = str2num(get(handles.ycText,'String'));
-init_x_r = str2num(get(handles.xrText,'String'));
-init_y_r = str2num(get(handles.yrText,'String'));
+% init_x_c = str2num(get(handles.xcText,'String'));
+% init_y_c = str2num(get(handles.ycText,'String'));
+% init_x_r = str2num(get(handles.xrText,'String'));
+% init_y_r = str2num(get(handles.yrText,'String'));
 
 switch trajectoryTypeSelection
     case 'Line'
+        
+        % Change the poses of car and reference initials of line trajectory
+        car_x_c = -0.2;
+        car_y_c = -0.2;
+        car_theta_c = 1.5708;
+        
+        car_x_r = 0;
+        car_y_r = 0;
+        car_theta_r = 0.7854;
+        
+        set(handles.xcText, 'String', num2str(car_x_c));
+        set(handles.ycText, 'String', num2str(car_y_c));
+        set(handles.thetacText, 'String', num2str(car_theta_c));
+        set(handles.xrText, 'String', num2str(car_x_r));
+        set(handles.yrText, 'String', num2str(car_y_r));
+        set(handles.thetarText, 'String', num2str(car_theta_r));
+        
+        % Get the values of car and reference initial positions
+        init_x_c = str2num(get(handles.xcText,'String'));
+        init_y_c = str2num(get(handles.ycText,'String'));
+        init_x_r = str2num(get(handles.xrText,'String'));
+        init_y_r = str2num(get(handles.yrText,'String'));
+        
 %         msgbox('Line Trajectory');
 %         set(handles.noUncertainty, 'Enable', 'Off');
 %         set(handles.matchedUncertainty, 'Enable', 'On');
@@ -532,6 +574,7 @@ switch trajectoryTypeSelection
         assignin('base','inCircle',inCircle);
         
         LineTrajectoryTypeConfig;
+        
 %         vrVal = 0.8;
 %         wrVal = 0.0;
 %         assignin('base','vrVal',vrVal);
@@ -572,6 +615,29 @@ switch trajectoryTypeSelection
         assignin('base','frameSize',frameSize);
         
     case 'Circle'
+
+        % Change the poses of car and reference initials of circle trajectory
+        car_x_c = 0.25;
+        car_y_c = -0.25;
+        car_theta_c = 1.5708;
+        
+        car_x_r = 0;
+        car_y_r = 0;
+        car_theta_r = 1.5708;
+        
+        set(handles.xcText, 'String', num2str(car_x_c));
+        set(handles.ycText, 'String', num2str(car_y_c));
+        set(handles.thetacText, 'String', num2str(car_theta_c));
+        set(handles.xrText, 'String', num2str(car_x_r));
+        set(handles.yrText, 'String', num2str(car_y_r));
+        set(handles.thetarText, 'String', num2str(car_theta_r));
+        
+        % Get the values of car and reference initial positions
+        init_x_c = str2num(get(handles.xcText,'String'));
+        init_y_c = str2num(get(handles.ycText,'String'));
+        init_x_r = str2num(get(handles.xrText,'String'));
+        init_y_r = str2num(get(handles.yrText,'String'));
+        
 %         msgbox('Circle Trajectory');
 %         set(handles.matchedUncertainty, 'Enable', 'Off');
 %         set(handles.noUncertainty, 'Enable', 'On');
@@ -642,6 +708,7 @@ handles.YOUT = YOUT;
 guidata(hObject, handles);
 
 save resultsDataFile.mat TOUT YOUT
+% save TOUT YOUT
 % save RESULTS/MAT_Results/resultsDataFile.mat TOUT YOUT
 
 
@@ -1124,7 +1191,7 @@ patch(carModelTriReal(1,:), carModelTriReal(2,:), 'green');
 % handles = guidata(hObject);
 % output = handles.carShape
 
-legend('Reference trajectory','WMR trajectory','Initial point of the reference trajectory','Initial point of the robot','Location','northwest')
+legend('Reference trajectory','WMR trajectory','Initial point of the reference robot','Initial point of the robot','Location','northwest')
 % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
 xlabel('XOUT(m)');
 ylabel('YOUT(m)');
@@ -1238,17 +1305,21 @@ SMCDesignSelection = get(SMCDesignOption,'String');
 handles = guidata(hObject);
 
 switch SMCDesignSelection
-    case 'Linear controller'
-%         msgbox('Linear SMC Controller');
+    case 'Linear sliding surface'
+%         msgbox('Linear sliding surface');
         SMCMode = 1;
         handles.SMCMode = 1;
         assignin('base','SMCMode',SMCMode);
+        
+        SMCLConfig;
 
-    case 'Nonlinear controller'
-%         msgbox('Nonlinear SMC Controller');
+    case 'Nonlinear sliding surface'
+%         msgbox('Nonlinear sliding surface');
         SMCMode = 2;
         handles.SMCMode = 2;
         assignin('base','SMCMode',SMCMode);
+        
+        SMCNLConfig;
 end
 
 guidata(hObject,handles);
@@ -1273,7 +1344,7 @@ axis(handles.trajectoryTrackingResult);
 if l_lineTrojectory == 1 && nl_lineTrojectory == 1
     % Plot linear and nonlinear line trajectories
     plot(handles.trajectoryTrackingResult, x_r_l_line(1,:),x_r_l_line(2,:),'r',x_c_l_line(1,:),x_c_l_line(2,:),'b-.');
-    legend('Reference trajectory','WMR using linear sliding mode controller','WMR using nonlinear sliding mode controller','Location','northwest')
+    legend('Reference trajectory','WMR using linear sliding mode surface','WMR using nonlinear sliding mode surface','Location','northwest')
     % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
     xlabel('XOUT(m)');
     ylabel('YOUT(m)');
@@ -1296,7 +1367,7 @@ if l_lineTrojectory == 1 && nl_lineTrojectory == 1
 elseif l_circleTrajectory == 1 && nl_circleTrajectory == 1
     % Plot linear and nonlinear circle trajectories
     plot(handles.trajectoryTrackingResult, x_r_l_circle(1,:),x_r_l_circle(2,:),'r',x_c_l_circle(1,:),x_c_l_circle(2,:),'b-.');
-    legend('Reference trajectory','WMR using linear sliding mode controller','WMR using nonlinear sliding mode controller','Location','northwest')
+    legend('Reference trajectory','WMR using linear sliding mode surface','WMR using nonlinear sliding mode surface','Location','northwest')
     % legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
     xlabel('XOUT(m)');
     ylabel('YOUT(m)');
@@ -1324,8 +1395,8 @@ end
 % patch(carModelTriRef(1,:), carModelTriRef(2,:), 'red');
 % patch(carModelTriReal(1,:), carModelTriReal(2,:), 'green');
 
-legend('Reference trajectory','WMR trajectory','Initial point of the reference trajectory','Initial point of the robot','Location','northwest')
-% legend('Reference trajectory','WMR trjectory','Start point of reference trajectory','Initial point of actual robot','Location','northwest')
+legend('Reference trajectory','WMR trajectory','Initial point of the reference robot','Initial point of the robot','Location','northwest')
+% legend('Reference trajectory','WMR trjectory','Start point of reference robot','Initial point of actual robot','Location','northwest')
 xlabel('XOUT(m)');
 ylabel('YOUT(m)');
 title('Trajectory tracking of the WMR');
